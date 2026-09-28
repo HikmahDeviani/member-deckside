@@ -10,37 +10,37 @@ const memberBeverages = [
   {
     id: 1,
     name: "Lemon Peach Ice Tea",
-    image: "/images/menu_1.png",
+    image: "/images/menu_1.PNG",
   },
   {
     id: 2,
     name: "Mango Matcha Latte",
-    image: "/images/menu_3.png",
+    image: "/images/menu_3.PNG",
   },
   {
     id: 3,
     name: "Strawberry Splash",
-    image: "/images/menu_4.png",
+    image: "/images/menu_4.PNG",
   },
   {
     id: 4,
     name: "Coffee Boom",
-    image: "/images/menu_5.png",
+    image: "/images/menu_5.PNG",
   },
   {
     id: 5,
     name: "Matcha Passion",
-    image: "/images/menu_6.png",
+    image: "/images/menu_6.PNG",
   },
   {
     id: 6,
     name: "Sun Kiss Coffee",
-    image: "/images/menu_7.png",
+    image: "/images/menu_7.PNG",
   },
   {
     id: 7,
     name: "Butterscotch Creamy Latte",
-    image: "/images/menu_8.png",
+    image: "/images/menu_8.PNG",
   },
 ];
 
