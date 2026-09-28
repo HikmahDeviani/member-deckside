@@ -1,13 +1,41 @@
 import styles from "./page.module.css";
 
 const memberBeverages = [
-  { id: 1, name: "Lemon Peach Ice Tea", image: "/images/menu_1.PNG" },
-  { id: 2, name: "Mango Matcha Latte", image: "/images/menu_3.PNG" },
-  { id: 3, name: "Strawberry Splash", image: "/images/menu_4.PNG" },
-  { id: 4, name: "Coffe Boom", image: "/images/menu_5.PNG" },
-  { id: 5, name: "Matcha Passion", image: "/images/menu_6.PNG" },
-  { id: 6, name: "Sunkiss Coffee", image: "/images/menu_7.PNG" },
-  { id: 7, name: "Butterscotch Creamy Latte", image: "/images/menu_8.PNG" },
+  {
+    id: 1,
+    name: "Lemon Peach Ice Tea",
+    image: "/images/menu_1.png",
+  },
+  {
+    id: 2,
+    name: "Mango Matcha Latte",
+    image: "/images/menu_3.png",
+  },
+  {
+    id: 3,
+    name: "Strawberry Splash",
+    image: "/images/menu_4.png",
+  },
+  {
+    id: 4,
+    name: "Coffee Boom",
+    image: "/images/menu_5.png",
+  },
+  {
+    id: 5,
+    name: "Matcha Passion",
+    image: "/images/menu_6.png",
+  },
+  {
+    id: 6,
+    name: "Sun Kiss Coffee",
+    image: "/images/menu_7.png",
+  },
+  {
+    id: 7,
+    name: "Butterscotch Creamy Latte",
+    image: "/images/menu_8.png",
+  },
 ];
 
 const appetizerSnacks = [
@@ -201,9 +229,7 @@ function AddonList({
                 {formatRupiah(item.price)}
               </span>
 
-              <strong>
-                {formatRupiah(memberPrice)}
-              </strong>
+              <strong>{formatRupiah(memberPrice)}</strong>
 
               <span className={styles.memberPriceLabel}>
                 Member price
@@ -247,8 +273,6 @@ export default function Menu() {
           </p>
         </div>
 
-        {/* MEMBER BEVERAGE */}
-
         <section className={styles.category}>
           <div className={styles.categoryHeader}>
             <div>
@@ -287,8 +311,6 @@ export default function Menu() {
           </div>
         </section>
 
-        {/* ADD-ONS */}
-
         <section className={styles.category}>
           <div className={styles.categoryHeader}>
             <div>
@@ -304,8 +326,6 @@ export default function Menu() {
             </p>
           </div>
 
-          {/* APPETIZERS & SNACK */}
-
           <div className={styles.addonCategory}>
             <div className={styles.addonCategoryHeader}>
               <h3>Appetizers & Snack</h3>
@@ -315,8 +335,6 @@ export default function Menu() {
 
             <AddonList items={appetizerSnacks} />
           </div>
-
-          {/* BEVERAGES */}
 
           <div className={styles.addonCategory}>
             <div className={styles.addonCategoryHeader}>
