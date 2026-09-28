@@ -1,0 +1,1191 @@
+.page {
+  min-height: 100vh;
+  background-color: #f5f3ef;
+  color: #00494f;
+  font-family: "Gotham", "Century Gothic", sans-serif;
+}
+
+/* NAVBAR */
+
+.navbar {
+  width: 100%;
+  height: 90px;
+  padding: 0 60px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  background-color: #00494f;
+}
+
+.logo {
+  color: white;
+  text-decoration: none;
+  font-family: "Century Gothic", sans-serif;
+  font-size: 32px;
+  font-weight: bold;
+  letter-spacing: 2px;
+}
+
+.logo:visited {
+  color: white;
+}
+
+.logo:hover {
+  color: #c4bfb6;
+}
+
+.navLinks {
+  display: flex;
+  align-items: center;
+  gap: 35px;
+}
+
+.navLinks a {
+  color: white;
+  text-decoration: none;
+  font-family: "Century Gothic", sans-serif;
+  font-size: 14px;
+  letter-spacing: 1px;
+}
+
+.navLinks a:hover {
+  color: #c4bfb6;
+}
+
+/* MAIN */
+
+.container {
+  padding: 70px 8% 100px;
+}
+
+/* WELCOME */
+
+.welcome {
+  max-width: 700px;
+  margin-bottom: 55px;
+}
+
+.eyebrow {
+  margin-bottom: 15px;
+  font-family: "Century Gothic", sans-serif;
+  font-size: 12px;
+  font-weight: bold;
+  letter-spacing: 2px;
+  color: #42738d;
+}
+
+.welcome h1 {
+  margin: 0;
+  font-family: "Century Gothic", sans-serif;
+  font-size: 52px;
+  line-height: 1.1;
+  color: #00494f;
+}
+
+.welcomeText {
+  margin-top: 20px;
+  font-size: 15px;
+  line-height: 1.7;
+  color: #776e64;
+}
+
+/* MEMBERSHIP CARD */
+
+.membershipCard {
+  margin-bottom: 85px;
+  padding: 30px 35px;
+  display: grid;
+  grid-template-columns: repeat(4, 1fr) auto;
+  align-items: center;
+  gap: 30px;
+  background-color: white;
+  box-shadow: 0 8px 25px rgba(0, 73, 79, 0.07);
+}
+
+.membershipCard > div {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.membershipCard span {
+  font-family: "Century Gothic", sans-serif;
+  font-size: 10px;
+  font-weight: bold;
+  letter-spacing: 1.5px;
+  color: #93a7ba;
+}
+
+.membershipCard strong {
+  font-family: "Century Gothic", sans-serif;
+  font-size: 15px;
+  color: #00494f;
+}
+
+.active {
+  color: #42738d !important;
+}
+
+.extendButton {
+  padding: 12px 18px;
+  border: 1px solid #42738d;
+  background-color: white;
+  color: #42738d;
+  font-family: "Century Gothic", sans-serif;
+  font-size: 10px;
+  font-weight: bold;
+  letter-spacing: 1px;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.extendButton:hover {
+  background-color: #42738d;
+  color: white;
+}
+
+/* SECTION */
+
+.section {
+  margin-bottom: 90px;
+}
+
+.sectionHeader {
+  margin-bottom: 30px;
+  display: flex;
+  align-items: flex-end;
+  justify-content: space-between;
+  gap: 20px;
+}
+
+.sectionHeader .eyebrow {
+  margin-bottom: 8px;
+}
+
+.sectionHeader h2 {
+  margin: 0;
+  font-family: "Century Gothic", sans-serif;
+  font-size: 30px;
+  color: #00494f;
+}
+
+.badge {
+  padding: 8px 14px;
+  background-color: #e7eeee;
+  color: #42738d;
+  font-family: "Century Gothic", sans-serif;
+  font-size: 11px;
+  font-weight: bold;
+  letter-spacing: 1px;
+  white-space: nowrap;
+}
+
+.badgeAvailable {
+  background-color: #e7eeee;
+  color: #42738d;
+}
+
+.badgeClosed {
+  background-color: #ece9e4;
+  color: #776e64;
+}
+
+/* LOCKED / CLAIMED BEVERAGE */
+
+.lockedBox {
+  padding: 55px 40px;
+  background-color: white;
+  text-align: center;
+  box-shadow: 0 8px 25px rgba(0, 73, 79, 0.07);
+}
+
+.lockedLabel {
+  margin-bottom: 15px;
+  font-family: "Century Gothic", sans-serif;
+  font-size: 11px;
+  font-weight: bold;
+  letter-spacing: 2px;
+  color: #93a7ba;
+}
+
+.lockedBox h3 {
+  margin-bottom: 15px;
+  font-family: "Century Gothic", sans-serif;
+  font-size: 24px;
+  color: #00494f;
+}
+
+.lockedBox > p:not(.lockedLabel) {
+  max-width: 520px;
+  margin: 0 auto 25px;
+  font-size: 13px;
+  line-height: 1.7;
+  color: #776e64;
+}
+
+/* CLAIMED TODAY */
+
+.claimedStatus {
+  max-width: 520px;
+  margin: 0 auto 25px;
+  padding: 16px 18px;
+  display: flex;
+  align-items: flex-start;
+  gap: 14px;
+  text-align: left;
+  background-color: #f5f8f9;
+  border: 1px solid #93a7ba;
+}
+
+.claimedStatus > span {
+  width: 30px;
+  height: 30px;
+  flex-shrink: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 50%;
+  background-color: #00494f;
+  color: white;
+  font-size: 14px;
+  font-weight: bold;
+}
+
+.claimedStatus div {
+  flex: 1;
+}
+
+.claimedStatus strong {
+  display: block;
+  margin-bottom: 5px;
+  font-family: "Century Gothic", sans-serif;
+  font-size: 11px;
+  letter-spacing: 1.2px;
+  color: #00494f;
+}
+
+.claimedStatus p {
+  margin: 0;
+  font-size: 12px;
+  line-height: 1.5;
+  color: #776e64;
+}
+
+/* BUTTONS */
+
+.primaryButton {
+  padding: 14px 25px;
+  border: none;
+  background-color: #42738d;
+  color: white;
+  font-family: "Gotham", "Century Gothic", sans-serif;
+  font-size: 11px;
+  font-weight: bold;
+  letter-spacing: 1.5px;
+  cursor: pointer;
+  transition: background-color 0.2s ease;
+}
+
+.primaryButton:hover {
+  background-color: #00494f;
+}
+
+.primaryButton:disabled {
+  background-color: #c4bfb6;
+  cursor: not-allowed;
+}
+
+/* QR SCANNER */
+
+.scanner {
+  max-width: 400px;
+  margin: 30px auto 0;
+}
+
+.qrReader {
+  width: 100%;
+  overflow: hidden;
+  background-color: #3b3b3b;
+}
+
+.error {
+  margin-top: 15px;
+  color: #776e64;
+  font-size: 12px;
+  line-height: 1.5;
+}
+
+.closeButton {
+  margin-top: 15px;
+  padding: 12px 20px;
+  border: 1px solid #c4bfb6;
+  background-color: white;
+  color: #3b3b3b;
+  font-family: "Century Gothic", sans-serif;
+  font-size: 10px;
+  font-weight: bold;
+  letter-spacing: 1px;
+  cursor: pointer;
+}
+
+.closeButton:hover {
+  border-color: #42738d;
+  color: #42738d;
+}
+
+/* UNLOCKED BEVERAGE */
+
+.unlockedBox {
+  padding: 30px;
+  background-color: white;
+  box-shadow: 0 8px 25px rgba(0, 73, 79, 0.07);
+}
+
+.available {
+  margin-bottom: 25px;
+}
+
+.available span {
+  font-family: "Century Gothic", sans-serif;
+  font-size: 11px;
+  font-weight: bold;
+  letter-spacing: 1.5px;
+  color: #42738d;
+}
+
+.available p {
+  margin-top: 8px;
+  font-size: 13px;
+  color: #776e64;
+}
+
+/* HORIZONTAL MEMBER BEVERAGE */
+
+.horizontalGrid {
+  display: flex;
+  gap: 25px;
+  overflow-x: auto;
+  overflow-y: hidden;
+  padding-bottom: 12px;
+  scroll-behavior: smooth;
+  scrollbar-width: none;
+  -webkit-overflow-scrolling: touch;
+}
+
+.horizontalGrid::-webkit-scrollbar {
+  display: none;
+}
+
+/* BEVERAGE CARD */
+
+.beverageCard {
+  flex: 0 0 330px;
+  padding: 0;
+  border: 2px solid transparent;
+  background-color: white;
+  overflow: hidden;
+  text-align: left;
+  cursor: pointer;
+  box-shadow: 0 8px 25px rgba(0, 73, 79, 0.07);
+  transition:
+    transform 0.2s ease,
+    box-shadow 0.2s ease,
+    border-color 0.2s ease;
+}
+
+.beverageCard:hover {
+  transform: translateY(-4px);
+  box-shadow: 0 12px 30px rgba(0, 73, 79, 0.12);
+}
+
+.beverageCard img {
+  width: 100%;
+  height: 230px;
+  display: block;
+  object-fit: cover;
+}
+
+.beverageCard > div {
+  padding: 20px 22px 22px;
+}
+
+.beverageCard h3 {
+  margin: 0;
+  font-family: "Century Gothic", sans-serif;
+  font-size: 19px;
+  color: #00494f;
+}
+
+.selected {
+  border-color: #42738d;
+}
+
+.selectedText {
+  display: block;
+  margin-top: 8px;
+  font-family: "Century Gothic", sans-serif;
+  font-size: 10px;
+  font-weight: bold;
+  letter-spacing: 1.5px;
+  color: #42738d;
+}
+
+.unlockedBox > .primaryButton {
+  margin-top: 25px;
+}
+
+/* ADD-ONS */
+
+.addonCategory {
+  margin-top: 40px;
+}
+
+.addonCategoryHeader {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 18px;
+  padding-bottom: 12px;
+  border-bottom: 1px solid #c4bfb6;
+}
+
+.addonCategoryHeader h3 {
+  margin: 0;
+  font-family: "Century Gothic", sans-serif;
+  font-size: 20px;
+  color: #00494f;
+}
+
+.addonCategoryHeader span {
+  font-size: 12px;
+  color: #776e64;
+}
+
+/* ADD-ON SCROLL */
+
+.addonList {
+  max-height: 500px;
+  overflow-y: auto;
+  overflow-x: hidden;
+  display: flex;
+  flex-direction: column;
+  background-color: white;
+  box-shadow: 0 8px 25px rgba(0, 73, 79, 0.07);
+  scrollbar-width: thin;
+  scrollbar-color: #93a7ba #f5f3ef;
+}
+
+.addonList::-webkit-scrollbar {
+  width: 6px;
+}
+
+.addonList::-webkit-scrollbar-track {
+  background-color: #f5f3ef;
+}
+
+.addonList::-webkit-scrollbar-thumb {
+  background-color: #93a7ba;
+}
+
+.addonList::-webkit-scrollbar-thumb:hover {
+  background-color: #42738d;
+}
+
+/* ADD-ON ITEM */
+
+.addonItem {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 40px;
+  padding: 25px 30px;
+  border-bottom: 1px solid #eeeae5;
+  flex-shrink: 0;
+}
+
+.addonItem:last-child {
+  border-bottom: none;
+}
+
+.addonInfo {
+  flex: 1;
+  min-width: 0;
+}
+
+.addonInfo h3 {
+  margin: 0;
+  font-family: "Century Gothic", sans-serif;
+  font-size: 17px;
+  color: #00494f;
+}
+
+.addonInfo p {
+  max-width: 700px;
+  margin-top: 8px;
+  font-size: 12px;
+  line-height: 1.6;
+  color: #776e64;
+}
+
+.addonOrder {
+  min-width: 180px;
+  display: flex;
+  flex-direction: column;
+  align-items: flex-end;
+  gap: 14px;
+}
+
+.addonPrices {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-end;
+}
+
+.originalPrice {
+  font-family: "Century Gothic", sans-serif;
+  font-size: 12px;
+  color: #93a7ba;
+  text-decoration: line-through;
+}
+
+.addonPrices strong {
+  margin-top: 3px;
+  font-family: "Century Gothic", sans-serif;
+  font-size: 17px;
+  color: #00494f;
+}
+
+.memberPriceLabel {
+  margin-top: 4px;
+  font-size: 10px;
+  color: #42738d;
+}
+
+.secondaryButton {
+  min-width: 150px;
+  padding: 11px 14px;
+  border: 1px solid #42738d;
+  background-color: white;
+  color: #42738d;
+  font-family: "Century Gothic", sans-serif;
+  font-size: 10px;
+  font-weight: bold;
+  letter-spacing: 1px;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.secondaryButton:hover {
+  background-color: #42738d;
+  color: white;
+}
+
+/* QUANTITY */
+
+.quantity {
+  min-width: 150px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  border: 1px solid #c4bfb6;
+}
+
+.quantity button {
+  width: 40px;
+  height: 36px;
+  border: none;
+  background-color: white;
+  color: #42738d;
+  font-size: 18px;
+  cursor: pointer;
+}
+
+.quantity button:hover {
+  background-color: #f5f3ef;
+}
+
+.quantity span {
+  font-family: "Century Gothic", sans-serif;
+  font-size: 13px;
+  font-weight: bold;
+  color: #00494f;
+}
+
+/* ORDER SUMMARY */
+
+.orderSection {
+  margin-bottom: 90px;
+}
+
+.orderCard {
+  max-width: 700px;
+  margin-left: auto;
+  padding: 35px 40px;
+  background-color: white;
+  box-shadow: 0 8px 25px rgba(0, 73, 79, 0.07);
+}
+
+.orderCard h2 {
+  margin: 0 0 25px;
+  font-family: "Century Gothic", sans-serif;
+  font-size: 30px;
+  color: #00494f;
+}
+
+.items {
+  border-top: 1px solid #e5e1db;
+}
+
+.item {
+  padding: 17px 0;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 20px;
+  border-bottom: 1px solid #e5e1db;
+  font-size: 13px;
+  color: #3b3b3b;
+}
+
+.item > div {
+  display: flex;
+  flex-direction: column;
+  gap: 5px;
+}
+
+.item small {
+  color: #93a7ba;
+  font-size: 11px;
+}
+
+.priceLine {
+  padding-top: 15px;
+  display: flex;
+  justify-content: space-between;
+  font-size: 12px;
+  color: #776e64;
+}
+
+.total {
+  margin-top: 20px;
+  padding-top: 20px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  border-top: 1px solid #c4bfb6;
+  font-family: "Century Gothic", sans-serif;
+  color: #00494f;
+}
+
+.total strong {
+  font-size: 20px;
+}
+
+/* ORDER HISTORY */
+
+.history {
+  background-color: white;
+  box-shadow: 0 8px 25px rgba(0, 73, 79, 0.07);
+}
+
+.historyRow {
+  padding: 23px 30px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 30px;
+  border-bottom: 1px solid #e5e1db;
+}
+
+.historyRow:last-child {
+  border-bottom: none;
+}
+
+.historyRow > div {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.historyRow > div:last-child {
+  align-items: flex-end;
+}
+
+.historyRow strong {
+  font-family: "Century Gothic", sans-serif;
+  font-size: 13px;
+  color: #00494f;
+}
+
+.historyRow span {
+  font-size: 11px;
+  color: #776e64;
+}
+
+.delivered {
+  color: #42738d !important;
+  letter-spacing: 1px;
+}
+
+/* OVERLAY */
+
+.overlay {
+  position: fixed;
+  inset: 0;
+  z-index: 1000;
+  padding: 30px 20px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background-color: rgba(0, 73, 79, 0.55);
+  overflow-y: auto;
+}
+
+/* CONFIRMATION */
+
+.confirmation {
+  position: relative;
+  width: 100%;
+  max-width: 550px;
+  padding: 45px;
+  background-color: white;
+  box-shadow: 0 15px 50px rgba(0, 73, 79, 0.2);
+}
+
+.confirmationClose {
+  position: absolute;
+  top: 15px;
+  right: 18px;
+  border: none;
+  background: transparent;
+  color: #776e64;
+  font-size: 25px;
+  cursor: pointer;
+}
+
+.confirmationClose:hover {
+  color: #00494f;
+}
+
+.check {
+  width: 45px;
+  height: 45px;
+  margin-bottom: 20px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 50%;
+  background-color: #e7eeee;
+  color: #42738d;
+  font-size: 20px;
+}
+
+.confirmationEyebrow {
+  margin-bottom: 12px;
+  font-family: "Century Gothic", sans-serif;
+  font-size: 11px;
+  font-weight: bold;
+  letter-spacing: 2px;
+  color: #42738d;
+}
+
+.confirmation h2 {
+  margin: 0 0 18px;
+  font-family: "Century Gothic", sans-serif;
+  font-size: 30px;
+  color: #00494f;
+}
+
+.confirmationText {
+  margin-bottom: 12px;
+  font-size: 13px;
+  line-height: 1.7;
+  color: #776e64;
+}
+
+.orderInfo {
+  margin-top: 25px;
+  padding: 20px;
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 15px;
+  background-color: #f5f3ef;
+}
+
+.orderInfo div {
+  display: flex;
+  flex-direction: column;
+  gap: 7px;
+}
+
+.orderInfo span,
+.confirmationDetails h3,
+.currentMembership span,
+.extensionSummary span,
+.extensionPlan span {
+  font-family: "Century Gothic", sans-serif;
+  font-size: 9px;
+  font-weight: bold;
+  letter-spacing: 1.3px;
+  color: #93a7ba;
+}
+
+.orderInfo strong {
+  font-family: "Century Gothic", sans-serif;
+  font-size: 11px;
+  color: #00494f;
+}
+
+.confirmationDetails {
+  margin-top: 25px;
+}
+
+.confirmationDetails h3 {
+  margin-bottom: 12px;
+}
+
+.confirmationItem {
+  padding: 13px 0;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  border-top: 1px solid #e5e1db;
+  font-size: 12px;
+  color: #3b3b3b;
+}
+
+.confirmationItem > div {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.confirmationItem small {
+  color: #93a7ba;
+  font-size: 10px;
+}
+
+.confirmationTotal {
+  padding-top: 15px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  border-top: 1px solid #c4bfb6;
+  font-family: "Century Gothic", sans-serif;
+  color: #00494f;
+}
+
+.confirmationTotal strong {
+  font-size: 18px;
+}
+
+.confirmation > .primaryButton {
+  width: 100%;
+  margin-top: 25px;
+}
+
+/* EXTEND MEMBERSHIP */
+
+.extendCard {
+  position: relative;
+  width: 100%;
+  max-width: 550px;
+  padding: 45px;
+  background-color: white;
+  box-shadow: 0 15px 50px rgba(0, 73, 79, 0.2);
+}
+
+.extendCard h2 {
+  margin: 0 0 15px;
+  font-family: "Century Gothic", sans-serif;
+  font-size: 30px;
+  color: #00494f;
+}
+
+.currentMembership {
+  margin-top: 25px;
+  padding: 20px;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  background-color: #f5f3ef;
+}
+
+.currentMembership strong {
+  font-family: "Century Gothic", sans-serif;
+  font-size: 14px;
+  color: #00494f;
+}
+
+/* ONE MONTH EXTENSION */
+
+.extensionPlan {
+  margin-top: 20px;
+  padding: 20px;
+  border: 2px solid #42738d;
+  background-color: #f5f8f9;
+}
+
+.extensionPlan strong {
+  display: block;
+  margin-bottom: 8px;
+  font-family: "Century Gothic", sans-serif;
+  font-size: 12px;
+  letter-spacing: 1px;
+  color: #00494f;
+}
+
+.extensionPlan span {
+  font-size: 11px;
+  line-height: 1.5;
+  color: #776e64;
+}
+
+/* EXTENSION SUMMARY */
+
+.extensionSummary {
+  margin-top: 20px;
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  border-top: 1px solid #e5e1db;
+  border-left: 1px solid #e5e1db;
+}
+
+.extensionSummary div {
+  padding: 15px;
+  display: flex;
+  flex-direction: column;
+  gap: 7px;
+  border-right: 1px solid #e5e1db;
+  border-bottom: 1px solid #e5e1db;
+}
+
+.extensionSummary strong {
+  font-family: "Century Gothic", sans-serif;
+  font-size: 12px;
+  color: #00494f;
+}
+
+.extendCard > .primaryButton {
+  width: 100%;
+  margin-top: 25px;
+}
+
+/* MOBILE */
+
+@media (max-width: 768px) {
+  .navbar {
+    height: 75px;
+    padding: 0 25px;
+  }
+
+  .logo {
+    font-size: 25px;
+  }
+
+  .navLinks {
+    gap: 15px;
+  }
+
+  .navLinks a {
+    font-size: 11px;
+    letter-spacing: 0.5px;
+  }
+
+  .container {
+    padding: 50px 25px 70px;
+  }
+
+  .welcome {
+    margin-bottom: 45px;
+  }
+
+  .welcome h1 {
+    font-size: 40px;
+  }
+
+  .welcomeText {
+    font-size: 14px;
+  }
+
+  /* MEMBERSHIP MOBILE */
+
+  .membershipCard {
+    margin-bottom: 65px;
+    padding: 25px;
+    grid-template-columns: 1fr 1fr;
+    gap: 25px 20px;
+  }
+
+  .extendButton {
+    grid-column: 1 / -1;
+    width: 100%;
+  }
+
+  /* SECTION MOBILE */
+
+  .section {
+    margin-bottom: 70px;
+  }
+
+  .sectionHeader {
+    align-items: flex-start;
+    flex-direction: column;
+    gap: 12px;
+  }
+
+  .sectionHeader h2 {
+    font-size: 27px;
+  }
+
+  .badge {
+    font-size: 10px;
+  }
+
+  /* BEVERAGE MOBILE */
+
+  .lockedBox {
+    padding: 40px 25px;
+  }
+
+  .lockedBox h3 {
+    font-size: 21px;
+  }
+
+  .unlockedBox {
+    padding: 20px;
+  }
+
+  .horizontalGrid {
+    gap: 15px;
+  }
+
+  .beverageCard {
+    flex: 0 0 280px;
+  }
+
+  .beverageCard img {
+    height: 220px;
+  }
+
+  /* CLAIMED MOBILE */
+
+  .claimedStatus {
+    padding: 14px;
+    gap: 12px;
+  }
+
+  .claimedStatus > span {
+    width: 28px;
+    height: 28px;
+    font-size: 13px;
+  }
+
+  .claimedStatus strong {
+    font-size: 10px;
+  }
+
+  .claimedStatus p {
+    font-size: 11px;
+  }
+
+  /* ADD-ONS MOBILE */
+
+  .addonCategory {
+    margin-top: 35px;
+  }
+
+  .addonCategoryHeader h3 {
+    font-size: 18px;
+  }
+
+  .addonCategoryHeader span {
+    font-size: 10px;
+  }
+
+  .addonList {
+    max-height: 460px;
+  }
+
+  .addonItem {
+    align-items: flex-start;
+    flex-direction: column;
+    gap: 18px;
+    padding: 22px 20px;
+  }
+
+  .addonInfo h3 {
+    font-size: 16px;
+    line-height: 1.4;
+  }
+
+  .addonInfo p {
+    font-size: 11px;
+    line-height: 1.6;
+  }
+
+  .addonOrder {
+    width: 100%;
+    min-width: 0;
+    align-items: stretch;
+  }
+
+  .addonPrices {
+    align-items: flex-start;
+  }
+
+  .secondaryButton {
+    width: 100%;
+  }
+
+  .quantity {
+    width: 100%;
+  }
+
+  /* ORDER SUMMARY MOBILE */
+
+  .orderCard {
+    padding: 30px 25px;
+  }
+
+  .orderCard h2 {
+    font-size: 27px;
+  }
+
+  /* HISTORY MOBILE */
+
+  .historyRow {
+    padding: 20px;
+    align-items: flex-start;
+    flex-direction: column;
+    gap: 15px;
+  }
+
+  .historyRow > div:last-child {
+    align-items: flex-start;
+  }
+
+  /* MODAL MOBILE */
+
+  .confirmation,
+  .extendCard {
+    padding: 35px 25px;
+  }
+
+  .confirmation h2,
+  .extendCard h2 {
+    font-size: 27px;
+  }
+
+  .orderInfo {
+    grid-template-columns: 1fr;
+  }
+
+  .extensionSummary {
+    grid-template-columns: 1fr;
+  }
+
+  .extensionPlan {
+    padding: 18px;
+  }
+}

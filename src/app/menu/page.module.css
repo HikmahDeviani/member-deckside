@@ -1,0 +1,385 @@
+.page {
+  min-height: 100vh;
+  background-color: #f5f3ef;
+  color: #00494f;
+}
+
+/* NAVBAR */
+
+.navbar {
+  width: 100%;
+  height: 90px;
+  padding: 0 60px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  background-color: #00494f;
+}
+
+.logo {
+  color: white;
+  text-decoration: none;
+  font-family: "Century Gothic", sans-serif;
+  font-size: 32px;
+  font-weight: bold;
+  letter-spacing: 2px;
+}
+
+.logo:visited {
+  color: white;
+}
+
+.logo:hover {
+  color: #c4bfb6;
+}
+
+.menu {
+  display: flex;
+  align-items: center;
+  gap: 35px;
+}
+
+.menu a {
+  color: white;
+  text-decoration: none;
+  font-family: "Century Gothic", sans-serif;
+  font-size: 14px;
+  letter-spacing: 1px;
+}
+
+.menu a:hover {
+  color: #c4bfb6;
+}
+
+/* MENU SECTION */
+
+.menuSection {
+  padding: 70px 8% 100px;
+}
+
+/* HEADING */
+
+.heading {
+  max-width: 650px;
+  margin-bottom: 70px;
+}
+
+.label {
+  font-family: "Century Gothic", sans-serif;
+  font-size: 12px;
+  font-weight: bold;
+  letter-spacing: 2px;
+  color: #42738d;
+}
+
+.heading h1 {
+  margin-top: 15px;
+  font-family: "Century Gothic", sans-serif;
+  font-size: 52px;
+  line-height: 1.1;
+  color: #00494f;
+}
+
+.description {
+  margin-top: 20px;
+  font-family: "Gotham", "Century Gothic", sans-serif;
+  font-size: 15px;
+  line-height: 1.7;
+  color: #776e64;
+}
+
+/* CATEGORY */
+
+.category {
+  margin-bottom: 90px;
+}
+
+.categoryHeader {
+  display: flex;
+  align-items: flex-end;
+  justify-content: space-between;
+  margin-bottom: 30px;
+}
+
+.categoryLabel {
+  font-family: "Century Gothic", sans-serif;
+  font-size: 11px;
+  font-weight: bold;
+  letter-spacing: 2px;
+  color: #42738d;
+}
+
+.categoryHeader h2 {
+  margin-top: 8px;
+  font-family: "Century Gothic", sans-serif;
+  font-size: 30px;
+  color: #00494f;
+}
+
+.categoryInfo {
+  text-align: right;
+  font-family: "Gotham", "Century Gothic", sans-serif;
+  font-size: 13px;
+  line-height: 1.6;
+  color: #776e64;
+}
+
+.discount {
+  font-family: "Century Gothic", sans-serif;
+  font-size: 13px;
+  font-weight: bold;
+  color: #42738d;
+}
+
+/* MEMBER BEVERAGE GRID */
+
+.menuGrid {
+  display: flex;
+  gap: 25px;
+  overflow-x: auto;
+  overflow-y: hidden;
+  scroll-behavior: smooth;
+  padding-bottom: 10px;
+  scrollbar-width: none;
+}
+
+.menuGrid::-webkit-scrollbar {
+  display: none;
+}
+
+.menuCard {
+  flex: 0 0 330px;
+  background-color: white;
+  overflow: hidden;
+  box-shadow: 0 8px 25px rgba(0, 73, 79, 0.07);
+  transition: transform 0.2s ease, box-shadow 0.2s ease;
+}
+
+.menuCard:hover {
+  transform: translateY(-4px);
+  box-shadow: 0 12px 30px rgba(0, 73, 79, 0.12);
+}
+
+.menuImage {
+  width: 100%;
+  height: 230px;
+  display: block;
+  object-fit: cover;
+}
+
+.cardContent {
+  padding: 23px 25px 25px;
+}
+
+.cardContent h3 {
+  font-family: "Century Gothic", sans-serif;
+  font-size: 21px;
+  color: #00494f;
+}
+
+/* MEMBER BEVERAGE */
+
+.complimentary {
+  margin-top: 9px;
+  font-family: "Gotham", "Century Gothic", sans-serif;
+  font-size: 12px;
+  color: #42738d;
+}
+
+/* ADD-ON CATEGORY */
+
+.addonCategory {
+  margin-top: 45px;
+}
+
+.addonCategoryHeader {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 18px;
+  padding-bottom: 12px;
+  border-bottom: 1px solid #c4bfb6;
+}
+
+.addonCategoryHeader h3 {
+  font-family: "Century Gothic", sans-serif;
+  font-size: 20px;
+  color: #00494f;
+}
+
+.addonCategoryHeader span {
+  font-family: "Gotham", "Century Gothic", sans-serif;
+  font-size: 12px;
+  color: #776e64;
+}
+
+/* ADD-ON LIST */
+
+.addonList {
+  display: flex;
+  flex-direction: column;
+  background-color: white;
+  box-shadow: 0 8px 25px rgba(0, 73, 79, 0.07);
+}
+
+.addonItem {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 40px;
+  padding: 25px 30px;
+  border-bottom: 1px solid #eeeae5;
+}
+
+.addonItem:last-child {
+  border-bottom: none;
+}
+
+.addonInfo {
+  flex: 1;
+  min-width: 0;
+}
+
+.addonInfo h3 {
+  font-family: "Century Gothic", sans-serif;
+  font-size: 17px;
+  font-weight: bold;
+  color: #00494f;
+}
+
+.addonInfo p {
+  max-width: 700px;
+  margin-top: 8px;
+  font-family: "Gotham", "Century Gothic", sans-serif;
+  font-size: 12px;
+  line-height: 1.6;
+  color: #776e64;
+}
+
+.addonPrice {
+  min-width: 150px;
+  display: flex;
+  flex-direction: column;
+  align-items: flex-end;
+}
+
+.originalPrice {
+  font-family: "Century Gothic", sans-serif;
+  font-size: 12px;
+  color: #93a7ba;
+  text-decoration: line-through;
+}
+
+.addonPrice strong {
+  margin-top: 3px;
+  font-family: "Century Gothic", sans-serif;
+  font-size: 17px;
+  color: #00494f;
+}
+
+.memberPriceLabel {
+  margin-top: 4px;
+  font-family: "Gotham", "Century Gothic", sans-serif;
+  font-size: 10px;
+  color: #42738d;
+}
+
+/* MOBILE */
+
+@media (max-width: 768px) {
+  .navbar {
+    height: 75px;
+    padding: 0 25px;
+  }
+
+  .logo {
+    font-size: 25px;
+  }
+
+  .menu {
+    gap: 15px;
+  }
+
+  .menu a {
+    font-size: 11px;
+    letter-spacing: 0.5px;
+  }
+
+  .menuSection {
+    padding: 50px 25px 70px;
+  }
+
+  .heading {
+    margin-bottom: 50px;
+  }
+
+  .heading h1 {
+    font-size: 40px;
+  }
+
+  .description {
+    font-size: 14px;
+  }
+
+  .categoryHeader {
+    align-items: flex-start;
+    flex-direction: column;
+    gap: 12px;
+  }
+
+  .categoryHeader h2 {
+    font-size: 27px;
+  }
+
+  .categoryInfo {
+    text-align: left;
+  }
+
+  .menuGrid {
+    gap: 15px;
+  }
+
+  .menuCard {
+    flex: 0 0 280px;
+  }
+
+  .menuImage {
+    height: 220px;
+  }
+
+  /* ADD-ONS MOBILE */
+
+  .addonCategory {
+    margin-top: 35px;
+  }
+
+  .addonCategoryHeader h3 {
+    font-size: 18px;
+  }
+
+  .addonItem {
+    align-items: flex-start;
+    flex-direction: column;
+    gap: 15px;
+    padding: 22px 20px;
+  }
+
+  .addonInfo h3 {
+    font-size: 16px;
+    line-height: 1.4;
+  }
+
+  .addonInfo p {
+    font-size: 11px;
+    line-height: 1.6;
+  }
+
+  .addonPrice {
+    min-width: 0;
+    align-items: flex-start;
+  }
+
+  .addonPrice strong {
+    font-size: 16px;
+  }
+}

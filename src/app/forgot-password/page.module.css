@@ -1,0 +1,213 @@
+.page {
+  min-height: 100vh;
+  background-color: #f5f3ef;
+  color: #3b3b3b;
+  font-family: "Gotham", "Century Gothic", sans-serif;
+}
+
+/* NAVBAR */
+
+.navbar {
+  width: 100%;
+  height: 90px;
+  padding: 0 60px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  background-color: #00494f;
+}
+
+.logo {
+  color: white;
+  text-decoration: none;
+  font-family: "Century Gothic", sans-serif;
+  font-size: 32px;
+  font-weight: bold;
+  letter-spacing: 2px;
+}
+
+.logo:visited {
+  color: white;
+}
+
+.logo:hover {
+  color: #c4bfb6;
+}
+
+.menu {
+  display: flex;
+  align-items: center;
+  gap: 35px;
+}
+
+.menu a {
+  color: white;
+  text-decoration: none;
+  font-family: "Century Gothic", sans-serif;
+  font-size: 14px;
+  letter-spacing: 1px;
+}
+
+.menu a:hover {
+  color: #c4bfb6;
+}
+
+/* SECTION */
+
+.section {
+  min-height: calc(100vh - 90px);
+  padding: 70px 20px 100px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+/* CARD */
+
+.card {
+  width: 100%;
+  max-width: 460px;
+  padding: 48px 45px;
+  background-color: white;
+  box-shadow: 0 8px 25px rgba(0, 73, 79, 0.07);
+}
+
+.label {
+  margin-bottom: 15px;
+  font-family: "Century Gothic", sans-serif;
+  font-size: 11px;
+  font-weight: bold;
+  letter-spacing: 2px;
+  color: #42738d;
+}
+
+.card h1 {
+  margin: 0 0 15px;
+  font-family: "Century Gothic", sans-serif;
+  font-size: 34px;
+  line-height: 1.1;
+  color: #00494f;
+}
+
+.description {
+  margin-bottom: 35px;
+  color: #776e64;
+  font-size: 13px;
+  line-height: 1.7;
+}
+
+/* FORM */
+
+.form {
+  display: flex;
+  flex-direction: column;
+  gap: 22px;
+}
+
+.formGroup {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.formGroup label {
+  color: #3b3b3b;
+  font-size: 12px;
+  font-weight: bold;
+}
+
+.formGroup input {
+  width: 100%;
+  padding: 13px 14px;
+  border: 1px solid #c4bfb6;
+  background-color: white;
+  color: #3b3b3b;
+  font-family: "Gotham", "Century Gothic", sans-serif;
+  font-size: 13px;
+  outline: none;
+}
+
+.formGroup input:focus {
+  border-color: #42738d;
+}
+
+.formGroup input::placeholder {
+  color: #93a7ba;
+}
+
+/* BUTTON */
+
+.resetButton {
+  margin-top: 5px;
+  padding: 14px;
+  border: none;
+  background-color: #42738d;
+  color: white;
+  font-family: "Gotham", "Century Gothic", sans-serif;
+  font-size: 11px;
+  font-weight: bold;
+  letter-spacing: 1.5px;
+  cursor: pointer;
+  transition: background-color 0.2s ease;
+}
+
+.resetButton:hover {
+  background-color: #00494f;
+}
+
+/* BACK */
+
+.back {
+  margin-top: 30px;
+  padding-top: 25px;
+  border-top: 1px solid #e5e1db;
+  text-align: center;
+}
+
+.back a {
+  color: #42738d;
+  text-decoration: none;
+  font-family: "Century Gothic", sans-serif;
+  font-size: 10px;
+  font-weight: bold;
+  letter-spacing: 1px;
+}
+
+.back a:hover {
+  color: #00494f;
+}
+
+/* MOBILE */
+
+@media (max-width: 768px) {
+  .navbar {
+    height: 75px;
+    padding: 0 25px;
+  }
+
+  .logo {
+    font-size: 25px;
+  }
+
+  .menu {
+    gap: 15px;
+  }
+
+  .menu a {
+    font-size: 11px;
+    letter-spacing: 0.5px;
+  }
+
+  .section {
+    min-height: calc(100vh - 75px);
+    padding: 50px 20px 70px;
+  }
+
+  .card {
+    padding: 38px 25px;
+  }
+
+  .card h1 {
+    font-size: 28px;
+  }
+}

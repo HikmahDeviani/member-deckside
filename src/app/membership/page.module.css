@@ -1,0 +1,281 @@
+.page {
+  min-height: 100vh;
+
+  background-color: #f5f3ef;
+
+  color: #00494f;
+}
+
+
+/* ==================== NAVBAR ==================== */
+
+.navbar {
+  width: 100%;
+  height: 90px;
+
+  padding: 0 60px;
+
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+
+  background-color: #00494f;
+}
+
+.logo {
+  color: white;
+  text-decoration: none;
+
+  font-family: "Century Gothic", sans-serif;
+  font-size: 32px;
+  font-weight: bold;
+  letter-spacing: 2px;
+}
+
+.logo:visited {
+  color: white;
+}
+
+.logo:hover {
+  color: #c4bfb6;
+}
+
+.menu {
+  display: flex;
+  align-items: center;
+  gap: 35px;
+}
+
+.menu a {
+  color: white;
+  text-decoration: none;
+
+  font-family: "Century Gothic", sans-serif;
+  font-size: 14px;
+  letter-spacing: 1px;
+}
+
+.menu a:hover {
+  color: #c4bfb6;
+}
+
+
+/* ==================== REGISTRATION ==================== */
+
+.registration {
+  min-height: calc(100vh - 90px);
+
+  display: flex;
+  align-items: center;
+  justify-content: center;
+
+  gap: 100px;
+
+  padding: 70px 8%;
+}
+
+
+/* ==================== INTRODUCTION ==================== */
+
+.introduction {
+  max-width: 500px;
+}
+
+.label {
+  font-family: "Century Gothic", sans-serif;
+  font-size: 12px;
+  font-weight: bold;
+  letter-spacing: 2px;
+
+  color: #42738d;
+}
+
+.introduction h1 {
+  margin-top: 15px;
+
+  font-family: "Century Gothic", sans-serif;
+  font-size: 52px;
+  font-weight: bold;
+  line-height: 1.1;
+
+  color: #00494f;
+}
+
+.description {
+  margin-top: 25px;
+
+  max-width: 430px;
+
+  font-family: "Gotham", "Century Gothic", sans-serif;
+  font-size: 16px;
+  line-height: 1.7;
+
+  color: #776e64;
+}
+
+
+/* ==================== FORM CARD ==================== */
+
+.formCard {
+  width: 430px;
+
+  padding: 40px;
+
+  background-color: white;
+
+  box-shadow: 0 10px 30px rgba(0, 73, 79, 0.08);
+}
+
+.formCard h2 {
+  font-family: "Century Gothic", sans-serif;
+  font-size: 26px;
+
+  color: #00494f;
+}
+
+.formDescription {
+  margin-top: 8px;
+
+  font-family: "Gotham", "Century Gothic", sans-serif;
+  font-size: 13px;
+
+  color: #776e64;
+}
+
+
+/* ==================== FORM ==================== */
+
+.form {
+  margin-top: 30px;
+
+  display: flex;
+  flex-direction: column;
+
+  gap: 18px;
+}
+
+.formGroup {
+  display: flex;
+  flex-direction: column;
+
+  gap: 7px;
+}
+
+.formGroup label {
+  font-family: "Century Gothic", sans-serif;
+  font-size: 12px;
+  font-weight: bold;
+
+  color: #3b3b3b;
+}
+
+.formGroup input {
+  width: 100%;
+
+  padding: 13px 14px;
+
+  border: 1px solid #c4bfb6;
+
+  background-color: white;
+
+  font-family: "Gotham", "Century Gothic", sans-serif;
+  font-size: 13px;
+
+  color: #3b3b3b;
+
+  outline: none;
+}
+
+.formGroup input:focus {
+  border-color: #42738d;
+}
+
+.formGroup input::placeholder {
+  color: #93a7ba;
+}
+
+
+/* ==================== BUTTON ==================== */
+
+.submitButton {
+  width: 100%;
+
+  margin-top: 8px;
+  padding: 14px;
+
+  border: none;
+
+  background-color: #00494f;
+
+  color: white;
+
+  font-family: "Century Gothic", sans-serif;
+  font-size: 12px;
+  font-weight: bold;
+  letter-spacing: 1px;
+
+  cursor: pointer;
+}
+
+.submitButton:hover {
+  background-color: #42738d;
+}
+
+
+/* ==================== MOBILE ==================== */
+
+@media (max-width: 768px) {
+
+  .navbar {
+    height: 75px;
+
+    padding: 0 25px;
+  }
+
+  .logo {
+    font-size: 25px;
+  }
+
+  .menu {
+    gap: 15px;
+  }
+
+  .menu a {
+    font-size: 11px;
+    letter-spacing: 0.5px;
+  }
+
+
+  .registration {
+    min-height: auto;
+
+    flex-direction: column;
+
+    align-items: flex-start;
+
+    gap: 40px;
+
+    padding: 60px 25px;
+  }
+
+
+  .introduction {
+    max-width: 100%;
+  }
+
+  .introduction h1 {
+    font-size: 40px;
+  }
+
+  .description {
+    font-size: 14px;
+  }
+
+
+  .formCard {
+    width: 100%;
+
+    padding: 28px;
+  }
+
+}

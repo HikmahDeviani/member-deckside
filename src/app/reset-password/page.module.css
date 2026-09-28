@@ -1,0 +1,153 @@
+.page {
+  min-height: 100vh;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 40px 20px;
+  background-color: #f5f3ef;
+  color: #00494f;
+  font-family: "Gotham", "Century Gothic", sans-serif;
+}
+
+.card {
+  width: 100%;
+  max-width: 460px;
+  padding: 45px;
+  background-color: white;
+  box-shadow: 0 12px 35px rgba(0, 73, 79, 0.08);
+}
+
+.eyebrow {
+  margin: 0 0 14px;
+  font-family: "Century Gothic", sans-serif;
+  font-size: 11px;
+  font-weight: bold;
+  letter-spacing: 2px;
+  color: #42738d;
+}
+
+.card h1 {
+  margin: 0;
+  font-family: "Century Gothic", sans-serif;
+  font-size: 34px;
+  line-height: 1.2;
+  color: #00494f;
+}
+
+.description {
+  margin: 15px 0 30px;
+  font-size: 13px;
+  line-height: 1.7;
+  color: #776e64;
+}
+
+.card form {
+  display: flex;
+  flex-direction: column;
+}
+
+.card label {
+  margin-bottom: 8px;
+  font-family: "Century Gothic", sans-serif;
+  font-size: 10px;
+  font-weight: bold;
+  letter-spacing: 1.3px;
+  color: #00494f;
+}
+
+.card input {
+  width: 100%;
+  margin-bottom: 20px;
+  padding: 13px 14px;
+  border: 1px solid #c4bfb6;
+  outline: none;
+  background-color: white;
+  color: #3b3b3b;
+  font-family: "Gotham", "Century Gothic", sans-serif;
+  font-size: 12px;
+  box-sizing: border-box;
+}
+
+.card input:focus {
+  border-color: #42738d;
+}
+
+.card input:disabled {
+  background-color: #f5f3ef;
+  cursor: not-allowed;
+}
+
+.card button {
+  width: 100%;
+  margin-top: 5px;
+  padding: 14px 20px;
+  border: none;
+  background-color: #42738d;
+  color: white;
+  font-family: "Century Gothic", sans-serif;
+  font-size: 10px;
+  font-weight: bold;
+  letter-spacing: 1.5px;
+  cursor: pointer;
+  transition: background-color 0.2s ease;
+}
+
+.card button:hover {
+  background-color: #00494f;
+}
+
+.card button:disabled {
+  background-color: #c4bfb6;
+  cursor: not-allowed;
+}
+
+.error {
+  margin: 0 0 18px;
+  padding: 12px 14px;
+  background-color: #f5f3ef;
+  border-left: 3px solid #776e64;
+  color: #776e64;
+  font-size: 11px;
+  line-height: 1.5;
+}
+
+.success {
+  margin: 0 0 18px;
+  padding: 12px 14px;
+  background-color: #f5f8f9;
+  border-left: 3px solid #42738d;
+  color: #00494f;
+  font-size: 11px;
+  line-height: 1.5;
+}
+
+.loginLink {
+  display: block;
+  margin-top: 20px;
+  text-align: center;
+  color: #42738d;
+  text-decoration: none;
+  font-family: "Century Gothic", sans-serif;
+  font-size: 10px;
+  font-weight: bold;
+  letter-spacing: 1px;
+}
+
+.loginLink:hover {
+  color: #00494f;
+}
+
+@media (max-width: 600px) {
+  .page {
+    padding: 25px 18px;
+  }
+
+  .card {
+    padding: 35px 25px;
+  }
+
+  .card h1 {
+    font-size: 29px;
+  }
+}
+
