@@ -1,7 +1,6 @@
-```tsx
 "use client";
 
-import { useState } from "react";
+import { useState, type FormEvent } from "react";
 import { useRouter } from "next/navigation";
 import { createClient } from "../../lib/supabase/client";
 import styles from "./page.module.css";
@@ -20,9 +19,7 @@ export default function Membership() {
   const [error, setError] = useState("");
   const [loading, setLoading] = useState(false);
 
-  const handleSignUp = async (
-    event: React.FormEvent<HTMLFormElement>
-  ) => {
+  const handleSignUp = async (event: FormEvent<HTMLFormElement>) => {
     event.preventDefault();
 
     setError("");
@@ -39,18 +36,17 @@ export default function Membership() {
 
     setLoading(true);
 
-    const { data, error: signUpError } =
-      await supabase.auth.signUp({
-        email: email.trim(),
-        password,
-        options: {
-          data: {
-            title,
-            full_name: fullName.trim(),
-            phone: phone.trim(),
-          },
+    const { data, error: signUpError } = await supabase.auth.signUp({
+      email: email.trim(),
+      password,
+      options: {
+        data: {
+          title,
+          full_name: fullName.trim(),
+          phone: phone.trim(),
         },
-      });
+      },
+    });
 
     if (signUpError) {
       setLoading(false);
@@ -107,10 +103,7 @@ export default function Membership() {
             Fill in your details to get started.
           </p>
 
-          <form
-            className={styles.form}
-            onSubmit={handleSignUp}
-          >
+          <form className={styles.form} onSubmit={handleSignUp}>
             <div className={styles.formGroup}>
               <label htmlFor="title">Title</label>
 
@@ -118,16 +111,11 @@ export default function Membership() {
                 id="title"
                 name="title"
                 value={title}
-                onChange={(event) =>
-                  setTitle(event.target.value)
-                }
+                onChange={(event) => setTitle(event.target.value)}
                 required
                 disabled={loading}
               >
-                <option value="">
-                  Select your title
-                </option>
-
+                <option value="">Select your title</option>
                 <option value="mr">Mr.</option>
                 <option value="ms">Ms.</option>
                 <option value="mrs">Mrs.</option>
@@ -143,9 +131,7 @@ export default function Membership() {
                 type="text"
                 placeholder="Enter your full name"
                 value={fullName}
-                onChange={(event) =>
-                  setFullName(event.target.value)
-                }
+                onChange={(event) => setFullName(event.target.value)}
                 autoComplete="name"
                 required
                 disabled={loading}
@@ -153,9 +139,7 @@ export default function Membership() {
             </div>
 
             <div className={styles.formGroup}>
-              <label htmlFor="email">
-                Email Address
-              </label>
+              <label htmlFor="email">Email Address</label>
 
               <input
                 id="email"
@@ -163,9 +147,7 @@ export default function Membership() {
                 type="email"
                 placeholder="Enter your email address"
                 value={email}
-                onChange={(event) =>
-                  setEmail(event.target.value)
-                }
+                onChange={(event) => setEmail(event.target.value)}
                 autoComplete="email"
                 required
                 disabled={loading}
@@ -173,9 +155,7 @@ export default function Membership() {
             </div>
 
             <div className={styles.formGroup}>
-              <label htmlFor="phone">
-                Phone Number
-              </label>
+              <label htmlFor="phone">Phone Number</label>
 
               <input
                 id="phone"
@@ -183,9 +163,7 @@ export default function Membership() {
                 type="tel"
                 placeholder="Enter your phone number"
                 value={phone}
-                onChange={(event) =>
-                  setPhone(event.target.value)
-                }
+                onChange={(event) => setPhone(event.target.value)}
                 autoComplete="tel"
                 required
                 disabled={loading}
@@ -193,9 +171,7 @@ export default function Membership() {
             </div>
 
             <div className={styles.formGroup}>
-              <label htmlFor="password">
-                Password
-              </label>
+              <label htmlFor="password">Password</label>
 
               <input
                 id="password"
@@ -203,9 +179,7 @@ export default function Membership() {
                 type="password"
                 placeholder="Create your password"
                 value={password}
-                onChange={(event) =>
-                  setPassword(event.target.value)
-                }
+                onChange={(event) => setPassword(event.target.value)}
                 autoComplete="new-password"
                 minLength={8}
                 required
@@ -214,9 +188,7 @@ export default function Membership() {
             </div>
 
             <div className={styles.formGroup}>
-              <label htmlFor="confirmPassword">
-                Confirm Password
-              </label>
+              <label htmlFor="confirmPassword">Confirm Password</label>
 
               <input
                 id="confirmPassword"
@@ -234,20 +206,14 @@ export default function Membership() {
               />
             </div>
 
-            {error && (
-              <p className={styles.error}>
-                {error}
-              </p>
-            )}
+            {error && <p className={styles.error}>{error}</p>}
 
             <button
               type="submit"
               className={styles.submitButton}
               disabled={loading}
             >
-              {loading
-                ? "CREATING ACCOUNT..."
-                : "CREATE MEMBERSHIP"}
+              {loading ? "CREATING ACCOUNT..." : "CREATE MEMBERSHIP"}
             </button>
           </form>
         </div>
@@ -255,4 +221,4 @@ export default function Membership() {
     </main>
   );
 }
-```
+
