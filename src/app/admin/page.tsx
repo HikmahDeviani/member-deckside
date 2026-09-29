@@ -101,7 +101,6 @@ type ProfileRow = {
   title: string | null;
   full_name: string;
   email: string;
-  phone: string | null;
   role: string;
   created_at: string;
 };
@@ -279,13 +278,15 @@ export default function AdminPage() {
         .maybeSingle();
 
       if (profileError) {
-        console.error("ADMIN PROFILE ERROR:", profileError);
+        console.error(
+          "ADMIN PROFILE ERROR:",
+          profileError
+        );
 
         setErrorMessage(
           `Unable to verify admin access: ${profileError.message}`
         );
 
-        setLoading(false);
         return;
       }
 
@@ -294,7 +295,6 @@ export default function AdminPage() {
           "Admin profile was not found."
         );
 
-        setLoading(false);
         return;
       }
 
@@ -309,7 +309,10 @@ export default function AdminPage() {
         loadClaims(),
       ]);
     } catch (error) {
-      console.error("ADMIN DASHBOARD ERROR:", error);
+      console.error(
+        "ADMIN DASHBOARD ERROR:",
+        error
+      );
 
       setErrorMessage(
         "Something went wrong while loading the admin dashboard."
@@ -326,7 +329,7 @@ export default function AdminPage() {
     } = await supabase
       .from("profiles")
       .select(
-        "id, member_id, title, full_name, email, phone, role, created_at"
+        "id, member_id, title, full_name, email, role, created_at"
       )
       .eq("role", "member")
       .order("created_at", {
@@ -367,67 +370,24 @@ export default function AdminPage() {
       )
       .in("user_id", userIds);
 
-    /*
-      IMPORTANT:
-      Kalau membership gagal dibaca karena RLS,
-      member tetap ditampilkan sebagai PENDING.
-    */
+    const membershipMap =
+      new Map<string, MembershipRow>();
+
+    if (!membershipError && memberships) {
+      memberships.forEach((membership) => {
+        membershipMap.set(
+          membership.user_id,
+          membership as MembershipRow
+        );
+      });
+    }
+
     if (membershipError) {
       console.error(
         "MEMBERSHIP ERROR:",
         membershipError
       );
-
-      const mappedMembers: Member[] =
-        (profiles as ProfileRow[]).map(
-          (profile) => ({
-            id: profile.id,
-            userId: profile.id,
-            memberId:
-              profile.member_id ?? "-",
-            title:
-              profile.title ?? "",
-            name:
-              profile.full_name ?? "",
-            email:
-              profile.email ?? "",
-            phone:
-              profile.phone ?? "",
-            registrationDate:
-              profile.created_at.slice(
-                0,
-                10
-              ),
-            startDate: "",
-            endDate: "",
-            paymentStatus: "PENDING",
-            membershipStatus: "PENDING",
-            source: "ONLINE",
-          })
-        );
-
-      setMembers(mappedMembers);
-
-      setErrorMessage(
-        `Members loaded, but membership data could not be read: ${membershipError.message}`
-      );
-
-      return;
     }
-
-    const membershipMap = new Map<
-      string,
-      MembershipRow
-    >();
-
-    (memberships ?? []).forEach(
-      (membership) => {
-        membershipMap.set(
-          membership.user_id,
-          membership as MembershipRow
-        );
-      }
-    );
 
     const mappedMembers: Member[] =
       (profiles as ProfileRow[]).map(
@@ -435,16 +395,15 @@ export default function AdminPage() {
           const membership =
             membershipMap.get(profile.id);
 
-          let status: MembershipStatus =
-            membership?.status ??
-            "PENDING";
+          let membershipStatus: MembershipStatus =
+            membership?.status ?? "PENDING";
 
           if (
-            status === "ACTIVE" &&
+            membershipStatus === "ACTIVE" &&
             membership?.end_date &&
             membership.end_date < today
           ) {
-            status = "EXPIRED";
+            membershipStatus = "EXPIRED";
           }
 
           return {
@@ -458,24 +417,20 @@ export default function AdminPage() {
               profile.full_name ?? "",
             email:
               profile.email ?? "",
-            phone:
-              profile.phone ?? "",
+            phone: "",
             registrationDate:
               profile.created_at.slice(
                 0,
                 10
               ),
             startDate:
-              membership?.start_date ??
-              "",
+              membership?.start_date ?? "",
             endDate:
-              membership?.end_date ??
-              "",
+              membership?.end_date ?? "",
             paymentStatus:
               membership?.payment_status ??
               "PENDING",
-            membershipStatus:
-              status,
+            membershipStatus,
             source: "ONLINE",
           };
         }
@@ -504,10 +459,6 @@ export default function AdminPage() {
       );
 
       setOrders([]);
-
-      setErrorMessage(
-        `Unable to load order data: ${error.message}`
-      );
 
       return;
     }
@@ -685,10 +636,6 @@ export default function AdminPage() {
       );
 
       setClaims([]);
-
-      setErrorMessage(
-        `Unable to load beverage claim data: ${error.message}`
-      );
 
       return;
     }
@@ -893,10 +840,6 @@ export default function AdminPage() {
     );
   }, [claims, dateRange]);
 
-  /*
-    Member Database sengaja menggunakan
-    semua members, bukan filteredMembers.
-  */
   const filteredMembers = useMemo(() => {
     return members.filter(
       (member) =>
@@ -1010,8 +953,6 @@ export default function AdminPage() {
               memberForm.name.trim(),
             email:
               memberForm.email.trim(),
-            phone:
-              memberForm.phone.trim(),
           })
           .eq(
             "id",
@@ -1665,7 +1606,7 @@ export default function AdminPage() {
                   member.memberId,
                   `${member.title} ${member.name}`,
                   member.email,
-                  member.phone,
+                  member.phone || "-",
                   formatDate(
                     member.registrationDate
                   ),
@@ -1859,9 +1800,7 @@ export default function AdminPage() {
     return (
       <main className={styles.page}>
         <div
-          className={
-            styles.container
-          }
+          className={styles.container}
           style={{
             paddingTop: "120px",
             textAlign: "center",
@@ -1875,25 +1814,15 @@ export default function AdminPage() {
 
   return (
     <main className={styles.page}>
-      <nav
-        className={
-          styles.navbar
-        }
-      >
+      <nav className={styles.navbar}>
         <a
           href="/"
-          className={
-            styles.logo
-          }
+          className={styles.logo}
         >
           Deckside
         </a>
 
-        <div
-          className={
-            styles.navLinks
-          }
-        >
+        <div className={styles.navLinks}>
           <a href="/menu">
             MENU
           </a>
@@ -1916,22 +1845,10 @@ export default function AdminPage() {
         </div>
       </nav>
 
-      <div
-        className={
-          styles.container
-        }
-      >
-        <section
-          className={
-            styles.header
-          }
-        >
+      <div className={styles.container}>
+        <section className={styles.header}>
           <div>
-            <p
-              className={
-                styles.eyebrow
-              }
-            >
+            <p className={styles.eyebrow}>
               DECKSIDE ADMINISTRATION
             </p>
 
@@ -1939,11 +1856,7 @@ export default function AdminPage() {
               Admin Dashboard
             </h1>
 
-            <p
-              className={
-                styles.headerText
-              }
-            >
+            <p className={styles.headerText}>
               Manage memberships,
               orders, complimentary
               beverage claims, and
@@ -1951,11 +1864,7 @@ export default function AdminPage() {
             </p>
           </div>
 
-          <div
-            className={
-              styles.adminInfo
-            }
-          >
+          <div className={styles.adminInfo}>
             <span>ADMIN</span>
 
             <strong>
@@ -1965,11 +1874,7 @@ export default function AdminPage() {
         </section>
 
         {errorMessage && (
-          <div
-            className={
-              styles.notification
-            }
-          >
+          <div className={styles.notification}>
             <span>
               {errorMessage}
             </span>
@@ -1985,11 +1890,7 @@ export default function AdminPage() {
         )}
 
         {notification && (
-          <div
-            className={
-              styles.notification
-            }
-          >
+          <div className={styles.notification}>
             <span>
               {notification}
             </span>
@@ -2004,54 +1905,26 @@ export default function AdminPage() {
           </div>
         )}
 
-        <section
-          className={
-            styles.filterBar
-          }
-        >
+        <section className={styles.filterBar}>
           <div>
-            <p
-              className={
-                styles.filterLabel
-              }
-            >
+            <p className={styles.filterLabel}>
               REPORT PERIOD
             </p>
 
-            <div
-              className={
-                styles.filterOptions
-              }
-            >
+            <div className={styles.filterOptions}>
               {[
                 ["TODAY", "Today"],
-                [
-                  "YESTERDAY",
-                  "Yesterday",
-                ],
-                [
-                  "THIS_WEEK",
-                  "This Week",
-                ],
-                [
-                  "THIS_MONTH",
-                  "This Month",
-                ],
-                [
-                  "LAST_MONTH",
-                  "Last Month",
-                ],
-                [
-                  "CUSTOM",
-                  "Custom Range",
-                ],
+                ["YESTERDAY", "Yesterday"],
+                ["THIS_WEEK", "This Week"],
+                ["THIS_MONTH", "This Month"],
+                ["LAST_MONTH", "Last Month"],
+                ["CUSTOM", "Custom Range"],
               ].map(
                 ([value, label]) => (
                   <button
                     key={value}
                     className={
-                      dateFilter ===
-                      value
+                      dateFilter === value
                         ? styles.filterActive
                         : styles.filterButton
                     }
@@ -2068,13 +1941,8 @@ export default function AdminPage() {
             </div>
           </div>
 
-          {dateFilter ===
-            "CUSTOM" && (
-            <div
-              className={
-                styles.customRange
-              }
-            >
+          {dateFilter === "CUSTOM" && (
+            <div className={styles.customRange}>
               <div>
                 <label>
                   FROM
@@ -2082,13 +1950,10 @@ export default function AdminPage() {
 
                 <input
                   type="date"
-                  value={
-                    customFrom
-                  }
+                  value={customFrom}
                   onChange={(event) =>
                     setCustomFrom(
-                      event.target
-                        .value
+                      event.target.value
                     )
                   }
                 />
@@ -2101,13 +1966,10 @@ export default function AdminPage() {
 
                 <input
                   type="date"
-                  value={
-                    customTo
-                  }
+                  value={customTo}
                   onChange={(event) =>
                     setCustomTo(
-                      event.target
-                        .value
+                      event.target.value
                     )
                   }
                 />
@@ -2115,11 +1977,7 @@ export default function AdminPage() {
             </div>
           )}
 
-          <div
-            className={
-              styles.currentRange
-            }
-          >
+          <div className={styles.currentRange}>
             <span>
               SELECTED PERIOD
             </span>
@@ -2136,16 +1994,8 @@ export default function AdminPage() {
           </div>
         </section>
 
-        <section
-          className={
-            styles.overview
-          }
-        >
-          <div
-            className={
-              styles.statCard
-            }
-          >
+        <section className={styles.overview}>
+          <div className={styles.statCard}>
             <span>
               TOTAL MEMBERS
             </span>
@@ -2155,16 +2005,11 @@ export default function AdminPage() {
             </strong>
 
             <p>
-              All registered
-              members
+              All registered members
             </p>
           </div>
 
-          <div
-            className={
-              styles.statCard
-            }
-          >
+          <div className={styles.statCard}>
             <span>
               ACTIVE MEMBERS
             </span>
@@ -2174,16 +2019,11 @@ export default function AdminPage() {
             </strong>
 
             <p>
-              Current active
-              memberships
+              Current active memberships
             </p>
           </div>
 
-          <div
-            className={
-              styles.statCard
-            }
-          >
+          <div className={styles.statCard}>
             <span>
               ORDERS
             </span>
@@ -2193,16 +2033,11 @@ export default function AdminPage() {
             </strong>
 
             <p>
-              Orders in selected
-              period
+              Orders in selected period
             </p>
           </div>
 
-          <div
-            className={
-              styles.statCard
-            }
-          >
+          <div className={styles.statCard}>
             <span>
               REVENUE
             </span>
@@ -2214,28 +2049,15 @@ export default function AdminPage() {
             </strong>
 
             <p>
-              Revenue in selected
-              period
+              Revenue in selected period
             </p>
           </div>
         </section>
 
-        <section
-          className={
-            styles.section
-          }
-        >
-          <div
-            className={
-              styles.sectionHeader
-            }
-          >
+        <section className={styles.section}>
+          <div className={styles.sectionHeader}>
             <div>
-              <p
-                className={
-                  styles.sectionLabel
-                }
-              >
+              <p className={styles.sectionLabel}>
                 REPORTING
               </p>
 
@@ -2245,16 +2067,8 @@ export default function AdminPage() {
             </div>
           </div>
 
-          <div
-            className={
-              styles.exportCard
-            }
-          >
-            <div
-              className={
-                styles.exportText
-              }
-            >
+          <div className={styles.exportCard}>
+            <div className={styles.exportText}>
               <span>
                 SELECTED PERIOD
               </span>
@@ -2278,23 +2092,16 @@ export default function AdminPage() {
               </p>
             </div>
 
-            <div
-              className={
-                styles.reportType
-              }
-            >
+            <div className={styles.reportType}>
               <label>
                 REPORT TYPE
               </label>
 
               <select
-                value={
-                  reportType
-                }
+                value={reportType}
                 onChange={(event) =>
                   setReportType(
-                    event.target
-                      .value as ReportType
+                    event.target.value as ReportType
                   )
                 }
               >
@@ -2320,29 +2127,17 @@ export default function AdminPage() {
               </select>
             </div>
 
-            <div
-              className={
-                styles.exportActions
-              }
-            >
+            <div className={styles.exportActions}>
               <button
-                className={
-                  styles.primaryButton
-                }
-                onClick={
-                  exportExcel
-                }
+                className={styles.primaryButton}
+                onClick={exportExcel}
               >
                 EXPORT EXCEL
               </button>
 
               <button
-                className={
-                  styles.secondaryButton
-                }
-                onClick={
-                  exportPdf
-                }
+                className={styles.secondaryButton}
+                onClick={exportPdf}
               >
                 EXPORT PDF
               </button>
@@ -2350,22 +2145,10 @@ export default function AdminPage() {
           </div>
         </section>
 
-        <section
-          className={
-            styles.section
-          }
-        >
-          <div
-            className={
-              styles.sectionHeader
-            }
-          >
+        <section className={styles.section}>
+          <div className={styles.sectionHeader}>
             <div>
-              <p
-                className={
-                  styles.sectionLabel
-                }
-              >
+              <p className={styles.sectionLabel}>
                 MEMBERSHIP
               </p>
 
@@ -2374,26 +2157,13 @@ export default function AdminPage() {
               </h2>
             </div>
 
-            <span
-              className={
-                styles.sectionCount
-              }
-            >
-              {members.length}{" "}
-              MEMBERS
+            <span className={styles.sectionCount}>
+              {members.length} MEMBERS
             </span>
           </div>
 
-          <div
-            className={
-              styles.tableCard
-            }
-          >
-            <div
-              className={
-                styles.memberTableHeader
-              }
-            >
+          <div className={styles.tableCard}>
+            <div className={styles.memberTableHeader}>
               <span>
                 MEMBER
               </span>
@@ -2418,22 +2188,12 @@ export default function AdminPage() {
             {members.map(
               (member) => (
                 <div
-                  className={
-                    styles.memberTableRow
-                  }
-                  key={
-                    member.id
-                  }
+                  className={styles.memberTableRow}
+                  key={member.id}
                 >
-                  <div
-                    className={
-                      styles.memberIdentity
-                    }
-                  >
+                  <div className={styles.memberIdentity}>
                     <button
-                      className={
-                        styles.memberName
-                      }
+                      className={styles.memberName}
                       onClick={() =>
                         setSelectedHistoryMember(
                           member
@@ -2445,9 +2205,7 @@ export default function AdminPage() {
                     </button>
 
                     <span>
-                      {
-                        member.memberId
-                      }
+                      {member.memberId}
                     </span>
 
                     <small>
@@ -2472,36 +2230,22 @@ export default function AdminPage() {
                         : styles.statusExpired
                     }
                   >
-                    {
-                      member.membershipStatus
-                    }
+                    {member.membershipStatus}
                   </span>
 
-                  <span
-                    className={
-                      styles.source
-                    }
-                  >
+                  <span className={styles.source}>
                     {member.source}
                   </span>
 
-                  <div
-                    className={
-                      styles.actionGroup
-                    }
-                  >
+                  <div className={styles.actionGroup}>
                     <button
-                      className={
-                        styles.secondaryButton
-                      }
+                      className={styles.secondaryButton}
                       onClick={() =>
                         openEditMember(
                           member
                         )
                       }
-                      disabled={
-                        actionLoading
-                      }
+                      disabled={actionLoading}
                     >
                       EDIT
                     </button>
@@ -2509,17 +2253,13 @@ export default function AdminPage() {
                     {member.membershipStatus ===
                       "PENDING" && (
                       <button
-                        className={
-                          styles.primarySmallButton
-                        }
+                        className={styles.primarySmallButton}
                         onClick={() =>
                           approveMember(
                             member.userId
                           )
                         }
-                        disabled={
-                          actionLoading
-                        }
+                        disabled={actionLoading}
                       >
                         {actionLoading
                           ? "PROCESSING..."
@@ -2531,35 +2271,18 @@ export default function AdminPage() {
               )
             )}
 
-            {members.length ===
-              0 && (
-              <div
-                className={
-                  styles.emptyState
-                }
-              >
+            {members.length === 0 && (
+              <div className={styles.emptyState}>
                 No members registered yet.
               </div>
             )}
           </div>
         </section>
 
-        <section
-          className={
-            styles.section
-          }
-        >
-          <div
-            className={
-              styles.sectionHeader
-            }
-          >
+        <section className={styles.section}>
+          <div className={styles.sectionHeader}>
             <div>
-              <p
-                className={
-                  styles.sectionLabel
-                }
-              >
+              <p className={styles.sectionLabel}>
                 OPERATIONS
               </p>
 
@@ -2568,72 +2291,31 @@ export default function AdminPage() {
               </h2>
             </div>
 
-            <span
-              className={
-                styles.sectionCount
-              }
-            >
-              {
-                filteredOrders.length
-              }{" "}
-              ORDERS
+            <span className={styles.sectionCount}>
+              {filteredOrders.length} ORDERS
             </span>
           </div>
 
-          <div
-            className={
-              styles.tableCard
-            }
-          >
-            <div
-              className={
-                styles.orderHeader
-              }
-            >
-              <span>
-                ORDER
-              </span>
-
-              <span>
-                MEMBER
-              </span>
-
-              <span>
-                DATE
-              </span>
-
-              <span>
-                ITEMS
-              </span>
-
-              <span>
-                TOTAL
-              </span>
-
-              <span>
-                STATUS
-              </span>
-
-              <span>
-                ACTION
-              </span>
+          <div className={styles.tableCard}>
+            <div className={styles.orderHeader}>
+              <span>ORDER</span>
+              <span>MEMBER</span>
+              <span>DATE</span>
+              <span>ITEMS</span>
+              <span>TOTAL</span>
+              <span>STATUS</span>
+              <span>ACTION</span>
             </div>
 
             {filteredOrders.map(
               (order) => (
                 <div
-                  className={
-                    styles.orderRow
-                  }
-                  key={
-                    order.id
-                  }
+                  className={styles.orderRow}
+                  key={order.id}
                 >
                   <div>
                     <strong>
-                      {
-                        order.orderNumber
-                      }
+                      {order.orderNumber}
                     </strong>
 
                     <span>
@@ -2642,9 +2324,7 @@ export default function AdminPage() {
                   </div>
 
                   <button
-                    className={
-                      styles.orderMember
-                    }
+                    className={styles.orderMember}
                     onClick={() => {
                       const member =
                         members.find(
@@ -2660,9 +2340,7 @@ export default function AdminPage() {
                       }
                     }}
                   >
-                    {
-                      order.memberName
-                    }
+                    {order.memberName}
                   </button>
 
                   <span>
@@ -2681,41 +2359,29 @@ export default function AdminPage() {
                     )}
                   </strong>
 
-                  <span
-                    className={
-                      styles.orderStatus
-                    }
-                  >
+                  <span className={styles.orderStatus}>
                     {order.status}
                   </span>
 
                   <div>
                     {order.status !==
-                      "DELIVERED" ? (
+                    "DELIVERED" ? (
                       <button
-                        className={
-                          styles.secondaryButton
-                        }
+                        className={styles.secondaryButton}
                         onClick={() =>
                           updateOrderStatus(
                             order.id,
                             order.status
                           )
                         }
-                        disabled={
-                          actionLoading
-                        }
+                        disabled={actionLoading}
                       >
                         {getOrderAction(
                           order.status
                         )}
                       </button>
                     ) : (
-                      <span
-                        className={
-                          styles.completed
-                        }
-                      >
+                      <span className={styles.completed}>
                         COMPLETED
                       </span>
                     )}
@@ -2724,38 +2390,19 @@ export default function AdminPage() {
               )
             )}
 
-            {filteredOrders.length ===
-              0 && (
-              <div
-                className={
-                  styles.emptyState
-                }
-              >
-                No orders found in
-                the selected period.
+            {filteredOrders.length === 0 && (
+              <div className={styles.emptyState}>
+                No orders found in the selected period.
               </div>
             )}
           </div>
         </section>
 
-        <section
-          className={
-            styles.section
-          }
-        >
-          <div
-            className={
-              styles.sectionHeader
-            }
-          >
+        <section className={styles.section}>
+          <div className={styles.sectionHeader}>
             <div>
-              <p
-                className={
-                  styles.sectionLabel
-                }
-              >
-                COMPLIMENTARY
-                BEVERAGE
+              <p className={styles.sectionLabel}>
+                COMPLIMENTARY BEVERAGE
               </p>
 
               <h2>
@@ -2763,67 +2410,29 @@ export default function AdminPage() {
               </h2>
             </div>
 
-            <span
-              className={
-                styles.sectionCount
-              }
-            >
-              {
-                filteredClaims.length
-              }{" "}
-              CLAIMS
+            <span className={styles.sectionCount}>
+              {filteredClaims.length} CLAIMS
             </span>
           </div>
 
-          <div
-            className={
-              styles.tableCard
-            }
-          >
-            <div
-              className={
-                styles.claimHeader
-              }
-            >
-              <span>
-                MEMBER
-              </span>
-
-              <span>
-                MEMBER ID
-              </span>
-
-              <span>
-                BEVERAGE
-              </span>
-
-              <span>
-                DATE
-              </span>
-
-              <span>
-                TIME
-              </span>
-
-              <span>
-                STATUS
-              </span>
+          <div className={styles.tableCard}>
+            <div className={styles.claimHeader}>
+              <span>MEMBER</span>
+              <span>MEMBER ID</span>
+              <span>BEVERAGE</span>
+              <span>DATE</span>
+              <span>TIME</span>
+              <span>STATUS</span>
             </div>
 
             {filteredClaims.map(
               (claim) => (
                 <div
-                  className={
-                    styles.claimRow
-                  }
-                  key={
-                    claim.id
-                  }
+                  className={styles.claimRow}
+                  key={claim.id}
                 >
                   <button
-                    className={
-                      styles.orderMember
-                    }
+                    className={styles.orderMember}
                     onClick={() => {
                       const member =
                         members.find(
@@ -2839,21 +2448,15 @@ export default function AdminPage() {
                       }
                     }}
                   >
-                    {
-                      claim.memberName
-                    }
+                    {claim.memberName}
                   </button>
 
                   <span>
-                    {
-                      claim.memberId
-                    }
+                    {claim.memberId}
                   </span>
 
                   <span>
-                    {
-                      claim.beverage
-                    }
+                    {claim.beverage}
                   </span>
 
                   <span>
@@ -2866,134 +2469,74 @@ export default function AdminPage() {
                     {claim.time}
                   </span>
 
-                  <span
-                    className={
-                      styles.claimed
-                    }
-                  >
+                  <span className={styles.claimed}>
                     CLAIMED
                   </span>
                 </div>
               )
             )}
 
-            {filteredClaims.length ===
-              0 && (
-              <div
-                className={
-                  styles.emptyState
-                }
-              >
-                No beverage claims
-                found in the selected
-                period.
+            {filteredClaims.length === 0 && (
+              <div className={styles.emptyState}>
+                No beverage claims found in the selected period.
               </div>
             )}
           </div>
         </section>
 
-        <section
-          className={
-            styles.section
-          }
-        >
-          <div
-            className={
-              styles.sectionHeader
-            }
-          >
+        <section className={styles.section}>
+          <div className={styles.sectionHeader}>
             <div>
-              <p
-                className={
-                  styles.sectionLabel
-                }
-              >
+              <p className={styles.sectionLabel}>
                 CASHIER ACCESS
               </p>
 
               <h2>
-                Complimentary
-                Beverage QR
+                Complimentary Beverage QR
               </h2>
             </div>
 
-            <span
-              className={
-                styles.sectionCount
-              }
-            >
+            <span className={styles.sectionCount}>
               PERMANENT QR
             </span>
           </div>
 
-          <div
-            className={
-              styles.qrSection
-            }
-          >
-            <div
-              className={
-                styles.qrText
-              }
-            >
-              <p
-                className={
-                  styles.qrLabel
-                }
-              >
+          <div className={styles.qrSection}>
+            <div className={styles.qrText}>
+              <p className={styles.qrLabel}>
                 CASHIER QR CODE
               </p>
 
               <h3>
-                Customer Beverage
-                Claim
+                Customer Beverage Claim
               </h3>
 
               <p>
                 This QR code is used
                 by Deckside members
                 to unlock their daily
-                complimentary
-                beverage.
+                complimentary beverage.
               </p>
 
-              <div
-                className={
-                  styles.qrStatus
-                }
-              >
-                <span>
-                  STATUS
-                </span>
+              <div className={styles.qrStatus}>
+                <span>STATUS</span>
 
                 <strong>
                   ACTIVE
                 </strong>
               </div>
 
-              <div
-                className={
-                  styles.qrInfo
-                }
-              >
-                <span>
-                  QR TYPE
-                </span>
+              <div className={styles.qrInfo}>
+                <span>QR TYPE</span>
 
                 <strong>
                   Permanent Cashier QR
                 </strong>
               </div>
 
-              <div
-                className={
-                  styles.qrActions
-                }
-              >
+              <div className={styles.qrActions}>
                 <button
-                  className={
-                    styles.primaryButton
-                  }
+                  className={styles.primaryButton}
                   onClick={() =>
                     setQrOpen(true)
                   }
@@ -3002,23 +2545,15 @@ export default function AdminPage() {
                 </button>
 
                 <button
-                  className={
-                    styles.secondaryButton
-                  }
-                  onClick={
-                    downloadQr
-                  }
+                  className={styles.secondaryButton}
+                  onClick={downloadQr}
                 >
                   DOWNLOAD QR
                 </button>
               </div>
             </div>
 
-            <div
-              className={
-                styles.qrPreview
-              }
-            >
+            <div className={styles.qrPreview}>
               <QRCodeSVG
                 id="deckside-cashier-qr"
                 value="DECKSIDE-CLAIM-BEVERAGE"
@@ -3037,20 +2572,10 @@ export default function AdminPage() {
       </div>
 
       {selectedHistoryMember && (
-        <div
-          className={
-            styles.overlay
-          }
-        >
-          <div
-            className={
-              styles.historyModal
-            }
-          >
+        <div className={styles.overlay}>
+          <div className={styles.historyModal}>
             <button
-              className={
-                styles.closeButton
-              }
+              className={styles.closeButton}
               onClick={() =>
                 setSelectedHistoryMember(
                   null
@@ -3060,32 +2585,18 @@ export default function AdminPage() {
               ×
             </button>
 
-            <p
-              className={
-                styles.sectionLabel
-              }
-            >
+            <p className={styles.sectionLabel}>
               MEMBER PROFILE
             </p>
 
             <h2>
-              {
-                selectedHistoryMember.title
-              }{" "}
-              {
-                selectedHistoryMember.name
-              }
+              {selectedHistoryMember.title}{" "}
+              {selectedHistoryMember.name}
             </h2>
 
-            <div
-              className={
-                styles.profileMeta
-              }
-            >
+            <div className={styles.profileMeta}>
               <span>
-                {
-                  selectedHistoryMember.memberId
-                }
+                {selectedHistoryMember.memberId}
               </span>
 
               <span
@@ -3105,15 +2616,9 @@ export default function AdminPage() {
               </span>
             </div>
 
-            <div
-              className={
-                styles.profileGrid
-              }
-            >
+            <div className={styles.profileGrid}>
               <div>
-                <span>
-                  EMAIL
-                </span>
+                <span>EMAIL</span>
 
                 <strong>
                   {
@@ -3123,9 +2628,7 @@ export default function AdminPage() {
               </div>
 
               <div>
-                <span>
-                  PHONE
-                </span>
+                <span>PHONE</span>
 
                 <strong>
                   {
@@ -3137,8 +2640,7 @@ export default function AdminPage() {
 
               <div>
                 <span>
-                  MEMBERSHIP
-                  START
+                  MEMBERSHIP START
                 </span>
 
                 <strong>
@@ -3150,8 +2652,7 @@ export default function AdminPage() {
 
               <div>
                 <span>
-                  MEMBERSHIP
-                  END
+                  MEMBERSHIP END
                 </span>
 
                 <strong>
@@ -3162,45 +2663,27 @@ export default function AdminPage() {
               </div>
             </div>
 
-            <div
-              className={
-                styles.historyBlock
-              }
-            >
-              <div
-                className={
-                  styles.historyBlockHeader
-                }
-              >
+            <div className={styles.historyBlock}>
+              <div className={styles.historyBlockHeader}>
                 <h3>
                   ORDER HISTORY
                 </h3>
 
                 <span>
-                  {
-                    memberOrders.length
-                  }{" "}
-                  ORDERS
+                  {memberOrders.length} ORDERS
                 </span>
               </div>
 
-              {memberOrders.length >
-              0 ? (
+              {memberOrders.length > 0 ? (
                 memberOrders.map(
                   (order) => (
                     <div
-                      className={
-                        styles.historyItem
-                      }
-                      key={
-                        order.id
-                      }
+                      className={styles.historyItem}
+                      key={order.id}
                     >
                       <div>
                         <strong>
-                          {
-                            order.orderNumber
-                          }
+                          {order.orderNumber}
                         </strong>
 
                         <span>
@@ -3208,17 +2691,13 @@ export default function AdminPage() {
                             order.date
                           )}{" "}
                           ·{" "}
-                          {
-                            order.time
-                          }
+                          {order.time}
                         </span>
                       </div>
 
                       <div>
                         <span>
-                          {
-                            order.items
-                          }
+                          {order.items}
                         </span>
 
                         <strong>
@@ -3228,69 +2707,40 @@ export default function AdminPage() {
                         </strong>
                       </div>
 
-                      <span
-                        className={
-                          styles.orderStatus
-                        }
-                      >
-                        {
-                          order.status
-                        }
+                      <span className={styles.orderStatus}>
+                        {order.status}
                       </span>
                     </div>
                   )
                 )
               ) : (
-                <p
-                  className={
-                    styles.emptyHistory
-                  }
-                >
+                <p className={styles.emptyHistory}>
                   No orders found.
                 </p>
               )}
             </div>
 
-            <div
-              className={
-                styles.historyBlock
-              }
-            >
-              <div
-                className={
-                  styles.historyBlockHeader
-                }
-              >
+            <div className={styles.historyBlock}>
+              <div className={styles.historyBlockHeader}>
                 <h3>
-                  BEVERAGE CLAIM
-                  HISTORY
+                  BEVERAGE CLAIM HISTORY
                 </h3>
 
                 <span>
-                  {
-                    memberClaims.length
-                  }{" "}
-                  CLAIMS
+                  {memberClaims.length} CLAIMS
                 </span>
               </div>
 
-              {memberClaims.length >
-              0 ? (
+              {memberClaims.length > 0 ? (
                 memberClaims.map(
                   (claim) => (
                     <div
-                      className={
-                        styles.historyItem
-                      }
-                      key={
-                        claim.id
-                      }
+                      className={styles.historyItem}
+                      key={claim.id}
                     >
                       <div>
                         <strong>
-                          {
-                            claim.beverage
-                          }
+                          {claim.beverage}
                         </strong>
 
                         <span>
@@ -3304,24 +2754,15 @@ export default function AdminPage() {
                         {claim.time}
                       </span>
 
-                      <span
-                        className={
-                          styles.claimed
-                        }
-                      >
+                      <span className={styles.claimed}>
                         CLAIMED
                       </span>
                     </div>
                   )
                 )
               ) : (
-                <p
-                  className={
-                    styles.emptyHistory
-                  }
-                >
-                  No beverage
-                  claims found.
+                <p className={styles.emptyHistory}>
+                  No beverage claims found.
                 </p>
               )}
             </div>
@@ -3330,20 +2771,10 @@ export default function AdminPage() {
       )}
 
       {qrOpen && (
-        <div
-          className={
-            styles.overlay
-          }
-        >
-          <div
-            className={
-              styles.qrModal
-            }
-          >
+        <div className={styles.overlay}>
+          <div className={styles.qrModal}>
             <button
-              className={
-                styles.closeButton
-              }
+              className={styles.closeButton}
               onClick={() =>
                 setQrOpen(false)
               }
@@ -3351,34 +2782,19 @@ export default function AdminPage() {
               ×
             </button>
 
-            <p
-              className={
-                styles.sectionLabel
-              }
-            >
+            <p className={styles.sectionLabel}>
               CASHIER QR
             </p>
 
             <h2>
-              Complimentary
-              Beverage
+              Complimentary Beverage
             </h2>
 
-            <p
-              className={
-                styles.modalText
-              }
-            >
-              This is the permanent
-              QR code for customer
-              beverage claims.
+            <p className={styles.modalText}>
+              This is the permanent QR code for customer beverage claims.
             </p>
 
-            <div
-              className={
-                styles.largeQr
-              }
-            >
+            <div className={styles.largeQr}>
               <QRCodeSVG
                 value="DECKSIDE-CLAIM-BEVERAGE"
                 size={300}
@@ -3388,34 +2804,20 @@ export default function AdminPage() {
               />
             </div>
 
-            <p
-              className={
-                styles.qrCodeText
-              }
-            >
+            <p className={styles.qrCodeText}>
               DECKSIDE-CLAIM-BEVERAGE
             </p>
 
-            <div
-              className={
-                styles.qrModalActions
-              }
-            >
+            <div className={styles.qrModalActions}>
               <button
-                className={
-                  styles.primaryButton
-                }
-                onClick={
-                  downloadQr
-                }
+                className={styles.primaryButton}
+                onClick={downloadQr}
               >
                 DOWNLOAD QR
               </button>
 
               <button
-                className={
-                  styles.secondaryButton
-                }
+                className={styles.secondaryButton}
                 onClick={() =>
                   setQrOpen(false)
                 }
@@ -3429,32 +2831,16 @@ export default function AdminPage() {
 
       {editMemberOpen &&
         selectedMember && (
-          <div
-            className={
-              styles.overlay
-            }
-          >
-            <div
-              className={
-                styles.historyModal
-              }
-            >
+          <div className={styles.overlay}>
+            <div className={styles.historyModal}>
               <button
-                className={
-                  styles.closeButton
-                }
-                onClick={
-                  closeMemberModal
-                }
+                className={styles.closeButton}
+                onClick={closeMemberModal}
               >
                 ×
               </button>
 
-              <p
-                className={
-                  styles.sectionLabel
-                }
-              >
+              <p className={styles.sectionLabel}>
                 MEMBER MANAGEMENT
               </p>
 
@@ -3462,20 +2848,14 @@ export default function AdminPage() {
                 Edit Member
               </h2>
 
-              <div
-                className={
-                  styles.profileGrid
-                }
-              >
+              <div className={styles.profileGrid}>
                 <div>
                   <span>
                     MEMBER ID
                   </span>
 
                   <strong>
-                    {
-                      memberForm.memberId
-                    }
+                    {memberForm.memberId}
                   </strong>
                 </div>
 
@@ -3492,27 +2872,18 @@ export default function AdminPage() {
                 </div>
               </div>
 
-              <div
-                className={
-                  styles.memberForm
-                }
-              >
+              <div className={styles.memberForm}>
                 <div>
                   <label>
                     TITLE
                   </label>
 
                   <select
-                    value={
-                      memberForm.title
-                    }
-                    onChange={(
-                      event
-                    ) =>
+                    value={memberForm.title}
+                    onChange={(event) =>
                       handleFormChange(
                         "title",
-                        event.target
-                          .value
+                        event.target.value
                       )
                     }
                   >
@@ -3541,16 +2912,11 @@ export default function AdminPage() {
 
                   <input
                     type="text"
-                    value={
-                      memberForm.name
-                    }
-                    onChange={(
-                      event
-                    ) =>
+                    value={memberForm.name}
+                    onChange={(event) =>
                       handleFormChange(
                         "name",
-                        event.target
-                          .value
+                        event.target.value
                       )
                     }
                   />
@@ -3563,16 +2929,11 @@ export default function AdminPage() {
 
                   <input
                     type="email"
-                    value={
-                      memberForm.email
-                    }
-                    onChange={(
-                      event
-                    ) =>
+                    value={memberForm.email}
+                    onChange={(event) =>
                       handleFormChange(
                         "email",
-                        event.target
-                          .value
+                        event.target.value
                       )
                     }
                   />
@@ -3585,16 +2946,11 @@ export default function AdminPage() {
 
                   <input
                     type="text"
-                    value={
-                      memberForm.phone
-                    }
-                    onChange={(
-                      event
-                    ) =>
+                    value={memberForm.phone}
+                    onChange={(event) =>
                       handleFormChange(
                         "phone",
-                        event.target
-                          .value
+                        event.target.value
                       )
                     }
                   />
@@ -3607,16 +2963,11 @@ export default function AdminPage() {
 
                   <input
                     type="date"
-                    value={
-                      memberForm.startDate
-                    }
-                    onChange={(
-                      event
-                    ) =>
+                    value={memberForm.startDate}
+                    onChange={(event) =>
                       handleFormChange(
                         "startDate",
-                        event.target
-                          .value
+                        event.target.value
                       )
                     }
                   />
@@ -3629,16 +2980,11 @@ export default function AdminPage() {
 
                   <input
                     type="date"
-                    value={
-                      memberForm.endDate
-                    }
-                    onChange={(
-                      event
-                    ) =>
+                    value={memberForm.endDate}
+                    onChange={(event) =>
                       handleFormChange(
                         "endDate",
-                        event.target
-                          .value
+                        event.target.value
                       )
                     }
                   />
@@ -3650,16 +2996,11 @@ export default function AdminPage() {
                   </label>
 
                   <select
-                    value={
-                      memberForm.paymentStatus
-                    }
-                    onChange={(
-                      event
-                    ) =>
+                    value={memberForm.paymentStatus}
+                    onChange={(event) =>
                       handleFormChange(
                         "paymentStatus",
-                        event.target
-                          .value
+                        event.target.value
                       )
                     }
                   >
@@ -3682,13 +3023,10 @@ export default function AdminPage() {
                     value={
                       memberForm.membershipStatus
                     }
-                    onChange={(
-                      event
-                    ) =>
+                    onChange={(event) =>
                       handleFormChange(
                         "membershipStatus",
-                        event.target
-                          .value
+                        event.target.value
                       )
                     }
                   >
@@ -3707,21 +3045,13 @@ export default function AdminPage() {
                 </div>
               </div>
 
-              <div
-                className={
-                  styles.qrModalActions
-                }
-              >
+              <div className={styles.qrModalActions}>
                 <button
-                  className={
-                    styles.primaryButton
-                  }
+                  className={styles.primaryButton}
                   onClick={
                     saveEditedMember
                   }
-                  disabled={
-                    actionLoading
-                  }
+                  disabled={actionLoading}
                 >
                   {actionLoading
                     ? "SAVING..."
@@ -3729,15 +3059,9 @@ export default function AdminPage() {
                 </button>
 
                 <button
-                  className={
-                    styles.secondaryButton
-                  }
-                  onClick={
-                    closeMemberModal
-                  }
-                  disabled={
-                    actionLoading
-                  }
+                  className={styles.secondaryButton}
+                  onClick={closeMemberModal}
+                  disabled={actionLoading}
                 >
                   CANCEL
                 </button>
