@@ -1,3 +1,4 @@
+```tsx
 "use client";
 
 import { useState } from "react";
@@ -17,7 +18,6 @@ export default function Membership() {
   const [confirmPassword, setConfirmPassword] = useState("");
 
   const [error, setError] = useState("");
-  const [success, setSuccess] = useState("");
   const [loading, setLoading] = useState(false);
 
   const handleSignUp = async (
@@ -26,7 +26,6 @@ export default function Membership() {
     event.preventDefault();
 
     setError("");
-    setSuccess("");
 
     if (password.length < 8) {
       setError("Password must be at least 8 characters.");
@@ -50,7 +49,6 @@ export default function Membership() {
             full_name: fullName.trim(),
             phone: phone.trim(),
           },
-          emailRedirectTo: `${window.location.origin}/sign-in`,
         },
       });
 
@@ -60,17 +58,16 @@ export default function Membership() {
       return;
     }
 
-    setLoading(false);
-
-    if (data.session) {
-      router.push("/dashboard");
-      router.refresh();
+    if (!data.user) {
+      setLoading(false);
+      setError("Unable to create your account. Please try again.");
       return;
     }
 
-    setSuccess(
-      "Your account has been created. Please check your email to verify your account before signing in."
-    );
+    setLoading(false);
+
+    router.push("/dashboard");
+    router.refresh();
   };
 
   return (
@@ -243,12 +240,6 @@ export default function Membership() {
               </p>
             )}
 
-            {success && (
-              <p className={styles.success}>
-                {success}
-              </p>
-            )}
-
             <button
               type="submit"
               className={styles.submitButton}
@@ -264,3 +255,4 @@ export default function Membership() {
     </main>
   );
 }
+```
