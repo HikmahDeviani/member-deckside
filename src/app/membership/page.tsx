@@ -17,12 +17,14 @@ export default function Membership() {
   const [confirmPassword, setConfirmPassword] = useState("");
 
   const [error, setError] = useState("");
+  const [success, setSuccess] = useState("");
   const [loading, setLoading] = useState(false);
 
   const handleSignUp = async (event: FormEvent<HTMLFormElement>) => {
     event.preventDefault();
 
     setError("");
+    setSuccess("");
 
     if (password.length < 8) {
       setError("Password must be at least 8 characters.");
@@ -62,9 +64,81 @@ export default function Membership() {
 
     setLoading(false);
 
-    router.push("/dashboard");
-    router.refresh();
+    setSuccess(
+      "Your account has been created successfully. Your membership is now pending verification. Please wait for the Deckside team to verify your payment and activate your membership."
+    );
   };
+
+  if (success) {
+    return (
+      <main className={styles.page}>
+        <nav className={styles.navbar}>
+          <a href="/" className={styles.logo}>
+            Deckside
+          </a>
+
+          <div className={styles.menu}>
+            <a href="/membership">MEMBERSHIP</a>
+            <a href="/menu">MENU</a>
+            <a href="/sign-in">SIGN IN</a>
+          </div>
+        </nav>
+
+        <section className={styles.registration}>
+          <div className={styles.introduction}>
+            <p className={styles.label}>DECKSIDE MEMBERSHIP</p>
+
+            <h1>
+              Almost
+              <br />
+              There
+            </h1>
+
+            <p className={styles.description}>
+              Your account has been created. Your membership will become
+              active after verification by the Deckside team.
+            </p>
+          </div>
+
+          <div className={styles.formCard}>
+            <h2>Registration Submitted</h2>
+
+            <p className={styles.formDescription}>
+              Thank you for registering with Deckside.
+            </p>
+
+            <div
+              style={{
+                marginTop: "24px",
+                padding: "18px",
+                borderRadius: "8px",
+                backgroundColor: "#C4BFB6",
+                color: "#00494F",
+                lineHeight: "1.6",
+              }}
+            >
+              <strong>Membership Status: Pending Verification</strong>
+
+              <p style={{ marginTop: "10px", marginBottom: 0 }}>
+                Our team will verify your payment before activating your
+                membership. You will be able to access member benefits once
+                your membership has been approved.
+              </p>
+            </div>
+
+            <button
+              type="button"
+              className={styles.submitButton}
+              style={{ marginTop: "24px" }}
+              onClick={() => router.push("/sign-in")}
+            >
+              GO TO SIGN IN
+            </button>
+          </div>
+        </section>
+      </main>
+    );
+  }
 
   return (
     <main className={styles.page}>

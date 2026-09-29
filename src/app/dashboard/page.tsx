@@ -10,37 +10,37 @@ const memberBeverages = [
   {
     id: 1,
     name: "Lemon Peach Ice Tea",
-    image: "/images/menu_1.PNG",
+    image: "/images/menu_1.png",
   },
   {
     id: 2,
     name: "Mango Matcha Latte",
-    image: "/images/menu_3.PNG",
+    image: "/images/menu_3.png",
   },
   {
     id: 3,
     name: "Strawberry Splash",
-    image: "/images/menu_4.PNG",
+    image: "/images/menu_4.png",
   },
   {
     id: 4,
     name: "Coffee Boom",
-    image: "/images/menu_5.PNG",
+    image: "/images/menu_5.png",
   },
   {
     id: 5,
     name: "Matcha Passion",
-    image: "/images/menu_6.PNG",
+    image: "/images/menu_6.png",
   },
   {
     id: 6,
     name: "Sun Kiss Coffee",
-    image: "/images/menu_7.PNG",
+    image: "/images/menu_7.png",
   },
   {
     id: 7,
     name: "Butterscotch Creamy Latte",
-    image: "/images/menu_8.PNG",
+    image: "/images/menu_8.png",
   },
 ];
 
@@ -226,6 +226,23 @@ type ClaimRecord = {
   beverage: string;
 };
 
+type HistoryItem = {
+  id: string;
+  name: string;
+  quantity: number;
+  price: number;
+};
+
+type HistoryOrder = {
+  id: string;
+  orderNumber: string;
+  orderType: "COMPLIMENTARY_BEVERAGE" | "ADD_ON";
+  status: string;
+  totalAmount: number;
+  createdAt: string;
+  items: HistoryItem[];
+};
+
 const formatRupiah = (value: number) =>
   new Intl.NumberFormat("id-ID", {
     style: "currency",
@@ -239,6 +256,19 @@ const formatDate = (date: Date) =>
     month: "short",
     year: "numeric",
   }).format(date);
+
+const formatDateTime = (dateString: string) =>
+  new Intl.DateTimeFormat("en-GB", {
+    timeZone: "Asia/Jakarta",
+    day: "2-digit",
+    month: "short",
+    year: "numeric",
+    hour: "2-digit",
+    minute: "2-digit",
+    hour12: false,
+  })
+    .format(new Date(dateString))
+    .replace(",", " ·");
 
 const getJakartaDateKey = () => {
   const parts = new Intl.DateTimeFormat("en-US", {
@@ -315,11 +345,15 @@ export default function DashboardPage() {
   const [memberName, setMemberName] = useState("");
   const [memberEmail, setMemberEmail] = useState("");
   const [memberId, setMemberId] = useState("");
+  const [currentUserId, setCurrentUserId] = useState("");
   const [loadingMember, setLoadingMember] = useState(true);
+
+  const [orderHistory, setOrderHistory] = useState<HistoryOrder[]>([]);
+  const [loadingHistory, setLoadingHistory] = useState(true);
 
   /*
    * Temporary membership data.
-   * This will be connected to the memberships table later.
+   * This part is intentionally kept as it is for now.
    */
   const membershipStatus = "ACTIVE";
 
@@ -353,10 +387,11 @@ export default function DashboardPage() {
     (item) => item.id === selectedBeverage
   );
 
-  const generateOrderId = () => {
-    const number = Math.floor(1000 + Math.random() * 9000);
+  const generateOrderNumber = () => {
+    const timestamp = Date.now().toString();
+    const random = Math.floor(100 + Math.random() * 900);
 
-    return `DSK-ORD-${number}`;
+    return `DSK-ORD-${timestamp.slice(-6)}${random}`;
   };
 
   const increaseQuantity = (id: number) => {
@@ -383,6 +418,106 @@ export default function DashboardPage() {
         [id]: quantity - 1,
       };
     });
+  };
+
+  /*
+   * Load order history from Supabase.
+   */
+  const loadOrderHistory = async (userId: string) => {
+    setLoadingHistory(true);
+
+    const { data: orders, error: ordersError } = await supabase
+      .from("orders")
+      .select(
+        "id, order_number, order_type, status, total_amount, created_at"
+      )
+      .eq("user_id", userId)
+      .order("created_at", {
+        ascending: false,
+      });
+
+    if (ordersError) {
+      console.error(
+        "Unable to load order history:",
+        ordersError.message
+      );
+
+      setOrderHistory([]);
+      setLoadingHistory(false);
+
+      return;
+    }
+
+    if (!orders || orders.length === 0) {
+      setOrderHistory([]);
+      setLoadingHistory(false);
+
+      return;
+    }
+
+    const orderIds = orders.map(
+      (order) => order.id
+    );
+
+    const { data: items, error: itemsError } =
+      await supabase
+        .from("order_items")
+        .select(
+          "id, order_id, item_name, quantity, unit_price"
+        )
+        .in("order_id", orderIds);
+
+    if (itemsError) {
+      console.error(
+        "Unable to load order items:",
+        itemsError.message
+      );
+
+      setOrderHistory(
+        orders.map((order) => ({
+          id: order.id,
+          orderNumber: order.order_number,
+          orderType: order.order_type,
+          status: order.status,
+          totalAmount: Number(order.total_amount || 0),
+          createdAt: order.created_at,
+          items: [],
+        }))
+      );
+
+      setLoadingHistory(false);
+
+      return;
+    }
+
+    const history: HistoryOrder[] = orders.map(
+      (order) => ({
+        id: order.id,
+        orderNumber: order.order_number,
+        orderType: order.order_type,
+        status: order.status,
+        totalAmount: Number(
+          order.total_amount || 0
+        ),
+        createdAt: order.created_at,
+        items: (items || [])
+          .filter(
+            (item) =>
+              item.order_id === order.id
+          )
+          .map((item) => ({
+            id: item.id,
+            name: item.item_name,
+            quantity: item.quantity,
+            price: Number(
+              item.unit_price || 0
+            ),
+          })),
+      })
+    );
+
+    setOrderHistory(history);
+    setLoadingHistory(false);
   };
 
   const stopScanner = async () => {
@@ -443,7 +578,9 @@ export default function DashboardPage() {
       }
 
       try {
-        const scanner = new Html5Qrcode("deckside-qr-reader");
+        const scanner = new Html5Qrcode(
+          "deckside-qr-reader"
+        );
 
         scannerRef.current = scanner;
 
@@ -483,7 +620,10 @@ export default function DashboardPage() {
               return;
             }
 
-            if (decodedText === "DECKSIDE-CLAIM-BEVERAGE") {
+            if (
+              decodedText ===
+              "DECKSIDE-CLAIM-BEVERAGE"
+            ) {
               await stopScanner();
 
               setQrScanned(true);
@@ -527,31 +667,31 @@ export default function DashboardPage() {
         return;
       }
 
-      /*
-       * Check role from profiles table.
-       *
-       * Admin users should use /admin,
-       * not the member dashboard.
-       */
-      const { data: profile, error: profileError } =
-        await supabase
-          .from("profiles")
-          .select("role")
-          .eq("id", user.id)
-          .single();
+      setCurrentUserId(user.id);
+
+      const {
+        data: profile,
+        error: profileError,
+      } = await supabase
+        .from("profiles")
+        .select(
+          "role, title, full_name, email, member_id"
+        )
+        .eq("id", user.id)
+        .single();
 
       if (!active) {
         return;
       }
 
-      if (!profileError && profile?.role === "admin") {
+      if (
+        !profileError &&
+        profile?.role === "admin"
+      ) {
         router.replace("/admin");
         return;
       }
 
-      /*
-       * Read title from Auth metadata.
-       */
       const titleMap: Record<string, string> = {
         mr: "Mr.",
         ms: "Ms.",
@@ -559,36 +699,38 @@ export default function DashboardPage() {
       };
 
       const titleValue =
-        user.user_metadata?.title || "";
+        profile?.title ||
+        user.user_metadata?.title ||
+        "";
 
       const title =
         titleMap[titleValue] || "";
 
-      /*
-       * Read full name from Auth metadata.
-       */
       const fullName =
+        profile?.full_name?.trim() ||
         user.user_metadata?.full_name?.trim() ||
         user.user_metadata?.name?.trim() ||
         user.email?.split("@")[0] ||
         "Member";
 
-      /*
-       * Temporary member ID.
-       *
-       * Later this can be replaced with the
-       * permanent member ID from the profiles table.
-       */
-      const generatedMemberId = `DSK-${user.id
-        .replace(/-/g, "")
-        .slice(0, 6)
-        .toUpperCase()}`;
+      const permanentMemberId =
+        profile?.member_id ||
+        `DSK-${user.id
+          .replace(/-/g, "")
+          .slice(0, 6)
+          .toUpperCase()}`;
 
       setMemberTitle(title);
       setMemberName(fullName);
-      setMemberEmail(user.email || "");
-      setMemberId(generatedMemberId);
+      setMemberEmail(
+        profile?.email ||
+          user.email ||
+          ""
+      );
+      setMemberId(permanentMemberId);
       setLoadingMember(false);
+
+      await loadOrderHistory(user.id);
     };
 
     loadMember();
@@ -620,7 +762,9 @@ export default function DashboardPage() {
           getJakartaDateKey()
         ) {
           setClaimedToday(true);
-          setClaimedBeverage(parsed.beverage);
+          setClaimedBeverage(
+            parsed.beverage
+          );
         } else {
           localStorage.removeItem(
             claimStorageKey
@@ -684,13 +828,18 @@ export default function DashboardPage() {
     };
   }, []);
 
-  const confirmBeverage = () => {
+  /*
+   * Save complimentary beverage order
+   * to Supabase.
+   */
+  const confirmBeverage = async () => {
     if (
       !claimWindowOpen ||
       !qrScanned ||
       !selectedBeverageData ||
       claimedToday ||
-      !claimStorageKey
+      !claimStorageKey ||
+      !currentUserId
     ) {
       return;
     }
@@ -701,6 +850,62 @@ export default function DashboardPage() {
       date: today,
       beverage: selectedBeverageData.name,
     };
+
+    const orderNumber =
+      generateOrderNumber();
+
+    const { data: order, error: orderError } =
+      await supabase
+        .from("orders")
+        .insert({
+          user_id: currentUserId,
+          order_number: orderNumber,
+          order_type:
+            "COMPLIMENTARY_BEVERAGE",
+          status: "ORDER RECEIVED",
+          total_amount: 0,
+        })
+        .select(
+          "id, order_number"
+        )
+        .single();
+
+    if (orderError || !order) {
+      console.error(
+        "Unable to create beverage order:",
+        orderError?.message
+      );
+
+      setScanError(
+        "Unable to place your order. Please try again."
+      );
+
+      return;
+    }
+
+    const { error: itemError } =
+      await supabase
+        .from("order_items")
+        .insert({
+          order_id: order.id,
+          item_name:
+            selectedBeverageData.name,
+          quantity: 1,
+          unit_price: 0,
+        });
+
+    if (itemError) {
+      console.error(
+        "Unable to create beverage order item:",
+        itemError.message
+      );
+
+      setScanError(
+        "Unable to save your order details. Please try again."
+      );
+
+      return;
+    }
 
     localStorage.setItem(
       claimStorageKey,
@@ -718,24 +923,88 @@ export default function DashboardPage() {
 
     setConfirmedItems([]);
     setConfirmedTotal(0);
-    setOrderId(generateOrderId());
+    setOrderId(order.order_number);
     setConfirmationType("beverage");
 
     setQrScanned(false);
     setSelectedBeverage(null);
+
+    await loadOrderHistory(
+      currentUserId
+    );
   };
 
-  const placeAddonOrder = () => {
-    if (cartItems.length === 0) {
+  /*
+   * Save add-on order to Supabase.
+   */
+  const placeAddonOrder = async () => {
+    if (
+      cartItems.length === 0 ||
+      !currentUserId
+    ) {
+      return;
+    }
+
+    const orderNumber =
+      generateOrderNumber();
+
+    const { data: order, error: orderError } =
+      await supabase
+        .from("orders")
+        .insert({
+          user_id: currentUserId,
+          order_number: orderNumber,
+          order_type: "ADD_ON",
+          status: "ORDER RECEIVED",
+          total_amount: total,
+        })
+        .select(
+          "id, order_number"
+        )
+        .single();
+
+    if (orderError || !order) {
+      console.error(
+        "Unable to create add-on order:",
+        orderError?.message
+      );
+
+      return;
+    }
+
+    const orderItems = cartItems.map(
+      (item) => ({
+        order_id: order.id,
+        item_name: item.name,
+        quantity: item.quantity,
+        unit_price: item.price,
+      })
+    );
+
+    const { error: itemError } =
+      await supabase
+        .from("order_items")
+        .insert(orderItems);
+
+    if (itemError) {
+      console.error(
+        "Unable to create add-on order items:",
+        itemError.message
+      );
+
       return;
     }
 
     setConfirmedBeverage("");
     setConfirmedItems(cartItems);
     setConfirmedTotal(total);
-    setOrderId(generateOrderId());
+    setOrderId(order.order_number);
     setConfirmationType("addon");
     setCart({});
+
+    await loadOrderHistory(
+      currentUserId
+    );
   };
 
   const closeConfirmation = () => {
@@ -1438,57 +1707,85 @@ export default function DashboardPage() {
           </div>
 
           <div className={styles.history}>
-            <div className={styles.historyRow}>
-              <div>
-                <strong>
-                  Menu 2
-                </strong>
+            {loadingHistory ? (
+              <div className={styles.historyRow}>
+                <div>
+                  <strong>
+                    Loading orders...
+                  </strong>
 
-                <span>
-                  Complimentary Beverage
-                </span>
+                  <span>
+                    Please wait a moment.
+                  </span>
+                </div>
               </div>
+            ) : orderHistory.length === 0 ? (
+              <div className={styles.historyRow}>
+                <div>
+                  <strong>
+                    No orders yet
+                  </strong>
 
-              <div>
-                <span>
-                  25 Sep 2026 · 15:24
-                </span>
-
-                <strong
-                  className={
-                    styles.delivered
-                  }
+                  <span>
+                    Your order history will appear here.
+                  </span>
+                </div>
+              </div>
+            ) : (
+              orderHistory.map((order) => (
+                <div
+                  className={styles.historyRow}
+                  key={order.id}
                 >
-                  DELIVERED
-                </strong>
-              </div>
-            </div>
+                  <div>
+                    <strong>
+                      {order.items.length > 0
+                        ? order.items
+                            .map((item) =>
+                              item.quantity > 1
+                                ? `${item.name} × ${item.quantity}`
+                                : item.name
+                            )
+                            .join(", ")
+                        : order.orderType ===
+                          "COMPLIMENTARY_BEVERAGE"
+                        ? "Complimentary Beverage"
+                        : "Add-on Order"}
+                    </strong>
 
-            <div className={styles.historyRow}>
-              <div>
-                <strong>
-                  Menu 8 × 1
-                </strong>
+                    <span>
+                      {order.orderType ===
+                      "COMPLIMENTARY_BEVERAGE"
+                        ? "Complimentary Beverage"
+                        : "Add-on Order"}
+                    </span>
 
-                <span>
-                  Add-on Order
-                </span>
-              </div>
+                    <small>
+                      {order.orderNumber}
+                    </small>
+                  </div>
 
-              <div>
-                <span>
-                  24 Sep 2026 · 16:12
-                </span>
+                  <div>
+                    <span>
+                      {formatDateTime(
+                        order.createdAt
+                      )}
+                    </span>
 
-                <strong
-                  className={
-                    styles.delivered
-                  }
-                >
-                  DELIVERED
-                </strong>
-              </div>
-            </div>
+                    <strong
+                      className={
+                        order.status ===
+                        "DELIVERED"
+                          ? styles.delivered
+                          : undefined
+                      }
+                    >
+                      {order.status}
+                    </strong>
+                  </div>
+                </div>
+              ))
+            )}
           </div>
         </section>
       </div>
@@ -1919,4 +2216,3 @@ export default function DashboardPage() {
     </main>
   );
 }
-
