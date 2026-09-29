@@ -6,6 +6,51 @@ import { Html5Qrcode } from "html5-qrcode";
 import { createClient } from "../../lib/supabase/client";
 import styles from "./page.module.css";
 
+type MembershipStatus = "PENDING" | "ACTIVE" | "EXPIRED";
+type PaymentStatus = "PENDING" | "VERIFIED";
+
+type Profile = {
+  id: string;
+  title: string | null;
+  full_name: string;
+  email: string;
+  member_id: string;
+  role: "member" | "admin";
+};
+
+type Membership = {
+  id: string;
+  user_id: string;
+  status: MembershipStatus;
+  payment_status: PaymentStatus;
+  start_date: string | null;
+  end_date: string | null;
+};
+
+type CartItem = {
+  id: number;
+  name: string;
+  price: number;
+  quantity: number;
+  type: "FOOD" | "BEVERAGE";
+};
+
+type HistoryItem = {
+  item_name: string;
+  quantity: number;
+  unit_price: number;
+};
+
+type HistoryOrder = {
+  id: string;
+  order_number: string;
+  order_type: string;
+  status: string;
+  total_amount: number;
+  created_at: string;
+  items: HistoryItem[];
+};
+
 const memberBeverages = [
   {
     id: 1,
@@ -13,311 +58,169 @@ const memberBeverages = [
     image: "/images/menu_1.png",
   },
   {
-    id: 2,
+    id: 3,
     name: "Mango Matcha Latte",
     image: "/images/menu_3.png",
   },
   {
-    id: 3,
+    id: 4,
     name: "Strawberry Splash",
     image: "/images/menu_4.png",
   },
   {
-    id: 4,
+    id: 5,
     name: "Coffee Boom",
     image: "/images/menu_5.png",
   },
   {
-    id: 5,
+    id: 6,
     name: "Matcha Passion",
     image: "/images/menu_6.png",
   },
   {
-    id: 6,
+    id: 7,
     name: "Sun Kiss Coffee",
     image: "/images/menu_7.png",
   },
   {
-    id: 7,
+    id: 8,
     name: "Butterscotch Creamy Latte",
     image: "/images/menu_8.png",
   },
 ];
 
-const appetizerSnacks = [
-  {
-    id: 1,
-    name: "Blueberry Cheesecake",
-    price: 58000,
-    description:
-      "Creamy cheesecake with a buttery biscuit crust, topped with blueberry compote.",
-  },
-  {
-    id: 2,
-    name: "Tofu Salt Chili",
-    price: 48000,
-    description:
-      "Crispy fried tofu tossed with salt and chili seasoning.",
-  },
-  {
-    id: 3,
-    name: "Spring Roll Oakwood",
-    price: 48000,
-    description:
-      "Signature spring rolls filled with shrimp, chicken, and apple, served with Branche’s special sauce.",
-  },
-  {
-    id: 4,
-    name: "Mixed Sampler",
-    price: 58000,
-    description:
-      "Potato wedges, spring rolls, chicken wings, and sausages, served with cheese sauce and Thai chili sauce.",
-  },
-  {
-    id: 5,
-    name: "Chili Baba Fries with Cheese",
-    price: 58000,
-    description:
-      "Crispy fries seasoned with Chili Baba spices and topped with melted cheese.",
-  },
-  {
-    id: 6,
-    name: "Cheese French Fries",
-    price: 58000,
-    description:
-      "Golden French Fries served with rich cheese sauce.",
-  },
-  {
-    id: 7,
-    name: "Crispy Corn Salted Egg",
-    price: 58000,
-    description:
-      "Crispy corn coated in a rich and creamy salted egg sauce.",
-  },
-  {
-    id: 8,
-    name: "Chicken Karage",
-    price: 58000,
-    description:
-      "Japanese-style crispy fried chicken, tender and juicy on the inside.",
-  },
-  {
-    id: 9,
-    name: "Fried Cakwe Prawn with Beef Floss",
-    price: 58000,
-    description:
-      "Golden-fried Chinese crullers (cakwe) stuffed with juicy prawns and topped with savory beef floss.",
-  },
-  {
-    id: 10,
-    name: "Tempe Mendoan Sambal Kecap",
-    price: 58000,
-    description:
-      "Lightly battered fried tempeh served with sweet and spicy soy chili sauce.",
-  },
-  {
-    id: 11,
-    name: "Pisang Goreng Gula Aren",
-    price: 58000,
-    description:
-      "Crispy fried banana drizzled with rich palm sugar syrup.",
-  },
-  {
-    id: 12,
-    name: "French Toast",
-    price: 58000,
-    description:
-      "Golden pan-fried bread served with butter and maple syrup.",
-  },
+const foodAddons = [
+  { id: 101, name: "French Fries", price: 35000 },
+  { id: 102, name: "Chicken Wings", price: 45000 },
+  { id: 103, name: "Chicken Popcorn", price: 40000 },
+  { id: 104, name: "Onion Rings", price: 35000 },
+  { id: 105, name: "Nachos", price: 40000 },
+  { id: 106, name: "Club Sandwich", price: 55000 },
+  { id: 107, name: "Beef Burger", price: 65000 },
+  { id: 108, name: "Chicken Sandwich", price: 50000 },
+  { id: 109, name: "Caesar Salad", price: 50000 },
+  { id: 110, name: "Chocolate Cake", price: 40000 },
+  { id: 111, name: "Cheese Cake", price: 45000 },
+  { id: 112, name: "Croissant", price: 30000 },
 ];
 
-const addonBeverages = [
-  {
-    id: 13,
-    name: "Matcha Colada",
-    price: 58000,
-    description:
-      "Creamy matcha blended with tropical coconut flavors.",
-  },
-  {
-    id: 14,
-    name: "Butterscotch Creamy Latte",
-    price: 68000,
-    description:
-      "Smooth espresso with creamy milk and rich butterscotch.",
-  },
-  {
-    id: 15,
-    name: "Sun Kiss Coffee",
-    price: 68000,
-    description:
-      "Refreshing coffee with bright citrus notes.",
-  },
-  {
-    id: 16,
-    name: "Mood Monday",
-    price: 68000,
-    description:
-      "A refreshing coffee blend with a smooth, uplifting finish.",
-  },
-  {
-    id: 17,
-    name: "Lemon Peach Iced Tea",
-    price: 58000,
-    description:
-      "Refreshing iced tea infused with lemon and peach.",
-  },
-  {
-    id: 18,
-    name: "Coffee Boom",
-    price: 68000,
-    description:
-      "Bold espresso blended into a rich and creamy coffee drink.",
-  },
-  {
-    id: 19,
-    name: "Mango Matcha Latte",
-    price: 58000,
-    description:
-      "Creamy matcha latte with sweet, tropical mango.",
-  },
-  {
-    id: 20,
-    name: "Matcha Passion",
-    price: 58000,
-    description:
-      "A refreshing blend of matcha and passion fruit.",
-  },
-  {
-    id: 21,
-    name: "Strawberry Splash",
-    price: 58000,
-    description:
-      "A fruity strawberry refresher served over ice.",
-  },
-  {
-    id: 22,
-    name: "Salted Caramel Crème Brûlée",
-    price: 68000,
-    description:
-      "Salted caramel coffee topped with a hint of salted caramel.",
-  },
+const beverageAddons = [
+  { id: 201, name: "Americano", price: 35000 },
+  { id: 202, name: "Cappuccino", price: 40000 },
+  { id: 203, name: "Cafe Latte", price: 40000 },
+  { id: 204, name: "Mocha", price: 45000 },
+  { id: 205, name: "Matcha Latte", price: 45000 },
+  { id: 206, name: "Chocolate", price: 40000 },
+  { id: 207, name: "Iced Tea", price: 25000 },
+  { id: 208, name: "Lemon Tea", price: 30000 },
+  { id: 209, name: "Mineral Water", price: 15000 },
+  { id: 210, name: "Orange Juice", price: 35000 },
 ];
 
-const addOns = [...appetizerSnacks, ...addonBeverages];
+const CLAIM_QR_VALUE = "DECKSIDE-CLAIM-BEVERAGE";
+const DISCOUNT_RATE = 0.21;
+const SERVICE_RATE = 0.1;
+const TAX_RATE = 0.11;
 
-type Addon = {
-  id: number;
-  name: string;
-  price: number;
-  description: string;
-};
-
-type OrderItem = {
-  name: string;
-  quantity: number;
-  price: number;
-};
-
-type ConfirmationType = "beverage" | "addon" | null;
-
-type ClaimRecord = {
-  date: string;
-  beverage: string;
-};
-
-type HistoryItem = {
-  id: string;
-  name: string;
-  quantity: number;
-  price: number;
-};
-
-type HistoryOrder = {
-  id: string;
-  orderNumber: string;
-  orderType: "COMPLIMENTARY_BEVERAGE" | "ADD_ON";
-  status: string;
-  totalAmount: number;
-  createdAt: string;
-  items: HistoryItem[];
-};
-
-const formatRupiah = (value: number) =>
-  new Intl.NumberFormat("id-ID", {
+function formatRupiah(value: number) {
+  return new Intl.NumberFormat("id-ID", {
     style: "currency",
     currency: "IDR",
     maximumFractionDigits: 0,
   }).format(value);
+}
 
-const formatDate = (date: Date) =>
-  new Intl.DateTimeFormat("en-GB", {
+function formatDate(value: string | null) {
+  if (!value) {
+    return "-";
+  }
+
+  return new Intl.DateTimeFormat("en-GB", {
     day: "2-digit",
     month: "short",
     year: "numeric",
-  }).format(date);
-
-const formatDateTime = (dateString: string) =>
-  new Intl.DateTimeFormat("en-GB", {
     timeZone: "Asia/Jakarta",
+  }).format(new Date(`${value}T00:00:00`));
+}
+
+function formatDateTime(value: string) {
+  return new Intl.DateTimeFormat("en-GB", {
     day: "2-digit",
     month: "short",
     year: "numeric",
     hour: "2-digit",
     minute: "2-digit",
     hour12: false,
-  })
-    .format(new Date(dateString))
-    .replace(",", " ·");
+    timeZone: "Asia/Jakarta",
+  }).format(new Date(value));
+}
 
-const getJakartaDateKey = () => {
-  const parts = new Intl.DateTimeFormat("en-US", {
+function getJakartaDateKey() {
+  return new Intl.DateTimeFormat("en-CA", {
     timeZone: "Asia/Jakarta",
     year: "numeric",
     month: "2-digit",
     day: "2-digit",
-  }).formatToParts(new Date());
+  }).format(new Date());
+}
 
-  const year =
-    parts.find((part) => part.type === "year")?.value || "";
-
-  const month =
-    parts.find((part) => part.type === "month")?.value || "";
-
-  const day =
-    parts.find((part) => part.type === "day")?.value || "";
-
-  return `${year}-${month}-${day}`;
-};
-
-const isBeverageClaimTime = () => {
-  const jakartaTime = new Intl.DateTimeFormat("en-US", {
+function isBeverageClaimTime() {
+  const current = new Intl.DateTimeFormat("en-GB", {
     timeZone: "Asia/Jakarta",
-    hour: "numeric",
-    minute: "numeric",
+    hour: "2-digit",
+    minute: "2-digit",
     hour12: false,
-  }).formatToParts(new Date());
+  }).format(new Date());
 
-  const hour = Number(
-    jakartaTime.find((part) => part.type === "hour")?.value || 0
-  );
+  const [hour, minute] = current.split(":").map(Number);
+  const totalMinutes = hour * 60 + minute;
 
-  const minute = Number(
-    jakartaTime.find((part) => part.type === "minute")?.value || 0
-  );
+  return totalMinutes >= 15 * 60 && totalMinutes <= 19 * 60;
+}
 
-  const currentMinutes = hour * 60 + minute;
+function generateOrderNumber() {
+  const date = new Intl.DateTimeFormat("en-CA", {
+    timeZone: "Asia/Jakarta",
+    year: "numeric",
+    month: "2-digit",
+    day: "2-digit",
+  })
+    .format(new Date())
+    .replaceAll("-", "");
 
-  return currentMinutes >= 15 * 60 && currentMinutes < 19 * 60;
-};
+  const random = Math.floor(1000 + Math.random() * 9000);
 
-export default function DashboardPage() {
+  return `DSK-${date}-${random}`;
+}
+
+export default function Dashboard() {
   const router = useRouter();
   const [supabase] = useState(() => createClient());
 
   const scannerRef = useRef<Html5Qrcode | null>(null);
 
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState("");
+
+  const [memberTitle, setMemberTitle] = useState("");
+  const [memberName, setMemberName] = useState("");
+  const [memberEmail, setMemberEmail] = useState("");
+  const [memberId, setMemberId] = useState("");
+  const [currentUserId, setCurrentUserId] = useState("");
+
+  const [membershipStatus, setMembershipStatus] =
+    useState<MembershipStatus>("PENDING");
+
+  const [paymentStatus, setPaymentStatus] =
+    useState<PaymentStatus>("PENDING");
+
+  const [startDate, setStartDate] = useState<string | null>(null);
+  const [endDate, setEndDate] = useState<string | null>(null);
+
   const [claimWindowOpen, setClaimWindowOpen] = useState(false);
+  const [claimedToday, setClaimedToday] = useState(false);
+  const [claimedBeverage, setClaimedBeverage] = useState("");
+
   const [scannerOpen, setScannerOpen] = useState(false);
   const [qrScanned, setQrScanned] = useState(false);
   const [scanError, setScanError] = useState("");
@@ -325,104 +228,168 @@ export default function DashboardPage() {
   const [selectedBeverage, setSelectedBeverage] =
     useState<number | null>(null);
 
-  const [claimedToday, setClaimedToday] = useState(false);
-  const [claimedBeverage, setClaimedBeverage] = useState("");
-
   const [cart, setCart] = useState<Record<number, number>>({});
 
+  const [confirmationOpen, setConfirmationOpen] = useState(false);
+
   const [confirmationType, setConfirmationType] =
-    useState<ConfirmationType>(null);
+    useState<"beverage" | "addon">("beverage");
 
   const [orderId, setOrderId] = useState("");
   const [confirmedBeverage, setConfirmedBeverage] = useState("");
-  const [confirmedItems, setConfirmedItems] = useState<OrderItem[]>([]);
+  const [confirmedItems, setConfirmedItems] = useState<CartItem[]>([]);
   const [confirmedTotal, setConfirmedTotal] = useState(0);
-
-  const [extendOpen, setExtendOpen] = useState(false);
-  const [extendConfirmed, setExtendConfirmed] = useState(false);
-
-  const [memberTitle, setMemberTitle] = useState("");
-  const [memberName, setMemberName] = useState("");
-  const [memberEmail, setMemberEmail] = useState("");
-  const [memberId, setMemberId] = useState("");
-  const [currentUserId, setCurrentUserId] = useState("");
-  const [loadingMember, setLoadingMember] = useState(true);
 
   const [orderHistory, setOrderHistory] = useState<HistoryOrder[]>([]);
   const [loadingHistory, setLoadingHistory] = useState(true);
 
-  /*
-   * Temporary membership data.
-   * This part is intentionally kept as it is for now.
-   */
-  const membershipStatus = "ACTIVE";
+  const [extendOpen, setExtendOpen] = useState(false);
+  const [extendConfirmed, setExtendConfirmed] = useState(false);
 
-  const startDate = new Date(2026, 8, 25);
-  const endDate = new Date(2026, 9, 24);
+  const isActiveMember =
+    membershipStatus === "ACTIVE" &&
+    paymentStatus === "VERIFIED";
 
-  const claimStorageKey = memberId
-    ? `deckside-claim-${memberId}`
-    : "";
-
-  const memberPrice = (price: number) => price * 0.79;
-
-  const cartItems: OrderItem[] = addOns
-    .filter((item) => (cart[item.id] || 0) > 0)
-    .map((item) => ({
-      name: item.name,
-      quantity: cart[item.id],
-      price: memberPrice(item.price),
-    }));
-
-  const subtotal = cartItems.reduce(
-    (sum, item) => sum + item.price * item.quantity,
-    0
-  );
-
-  const serviceCharge = subtotal * 0.1;
-  const tax = (subtotal + serviceCharge) * 0.11;
-  const total = subtotal + serviceCharge + tax;
-
-  const selectedBeverageData = memberBeverages.find(
-    (item) => item.id === selectedBeverage
-  );
-
-  const generateOrderNumber = () => {
-    const timestamp = Date.now().toString();
-    const random = Math.floor(100 + Math.random() * 900);
-
-    return `DSK-ORD-${timestamp.slice(-6)}${random}`;
+  const refreshClaimWindow = () => {
+    setClaimWindowOpen(isBeverageClaimTime());
   };
 
-  const increaseQuantity = (id: number) => {
-    setCart((previous) => ({
-      ...previous,
-      [id]: (previous[id] || 0) + 1,
-    }));
+  const loadProfile = async (userId: string) => {
+    const { data, error: profileError } = await supabase
+      .from("profiles")
+      .select("id, title, full_name, email, member_id, role")
+      .eq("id", userId)
+      .limit(1);
+
+    if (profileError) {
+      setError(
+        "Unable to load your profile. Please try again or contact the Deckside team."
+      );
+      setLoading(false);
+      return null;
+    }
+
+    if (!data || data.length === 0) {
+      setError(
+        "Your account profile has not been created yet. Please contact the Deckside team."
+      );
+      setLoading(false);
+      return null;
+    }
+
+    const row = data[0];
+
+    const profile: Profile = {
+      id: String(row.id),
+      title: row.title ?? null,
+      full_name: String(row.full_name ?? ""),
+      email: String(row.email ?? ""),
+      member_id: String(row.member_id ?? ""),
+      role: row.role === "admin" ? "admin" : "member",
+    };
+
+    if (profile.role === "admin") {
+      router.replace("/admin");
+      return null;
+    }
+
+    setMemberTitle(profile.title || "");
+    setMemberName(profile.full_name);
+    setMemberEmail(profile.email);
+    setMemberId(profile.member_id);
+    setCurrentUserId(profile.id);
+
+    return profile;
   };
 
-  const decreaseQuantity = (id: number) => {
-    setCart((previous) => {
-      const quantity = previous[id] || 0;
+  const loadMembership = async (userId: string) => {
+    const { data, error: membershipError } = await supabase
+      .from("memberships")
+      .select(
+        "id, user_id, status, payment_status, start_date, end_date"
+      )
+      .eq("user_id", userId)
+      .limit(1);
 
-      if (quantity <= 1) {
-        const updated = { ...previous };
+    if (membershipError) {
+      setMembershipStatus("PENDING");
+      setPaymentStatus("PENDING");
+      setStartDate(null);
+      setEndDate(null);
+      return;
+    }
 
-        delete updated[id];
+    if (!data || data.length === 0) {
+      setMembershipStatus("PENDING");
+      setPaymentStatus("PENDING");
+      setStartDate(null);
+      setEndDate(null);
+      return;
+    }
 
-        return updated;
+    const row = data[0];
+
+    const membership: Membership = {
+      id: String(row.id),
+      user_id: String(row.user_id),
+      status:
+        row.status === "ACTIVE"
+          ? "ACTIVE"
+          : row.status === "EXPIRED"
+            ? "EXPIRED"
+            : "PENDING",
+      payment_status:
+        row.payment_status === "VERIFIED"
+          ? "VERIFIED"
+          : "PENDING",
+      start_date: row.start_date ?? null,
+      end_date: row.end_date ?? null,
+    };
+
+    let status = membership.status;
+
+    if (status === "ACTIVE" && membership.end_date) {
+      const today = getJakartaDateKey();
+
+      if (today > membership.end_date) {
+        status = "EXPIRED";
+
+        await supabase
+          .from("memberships")
+          .update({
+            status: "EXPIRED",
+            updated_at: new Date().toISOString(),
+          })
+          .eq("id", membership.id);
       }
+    }
 
-      return {
-        ...previous,
-        [id]: quantity - 1,
-      };
-    });
+    setMembershipStatus(status);
+    setPaymentStatus(membership.payment_status);
+    setStartDate(membership.start_date);
+    setEndDate(membership.end_date);
   };
 
-  /*
-   * Load order history from Supabase.
-   */
+  const loadTodayClaim = async (userId: string) => {
+    const today = getJakartaDateKey();
+
+    const { data, error: claimError } = await supabase
+      .from("beverage_claims")
+      .select("id, beverage_name, claim_date")
+      .eq("user_id", userId)
+      .eq("claim_date", today)
+      .limit(1);
+
+    if (claimError || !data || data.length === 0) {
+      setClaimedToday(false);
+      setClaimedBeverage("");
+      return;
+    }
+
+    setClaimedToday(true);
+    setClaimedBeverage(String(data[0].beverage_name));
+  };
+
   const loadOrderHistory = async (userId: string) => {
     setLoadingHistory(true);
 
@@ -436,112 +403,218 @@ export default function DashboardPage() {
         ascending: false,
       });
 
-    if (ordersError) {
-      console.error(
-        "Unable to load order history:",
-        ordersError.message
-      );
-
+    if (ordersError || !orders || orders.length === 0) {
       setOrderHistory([]);
       setLoadingHistory(false);
-
       return;
     }
 
-    if (!orders || orders.length === 0) {
-      setOrderHistory([]);
-      setLoadingHistory(false);
+    const orderIds = orders.map((order) => order.id);
 
-      return;
-    }
+    const { data: items } = await supabase
+      .from("order_items")
+      .select(
+        "order_id, item_name, quantity, unit_price"
+      )
+      .in("order_id", orderIds);
 
-    const orderIds = orders.map(
-      (order) => order.id
-    );
+    const safeItems = items || [];
 
-    const { data: items, error: itemsError } =
-      await supabase
-        .from("order_items")
-        .select(
-          "id, order_id, item_name, quantity, unit_price"
-        )
-        .in("order_id", orderIds);
-
-    if (itemsError) {
-      console.error(
-        "Unable to load order items:",
-        itemsError.message
-      );
-
-      setOrderHistory(
-        orders.map((order) => ({
-          id: order.id,
-          orderNumber: order.order_number,
-          orderType: order.order_type,
-          status: order.status,
-          totalAmount: Number(order.total_amount || 0),
-          createdAt: order.created_at,
-          items: [],
-        }))
-      );
-
-      setLoadingHistory(false);
-
-      return;
-    }
-
-    const history: HistoryOrder[] = orders.map(
+    const formattedOrders: HistoryOrder[] = orders.map(
       (order) => ({
-        id: order.id,
-        orderNumber: order.order_number,
-        orderType: order.order_type,
-        status: order.status,
-        totalAmount: Number(
-          order.total_amount || 0
-        ),
-        createdAt: order.created_at,
-        items: (items || [])
+        id: String(order.id),
+        order_number: String(order.order_number),
+        order_type: String(order.order_type),
+        status: String(order.status),
+        total_amount: Number(order.total_amount || 0),
+        created_at: String(order.created_at),
+        items: safeItems
           .filter(
-            (item) =>
-              item.order_id === order.id
+            (item) => item.order_id === order.id
           )
           .map((item) => ({
-            id: item.id,
-            name: item.item_name,
-            quantity: item.quantity,
-            price: Number(
-              item.unit_price || 0
-            ),
+            item_name: String(item.item_name),
+            quantity: Number(item.quantity || 0),
+            unit_price: Number(item.unit_price || 0),
           })),
       })
     );
 
-    setOrderHistory(history);
+    setOrderHistory(formattedOrders);
     setLoadingHistory(false);
   };
 
-  const stopScanner = async () => {
-    if (scannerRef.current) {
-      try {
-        await scannerRef.current.stop();
-      } catch {}
+  useEffect(() => {
+    let mounted = true;
 
-      try {
+    const initialize = async () => {
+      setLoading(true);
+      setError("");
+
+      const {
+        data: { user },
+      } = await supabase.auth.getUser();
+
+      if (!mounted) {
+        return;
+      }
+
+      if (!user) {
+        router.replace("/sign-in");
+        return;
+      }
+
+      const profile = await loadProfile(user.id);
+
+      if (!mounted || !profile) {
+        return;
+      }
+
+      await Promise.all([
+        loadMembership(user.id),
+        loadTodayClaim(user.id),
+        loadOrderHistory(user.id),
+      ]);
+
+      if (!mounted) {
+        return;
+      }
+
+      refreshClaimWindow();
+      setLoading(false);
+    };
+
+    initialize();
+
+    const interval = window.setInterval(
+      refreshClaimWindow,
+      30 * 1000
+    );
+
+    return () => {
+      mounted = false;
+      window.clearInterval(interval);
+
+      if (scannerRef.current) {
+        scannerRef.current
+          .stop()
+          .catch(() => undefined);
+
         scannerRef.current.clear();
-      } catch {}
+        scannerRef.current = null;
+      }
+    };
 
-      scannerRef.current = null;
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
+
+  useEffect(() => {
+    if (!scannerOpen) {
+      return;
     }
 
-    setScannerOpen(false);
-  };
+    let cancelled = false;
 
-  const startScanner = async () => {
-    if (!claimWindowOpen) {
-      setScanError(
-        "Camera access is only available from 15:00–19:00 WIB."
+    const startScanner = async () => {
+      setScanError("");
+
+      await new Promise((resolve) =>
+        window.setTimeout(resolve, 150)
       );
 
+      if (cancelled) {
+        return;
+      }
+
+      const readerId = "deckside-qr-reader";
+      const scanner = new Html5Qrcode(readerId);
+
+      scannerRef.current = scanner;
+
+      try {
+        await scanner.start(
+          { facingMode: "environment" },
+          {
+            fps: 10,
+            qrbox: {
+              width: 250,
+              height: 250,
+            },
+          },
+          async (decodedText) => {
+            if (decodedText.trim() !== CLAIM_QR_VALUE) {
+              setScanError(
+                "Invalid QR code. Please scan the Deckside cashier QR code."
+              );
+              return;
+            }
+
+            setQrScanned(true);
+            setScanError("");
+
+            try {
+              await scanner.stop();
+            } catch {
+              // Nothing to do.
+            }
+
+            try {
+              scanner.clear();
+            } catch {
+              // Nothing to do.
+            }
+
+            scannerRef.current = null;
+            setScannerOpen(false);
+          },
+          () => {
+            // QR scan frame without a valid result.
+          }
+        );
+      } catch {
+        if (!cancelled) {
+          setScanError(
+            "Unable to access the camera. Please allow camera permission and try again."
+          );
+        }
+      }
+    };
+
+    startScanner();
+
+    return () => {
+      cancelled = true;
+
+      if (scannerRef.current) {
+        scannerRef.current
+          .stop()
+          .catch(() => undefined);
+
+        try {
+          scannerRef.current.clear();
+        } catch {
+          // Nothing to do.
+        }
+
+        scannerRef.current = null;
+      }
+    };
+  }, [scannerOpen]);
+
+  const openScanner = () => {
+    setScanError("");
+
+    if (!isActiveMember) {
+      setScanError(
+        "Your membership is not active yet."
+      );
+      return;
+    }
+
+    if (!claimWindowOpen) {
+      setScanError(
+        "Complimentary beverage claiming is available from 15:00 to 19:00 WIB."
+      );
       return;
     }
 
@@ -549,519 +622,457 @@ export default function DashboardPage() {
       setScanError(
         "You have already claimed your complimentary beverage today."
       );
+      return;
+    }
 
+    setQrScanned(false);
+    setScannerOpen(true);
+  };
+
+  const closeScanner = () => {
+    if (scannerRef.current) {
+      scannerRef.current
+        .stop()
+        .catch(() => undefined);
+
+      try {
+        scannerRef.current.clear();
+      } catch {
+        // Nothing to do.
+      }
+
+      scannerRef.current = null;
+    }
+
+    setScannerOpen(false);
+    setQrScanned(false);
+    setScanError("");
+  };
+
+  const confirmBeverage = async () => {
+    if (selectedBeverage === null) {
+      setScanError(
+        "Please select one complimentary beverage."
+      );
+      return;
+    }
+
+    if (!isActiveMember) {
+      setScanError(
+        "Your membership is not active yet."
+      );
+      return;
+    }
+
+    if (!claimWindowOpen) {
+      setScanError(
+        "Complimentary beverage claiming is available from 15:00 to 19:00 WIB."
+      );
+      return;
+    }
+
+    if (!qrScanned) {
+      setScanError(
+        "Please scan the Deckside QR code first."
+      );
+      return;
+    }
+
+    if (claimedToday) {
+      setScanError(
+        "You have already claimed your complimentary beverage today."
+      );
+      return;
+    }
+
+    const beverage = memberBeverages.find(
+      (item) => item.id === selectedBeverage
+    );
+
+    if (!beverage) {
       return;
     }
 
     setScanError("");
-    setScannerOpen(true);
 
-    setTimeout(async () => {
-      if (!isBeverageClaimTime()) {
-        setScannerOpen(false);
+    const orderNumber = generateOrderNumber();
 
-        setScanError(
-          "The complimentary beverage claim period has ended."
-        );
+    const {
+      data: orderData,
+      error: orderError,
+    } = await supabase
+      .from("orders")
+      .insert({
+        user_id: currentUserId,
+        order_number: orderNumber,
+        order_type: "COMPLIMENTARY",
+        status: "NEW",
+        subtotal: 0,
+        service_charge: 0,
+        tax: 0,
+        total_amount: 0,
+      })
+      .select("id")
+      .limit(1);
 
-        return;
-      }
-
-      if (claimedToday) {
-        setScannerOpen(false);
-
-        setScanError(
-          "You have already claimed your complimentary beverage today."
-        );
-
-        return;
-      }
-
-      try {
-        const scanner = new Html5Qrcode(
-          "deckside-qr-reader"
-        );
-
-        scannerRef.current = scanner;
-
-        await scanner.start(
-          { facingMode: "environment" },
-          {
-            fps: 10,
-            qrbox: {
-              width: 240,
-              height: 240,
-            },
-          },
-          async (decodedText) => {
-            if (!isBeverageClaimTime()) {
-              await stopScanner();
-
-              setQrScanned(false);
-              setSelectedBeverage(null);
-
-              setScanError(
-                "The complimentary beverage claim period has ended."
-              );
-
-              return;
-            }
-
-            if (claimedToday) {
-              await stopScanner();
-
-              setQrScanned(false);
-              setSelectedBeverage(null);
-
-              setScanError(
-                "You have already claimed your complimentary beverage today."
-              );
-
-              return;
-            }
-
-            if (
-              decodedText ===
-              "DECKSIDE-CLAIM-BEVERAGE"
-            ) {
-              await stopScanner();
-
-              setQrScanned(true);
-              setScanError("");
-            } else {
-              setScanError(
-                "Invalid Deckside cashier QR code."
-              );
-            }
-          },
-          () => {}
-        );
-      } catch {
-        setScannerOpen(false);
-
-        setScanError(
-          "Unable to access the camera. Please allow camera permission and try again."
-        );
-      }
-    }, 150);
-  };
-
-  /*
-   * Load authenticated user and check role.
-   */
-  useEffect(() => {
-    let active = true;
-
-    const loadMember = async () => {
-      const {
-        data: { user },
-        error: userError,
-      } = await supabase.auth.getUser();
-
-      if (!active) {
-        return;
-      }
-
-      if (userError || !user) {
-        router.replace("/sign-in");
-        return;
-      }
-
-      setCurrentUserId(user.id);
-
-      const {
-        data: profile,
-        error: profileError,
-      } = await supabase
-        .from("profiles")
-        .select(
-          "role, title, full_name, email, member_id"
-        )
-        .eq("id", user.id)
-        .single();
-
-      if (!active) {
-        return;
-      }
-
-      if (
-        !profileError &&
-        profile?.role === "admin"
-      ) {
-        router.replace("/admin");
-        return;
-      }
-
-      const titleMap: Record<string, string> = {
-        mr: "Mr.",
-        ms: "Ms.",
-        mrs: "Mrs.",
-      };
-
-      const titleValue =
-        profile?.title ||
-        user.user_metadata?.title ||
-        "";
-
-      const title =
-        titleMap[titleValue] || "";
-
-      const fullName =
-        profile?.full_name?.trim() ||
-        user.user_metadata?.full_name?.trim() ||
-        user.user_metadata?.name?.trim() ||
-        user.email?.split("@")[0] ||
-        "Member";
-
-      const permanentMemberId =
-        profile?.member_id ||
-        `DSK-${user.id
-          .replace(/-/g, "")
-          .slice(0, 6)
-          .toUpperCase()}`;
-
-      setMemberTitle(title);
-      setMemberName(fullName);
-      setMemberEmail(
-        profile?.email ||
-          user.email ||
-          ""
+    if (
+      orderError ||
+      !orderData ||
+      orderData.length === 0
+    ) {
+      setScanError(
+        orderError?.message ||
+          "Unable to create your order."
       );
-      setMemberId(permanentMemberId);
-      setLoadingMember(false);
-
-      await loadOrderHistory(user.id);
-    };
-
-    loadMember();
-
-    return () => {
-      active = false;
-    };
-  }, [supabase, router]);
-
-  /*
-   * Load today's complimentary beverage claim.
-   */
-  useEffect(() => {
-    if (!claimStorageKey) {
       return;
     }
 
-    const storedClaim = localStorage.getItem(
-      claimStorageKey
-    );
+    const createdOrder = orderData[0];
 
-    if (storedClaim) {
-      try {
-        const parsed: ClaimRecord =
-          JSON.parse(storedClaim);
+    const { error: itemError } = await supabase
+      .from("order_items")
+      .insert({
+        order_id: createdOrder.id,
+        item_name: beverage.name,
+        quantity: 1,
+        unit_price: 0,
+        item_type: "COMPLIMENTARY",
+      });
 
-        if (
-          parsed.date ===
-          getJakartaDateKey()
-        ) {
-          setClaimedToday(true);
-          setClaimedBeverage(
-            parsed.beverage
-          );
-        } else {
-          localStorage.removeItem(
-            claimStorageKey
-          );
+    if (itemError) {
+      await supabase
+        .from("orders")
+        .delete()
+        .eq("id", createdOrder.id);
 
-          setClaimedToday(false);
-          setClaimedBeverage("");
-        }
-      } catch {
-        localStorage.removeItem(
-          claimStorageKey
-        );
-
-        setClaimedToday(false);
-        setClaimedBeverage("");
-      }
-    }
-  }, [claimStorageKey]);
-
-  /*
-   * Check complimentary beverage time.
-   */
-  useEffect(() => {
-    const checkClaimTime = () => {
-      const open = isBeverageClaimTime();
-
-      setClaimWindowOpen(open);
-
-      if (!open) {
-        setQrScanned(false);
-        setSelectedBeverage(null);
-
-        if (scannerRef.current) {
-          stopScanner();
-        }
-      }
-    };
-
-    checkClaimTime();
-
-    const interval = setInterval(
-      checkClaimTime,
-      30000
-    );
-
-    return () => {
-      clearInterval(interval);
-
-      if (scannerRef.current) {
-        scannerRef.current
-          .stop()
-          .catch(() => {})
-          .finally(() => {
-            try {
-              scannerRef.current?.clear();
-            } catch {}
-
-            scannerRef.current = null;
-          });
-      }
-    };
-  }, []);
-
-  /*
-   * Save complimentary beverage order
-   * to Supabase.
-   */
-  const confirmBeverage = async () => {
-    if (
-      !claimWindowOpen ||
-      !qrScanned ||
-      !selectedBeverageData ||
-      claimedToday ||
-      !claimStorageKey ||
-      !currentUserId
-    ) {
+      setScanError(
+        "Unable to create your order item."
+      );
       return;
     }
 
     const today = getJakartaDateKey();
 
-    const claimRecord: ClaimRecord = {
-      date: today,
-      beverage: selectedBeverageData.name,
-    };
+    const { error: claimError } = await supabase
+      .from("beverage_claims")
+      .insert({
+        user_id: currentUserId,
+        order_id: createdOrder.id,
+        beverage_name: beverage.name,
+        claim_date: today,
+      });
 
-    const orderNumber =
-      generateOrderNumber();
-
-    const { data: order, error: orderError } =
-      await supabase
-        .from("orders")
-        .insert({
-          user_id: currentUserId,
-          order_number: orderNumber,
-          order_type:
-            "COMPLIMENTARY_BEVERAGE",
-          status: "ORDER RECEIVED",
-          total_amount: 0,
-        })
-        .select(
-          "id, order_number"
-        )
-        .single();
-
-    if (orderError || !order) {
-      console.error(
-        "Unable to create beverage order:",
-        orderError?.message
-      );
-
-      setScanError(
-        "Unable to place your order. Please try again."
-      );
-
-      return;
-    }
-
-    const { error: itemError } =
+    if (claimError) {
       await supabase
         .from("order_items")
-        .insert({
-          order_id: order.id,
-          item_name:
-            selectedBeverageData.name,
-          quantity: 1,
-          unit_price: 0,
-        });
+        .delete()
+        .eq("order_id", createdOrder.id);
 
-    if (itemError) {
-      console.error(
-        "Unable to create beverage order item:",
-        itemError.message
-      );
+      await supabase
+        .from("orders")
+        .delete()
+        .eq("id", createdOrder.id);
 
-      setScanError(
-        "Unable to save your order details. Please try again."
-      );
+      if (claimError.code === "23505") {
+        setClaimedToday(true);
+        setScanError(
+          "You have already claimed your complimentary beverage today."
+        );
+      } else {
+        setScanError(
+          "Unable to complete your beverage claim."
+        );
+      }
 
       return;
     }
 
-    localStorage.setItem(
-      claimStorageKey,
-      JSON.stringify(claimRecord)
-    );
-
     setClaimedToday(true);
-    setClaimedBeverage(
-      selectedBeverageData.name
-    );
-
-    setConfirmedBeverage(
-      selectedBeverageData.name
-    );
-
-    setConfirmedItems([]);
-    setConfirmedTotal(0);
-    setOrderId(order.order_number);
-    setConfirmationType("beverage");
-
+    setClaimedBeverage(beverage.name);
     setQrScanned(false);
     setSelectedBeverage(null);
 
-    await loadOrderHistory(
-      currentUserId
+    setConfirmationType("beverage");
+    setOrderId(orderNumber);
+    setConfirmedBeverage(beverage.name);
+    setConfirmedItems([]);
+    setConfirmedTotal(0);
+    setConfirmationOpen(true);
+
+    await loadOrderHistory(currentUserId);
+  };
+
+  const getDiscountedPrice = (price: number) => {
+    return Math.round(
+      price * (1 - DISCOUNT_RATE)
     );
   };
 
-  /*
-   * Save add-on order to Supabase.
-   */
+  const getCartItems = (): CartItem[] => {
+    const items: CartItem[] = [];
+
+    [...foodAddons, ...beverageAddons].forEach(
+      (item) => {
+        const quantity = cart[item.id] || 0;
+
+        if (quantity > 0) {
+          items.push({
+            id: item.id,
+            name: item.name,
+            price: getDiscountedPrice(item.price),
+            quantity,
+            type:
+              item.id >= 200
+                ? "BEVERAGE"
+                : "FOOD",
+          });
+        }
+      }
+    );
+
+    return items;
+  };
+
+  const updateCart = (
+    itemId: number,
+    quantity: number
+  ) => {
+    setCart((previous) => {
+      const next = { ...previous };
+
+      if (quantity <= 0) {
+        delete next[itemId];
+      } else {
+        next[itemId] = quantity;
+      }
+
+      return next;
+    });
+  };
+
+  const cartItems = getCartItems();
+
+  const subtotal = cartItems.reduce(
+    (total, item) =>
+      total + item.price * item.quantity,
+    0
+  );
+
+  const serviceCharge = Math.round(
+    subtotal * SERVICE_RATE
+  );
+
+  const tax = Math.round(
+    (subtotal + serviceCharge) * TAX_RATE
+  );
+
+  const cartTotal =
+    subtotal + serviceCharge + tax;
+
   const placeAddonOrder = async () => {
-    if (
-      cartItems.length === 0 ||
-      !currentUserId
-    ) {
-      return;
-    }
-
-    const orderNumber =
-      generateOrderNumber();
-
-    const { data: order, error: orderError } =
-      await supabase
-        .from("orders")
-        .insert({
-          user_id: currentUserId,
-          order_number: orderNumber,
-          order_type: "ADD_ON",
-          status: "ORDER RECEIVED",
-          total_amount: total,
-        })
-        .select(
-          "id, order_number"
-        )
-        .single();
-
-    if (orderError || !order) {
-      console.error(
-        "Unable to create add-on order:",
-        orderError?.message
+    if (!isActiveMember) {
+      setError(
+        "Your membership must be active to place an order."
       );
-
       return;
     }
 
-    const orderItems = cartItems.map(
+    if (cartItems.length === 0) {
+      setError(
+        "Please select at least one item."
+      );
+      return;
+    }
+
+    setError("");
+
+    const orderNumber = generateOrderNumber();
+
+    const {
+      data: orderData,
+      error: orderError,
+    } = await supabase
+      .from("orders")
+      .insert({
+        user_id: currentUserId,
+        order_number: orderNumber,
+        order_type: "ADD_ON",
+        status: "NEW",
+        subtotal,
+        service_charge: serviceCharge,
+        tax,
+        total_amount: cartTotal,
+      })
+      .select("id")
+      .limit(1);
+
+    if (
+      orderError ||
+      !orderData ||
+      orderData.length === 0
+    ) {
+      setError(
+        orderError?.message ||
+          "Unable to create your order."
+      );
+      return;
+    }
+
+    const createdOrder = orderData[0];
+
+    const itemsToInsert = cartItems.map(
       (item) => ({
-        order_id: order.id,
+        order_id: createdOrder.id,
         item_name: item.name,
         quantity: item.quantity,
         unit_price: item.price,
+        item_type: item.type,
       })
     );
 
-    const { error: itemError } =
-      await supabase
-        .from("order_items")
-        .insert(orderItems);
+    const { error: itemError } = await supabase
+      .from("order_items")
+      .insert(itemsToInsert);
 
     if (itemError) {
-      console.error(
-        "Unable to create add-on order items:",
-        itemError.message
-      );
+      await supabase
+        .from("orders")
+        .delete()
+        .eq("id", createdOrder.id);
 
+      setError(
+        "Unable to add the items to your order."
+      );
       return;
     }
 
+    setConfirmationType("addon");
+    setOrderId(orderNumber);
     setConfirmedBeverage("");
     setConfirmedItems(cartItems);
-    setConfirmedTotal(total);
-    setOrderId(order.order_number);
-    setConfirmationType("addon");
+    setConfirmedTotal(cartTotal);
+    setConfirmationOpen(true);
+
     setCart({});
 
-    await loadOrderHistory(
-      currentUserId
+    await loadOrderHistory(currentUserId);
+  };
+
+  const extendMembership = async () => {
+    if (!currentUserId) {
+      return;
+    }
+
+    if (extendConfirmed) {
+      setExtendOpen(false);
+      return;
+    }
+
+    const requestedEndDate = new Date();
+
+    requestedEndDate.setMonth(
+      requestedEndDate.getMonth() + 1
     );
-  };
 
-  const closeConfirmation = () => {
-    setConfirmationType(null);
-    setOrderId("");
-    setConfirmedBeverage("");
-    setConfirmedItems([]);
-    setConfirmedTotal(0);
-  };
+    const formattedDate = requestedEndDate
+      .toISOString()
+      .split("T")[0];
 
-  const calculateExtendedEndDate = () => {
-    const newEndDate = new Date(endDate);
+    const { error: extensionError } =
+      await supabase
+        .from("membership_extensions")
+        .insert({
+          user_id: currentUserId,
+          requested_end_date: formattedDate,
+          status: "PENDING",
+        });
 
-    newEndDate.setMonth(
-      newEndDate.getMonth() + 1
-    );
+    if (extensionError) {
+      setError(
+        extensionError.message ||
+          "Unable to submit membership extension."
+      );
+      return;
+    }
 
-    return newEndDate;
-  };
-
-  const extendMembership = () => {
     setExtendConfirmed(true);
   };
 
-  const closeExtend = () => {
-    setExtendOpen(false);
-    setExtendConfirmed(false);
-  };
-
   const handleSignOut = async () => {
-    await stopScanner();
+    if (scannerRef.current) {
+      await scannerRef.current
+        .stop()
+        .catch(() => undefined);
+
+      try {
+        scannerRef.current.clear();
+      } catch {
+        // Nothing to do.
+      }
+
+      scannerRef.current = null;
+    }
 
     await supabase.auth.signOut();
 
     router.replace("/sign-in");
-    router.refresh();
   };
 
-  const extendedEndDate =
-    calculateExtendedEndDate();
-
-  if (loadingMember) {
+  if (loading) {
     return (
       <main className={styles.page}>
+        <nav className={styles.navbar}>
+          <a href="/" className={styles.logo}>
+            Deckside
+          </a>
+        </nav>
+
         <div className={styles.container}>
-          <section className={styles.welcome}>
-            <p className={styles.eyebrow}>
+          <section className={styles.lockedBox}>
+            <p className={styles.lockedLabel}>
               DECKSIDE MEMBERSHIP
             </p>
 
-            <h1>
-              Loading your membership...
-            </h1>
+            <h3>Loading Your Dashboard</h3>
 
-            <p className={styles.welcomeText}>
-              Please wait a moment.
+            <p>
+              Please wait while we load your
+              membership information.
             </p>
+          </section>
+        </div>
+      </main>
+    );
+  }
+
+  if (error) {
+    return (
+      <main className={styles.page}>
+        <nav className={styles.navbar}>
+          <a href="/" className={styles.logo}>
+            Deckside
+          </a>
+        </nav>
+
+        <div className={styles.container}>
+          <section className={styles.lockedBox}>
+            <p className={styles.lockedLabel}>
+              PROFILE ERROR
+            </p>
+
+            <h3>Unable to Load Your Profile</h3>
+
+            <p>{error}</p>
+
+            <button
+              type="button"
+              className={styles.primaryButton}
+              onClick={() =>
+                window.location.reload()
+              }
+            >
+              TRY AGAIN
+            </button>
           </section>
         </div>
       </main>
@@ -1071,21 +1082,12 @@ export default function DashboardPage() {
   return (
     <main className={styles.page}>
       <nav className={styles.navbar}>
-        <a
-          href="/"
-          className={styles.logo}
-        >
+        <a href="/" className={styles.logo}>
           Deckside
         </a>
 
         <div className={styles.navLinks}>
-          <a href="/menu">
-            MENU
-          </a>
-
-          <a href="/dashboard">
-            DASHBOARD
-          </a>
+          <a href="/">HOME</a>
 
           <button
             type="button"
@@ -1099,58 +1101,107 @@ export default function DashboardPage() {
       <div className={styles.container}>
         <section className={styles.welcome}>
           <p className={styles.eyebrow}>
-            DECKSIDE MEMBERSHIP
+            DECKSIDE MEMBER
           </p>
 
           <h1>
-            Welcome,{" "}
+            Welcome{" "}
             {memberTitle
-              ? `${memberTitle} `
-              : ""}
+              ? `${memberTitle
+                  .charAt(0)
+                  .toUpperCase()}${memberTitle.slice(1)}`
+              : ""}{" "}
             {memberName}
           </h1>
 
-          <p className={styles.welcomeText}>
-            Manage your membership and orders.
+          <p>
+            Your cozy corner for your productive
+            space.
           </p>
         </section>
 
         <section className={styles.membershipCard}>
           <div>
-            <span>MEMBER ID</span>
-            <strong>{memberId}</strong>
+            <p className={styles.eyebrow}>
+              MEMBERSHIP
+            </p>
+
+            <h2>Deckside Member</h2>
+
+            <p>
+              Member ID:{" "}
+              <strong>{memberId}</strong>
+            </p>
+
+            <p>{memberEmail}</p>
           </div>
 
           <div>
-            <span>MEMBERSHIP STATUS</span>
-            <strong className={styles.active}>
-              {membershipStatus}
-            </strong>
-          </div>
+            <p className={styles.eyebrow}>
+              STATUS
+            </p>
 
-          <div>
-            <span>START DATE</span>
-            <strong>
-              {formatDate(startDate)}
-            </strong>
-          </div>
+            <h3>{membershipStatus}</h3>
 
-          <div>
-            <span>END DATE</span>
-            <strong>
-              {formatDate(endDate)}
-            </strong>
-          </div>
+            <p>
+              Payment: {paymentStatus}
+            </p>
 
-          <button
-            className={styles.extendButton}
-            onClick={() =>
-              setExtendOpen(true)
-            }
-          >
-            EXTEND MEMBERSHIP
-          </button>
+            {startDate && (
+              <p>
+                Valid from:{" "}
+                {formatDate(startDate)}
+              </p>
+            )}
+
+            {endDate && (
+              <p>
+                Valid until:{" "}
+                {formatDate(endDate)}
+              </p>
+            )}
+
+            {(membershipStatus === "EXPIRED" ||
+              (membershipStatus === "PENDING" &&
+                paymentStatus === "VERIFIED")) && (
+              <button
+                type="button"
+                className={styles.extendButton}
+                onClick={() => {
+                  setExtendOpen(true);
+                  setExtendConfirmed(false);
+                }}
+              >
+                EXTEND MEMBERSHIP
+              </button>
+            )}
+          </div>
         </section>
+
+        {!isActiveMember && (
+          <section className={styles.section}>
+            <div className={styles.lockedBox}>
+              <p className={styles.lockedLabel}>
+                MEMBERSHIP NOT ACTIVE
+              </p>
+
+              <h3>
+                Your Membership Is{" "}
+                {membershipStatus === "PENDING"
+                  ? "Pending Verification"
+                  : membershipStatus}
+              </h3>
+
+              <p>
+                {paymentStatus === "PENDING"
+                  ? "Please wait for the Deckside team to verify your payment."
+                  : membershipStatus === "EXPIRED"
+                    ? "Your membership has expired. Please extend your membership to continue using member benefits."
+                    : "Your membership will become active after the activation process is completed."}
+              </p>
+            </div>
+          </section>
+        )}
 
         <section className={styles.section}>
           <div className={styles.sectionHeader}>
@@ -1159,207 +1210,168 @@ export default function DashboardPage() {
                 MEMBER BENEFIT
               </p>
 
-              <h2>
-                Complimentary Beverage
-              </h2>
+              <h2>Complimentary Beverage</h2>
             </div>
 
             <span
-              className={`${styles.badge} ${
+              className={
                 claimWindowOpen
                   ? styles.badgeAvailable
                   : styles.badgeClosed
-              }`}
+              }
             >
               {claimWindowOpen
                 ? "15:00 – 19:00 WIB"
-                : "AVAILABLE 15:00 – 19:00 WIB"}
+                : "CLOSED"}
             </span>
           </div>
 
-          {!claimWindowOpen ? (
-            <div className={styles.lockedBox}>
-              <p className={styles.lockedLabel}>
-                CURRENTLY UNAVAILABLE
-              </p>
-
-              <h3>
-                Complimentary Beverage
-              </h3>
-
-              <p>
-                Your complimentary beverage can
-                be claimed only from 15:00–19:00 WIB.
-                Please return during the claim period.
-              </p>
-
-              <button
-                className={styles.primaryButton}
-                disabled
-              >
-                SCAN AVAILABLE 15:00–19:00 WIB
-              </button>
-            </div>
-          ) : claimedToday ? (
-            <div className={styles.lockedBox}>
-              <p className={styles.lockedLabel}>
-                CLAIMED TODAY
-              </p>
-
-              <h3>
-                {claimedBeverage}
-              </h3>
-
-              <p>
-                Your complimentary beverage for
-                today has already been claimed.
-              </p>
-
-              <div className={styles.claimedStatus}>
-                <span>✓</span>
-
-                <div>
-                  <strong>
-                    CLAIM COMPLETED
-                  </strong>
-
-                  <p>
-                    You can claim another
-                    complimentary beverage
-                    tomorrow.
-                  </p>
-                </div>
-              </div>
-
-              <button
-                className={styles.primaryButton}
-                disabled
-              >
-                CLAIMED TODAY
-              </button>
-            </div>
-          ) : !qrScanned ? (
+          {!isActiveMember ? (
             <div className={styles.lockedBox}>
               <p className={styles.lockedLabel}>
                 LOCKED
               </p>
 
+              <h3>Activate Your Membership</h3>
+
+              <p>
+                Complimentary beverage benefits
+                are available only for active
+                members.
+              </p>
+            </div>
+          ) : claimedToday ? (
+            <div className={styles.claimedStatus}>
+              <p className={styles.lockedLabel}>
+                CLAIM COMPLETED
+              </p>
+
               <h3>
-                Claim Your Complimentary Beverage
+                Your Beverage Has Been Claimed
               </h3>
 
               <p>
-                Please visit the cashier and scan
-                the Deckside QR code to unlock
-                today&apos;s complimentary beverage.
+                Today&apos;s complimentary
+                beverage:{" "}
+                <strong>{claimedBeverage}</strong>
               </p>
 
-              <button
-                className={styles.primaryButton}
-                onClick={startScanner}
-              >
-                SCAN QR AT CASHIER
-              </button>
+              <p>
+                You can claim one complimentary
+                beverage every day from 15:00 to
+                19:00 WIB.
+              </p>
+            </div>
+          ) : !claimWindowOpen ? (
+            <div className={styles.lockedBox}>
+              <p className={styles.lockedLabel}>
+                BENEFIT CLOSED
+              </p>
 
-              {scanError && (
-                <p className={styles.error}>
-                  {scanError}
+              <h3>
+                Come Back Between 15:00 – 19:00
+              </h3>
+
+              <p>
+                Your complimentary beverage can
+                be claimed every day during the
+                claim window.
+              </p>
+            </div>
+          ) : (
+            <div className={styles.unlockedBox}>
+              <div className={styles.available}>
+                <p className={styles.lockedLabel}>
+                  AVAILABLE TODAY
                 </p>
-              )}
 
-              {scannerOpen && (
+                <p>
+                  Select one beverage, then scan
+                  the Deckside QR code at the
+                  cashier.
+                </p>
+              </div>
+
+              <div className={styles.horizontalGrid}>
+                {memberBeverages.map((beverage) => (
+                  <button
+                    key={beverage.id}
+                    type="button"
+                    className={`${styles.beverageCard} ${
+                      selectedBeverage === beverage.id
+                        ? styles.selected
+                        : ""
+                    }`}
+                    onClick={() =>
+                      setSelectedBeverage(beverage.id)
+                    }
+                  >
+                    <img
+                      src={beverage.image}
+                      alt={beverage.name}
+                    />
+
+                    <div>
+                      <h3>{beverage.name}</h3>
+
+                      {selectedBeverage ===
+                        beverage.id && (
+                        <span
+                          className={
+                            styles.selectedText
+                          }
+                        >
+                          SELECTED
+                        </span>
+                      )}
+                    </div>
+                  </button>
+                ))}
+              </div>
+
+              {selectedBeverage !== null && (
                 <div className={styles.scanner}>
-                  <div
-                    id="deckside-qr-reader"
-                    className={styles.qrReader}
-                  />
+                  {!qrScanned ? (
+                    <>
+                      <p>
+                        Scan the Deckside QR code
+                        at the cashier before
+                        confirming your beverage.
+                      </p>
+
+                      <button
+                        type="button"
+                        className={styles.primaryButton}
+                        onClick={openScanner}
+                      >
+                        SCAN QR CODE
+                      </button>
+                    </>
+                  ) : (
+                    <>
+                      <p>
+                        QR code verified. Your
+                        complimentary beverage is
+                        ready to be claimed.
+                      </p>
+
+                      <button
+                        type="button"
+                        className={styles.primaryButton}
+                        onClick={confirmBeverage}
+                      >
+                        CLAIM BEVERAGE
+                      </button>
+                    </>
+                  )}
 
                   {scanError && (
                     <p className={styles.error}>
                       {scanError}
                     </p>
                   )}
-
-                  <button
-                    className={styles.closeButton}
-                    onClick={stopScanner}
-                  >
-                    CLOSE CAMERA
-                  </button>
                 </div>
               )}
-            </div>
-          ) : (
-            <div className={styles.unlockedBox}>
-              <div className={styles.available}>
-                <span>AVAILABLE</span>
-
-                <p>
-                  Select one complimentary
-                  beverage for today.
-                </p>
-              </div>
-
-              <div className={styles.horizontalGrid}>
-                {memberBeverages.map((item) => {
-                  const selected =
-                    selectedBeverage === item.id;
-
-                  return (
-                    <button
-                      key={item.id}
-                      className={`${styles.beverageCard} ${
-                        selected
-                          ? styles.selected
-                          : ""
-                      }`}
-                      onClick={() => {
-                        if (
-                          claimWindowOpen &&
-                          qrScanned &&
-                          !claimedToday
-                        ) {
-                          setSelectedBeverage(
-                            item.id
-                          );
-                        }
-                      }}
-                    >
-                      <img
-                        src={item.image}
-                        alt={item.name}
-                      />
-
-                      <div>
-                        <h3>{item.name}</h3>
-
-                        {selected && (
-                          <span
-                            className={
-                              styles.selectedText
-                            }
-                          >
-                            SELECTED
-                          </span>
-                        )}
-                      </div>
-                    </button>
-                  );
-                })}
-              </div>
-
-              <button
-                className={styles.primaryButton}
-                disabled={
-                  !selectedBeverage ||
-                  !claimWindowOpen ||
-                  !qrScanned ||
-                  claimedToday
-                }
-                onClick={confirmBeverage}
-              >
-                CONFIRM BEVERAGE
-              </button>
             </div>
           )}
         </section>
@@ -1371,434 +1383,432 @@ export default function DashboardPage() {
                 MEMBER PRIVILEGE
               </p>
 
-              <h2>Add-ons</h2>
+              <h2>Food & Beverage Add-ons</h2>
             </div>
 
-            <span className={styles.badge}>
-              21% OFF
+            <span className={styles.badgeAvailable}>
+              21% MEMBER DISCOUNT
             </span>
           </div>
 
-          <div className={styles.addonCategory}>
-            <div className={styles.addonCategoryHeader}>
-              <h3>
-                Appetizers & Snack
-              </h3>
-
-              <span>
-                12 items
-              </span>
-            </div>
-
-            <div className={styles.addonList}>
-              {appetizerSnacks.map(
-                (item: Addon) => {
-                  const quantity =
-                    cart[item.id] || 0;
-
-                  return (
-                    <div
-                      key={item.id}
-                      className={styles.addonItem}
-                    >
-                      <div className={styles.addonInfo}>
-                        <h3>{item.name}</h3>
-
-                        <p>
-                          {item.description}
-                        </p>
-                      </div>
-
-                      <div className={styles.addonOrder}>
-                        <div className={styles.addonPrices}>
-                          <span
-                            className={
-                              styles.originalPrice
-                            }
-                          >
-                            {formatRupiah(
-                              item.price
-                            )}
-                          </span>
-
-                          <strong>
-                            {formatRupiah(
-                              memberPrice(
-                                item.price
-                              )
-                            )}
-                          </strong>
-
-                          <span
-                            className={
-                              styles.memberPriceLabel
-                            }
-                          >
-                            Member price
-                          </span>
-                        </div>
-
-                        {quantity === 0 ? (
-                          <button
-                            className={
-                              styles.secondaryButton
-                            }
-                            onClick={() =>
-                              increaseQuantity(
-                                item.id
-                              )
-                            }
-                          >
-                            ADD TO ORDER
-                          </button>
-                        ) : (
-                          <div
-                            className={
-                              styles.quantity
-                            }
-                          >
-                            <button
-                              onClick={() =>
-                                decreaseQuantity(
-                                  item.id
-                                )
-                              }
-                            >
-                              −
-                            </button>
-
-                            <span>
-                              {quantity}
-                            </span>
-
-                            <button
-                              onClick={() =>
-                                increaseQuantity(
-                                  item.id
-                                )
-                              }
-                            >
-                              +
-                            </button>
-                          </div>
-                        )}
-                      </div>
-                    </div>
-                  );
-                }
-              )}
-            </div>
-          </div>
-
-          <div className={styles.addonCategory}>
-            <div className={styles.addonCategoryHeader}>
-              <h3>
-                Beverages
-              </h3>
-
-              <span>
-                10 items
-              </span>
-            </div>
-
-            <div className={styles.addonList}>
-              {addonBeverages.map(
-                (item: Addon) => {
-                  const quantity =
-                    cart[item.id] || 0;
-
-                  return (
-                    <div
-                      key={item.id}
-                      className={styles.addonItem}
-                    >
-                      <div className={styles.addonInfo}>
-                        <h3>{item.name}</h3>
-
-                        <p>
-                          {item.description}
-                        </p>
-                      </div>
-
-                      <div className={styles.addonOrder}>
-                        <div className={styles.addonPrices}>
-                          <span
-                            className={
-                              styles.originalPrice
-                            }
-                          >
-                            {formatRupiah(
-                              item.price
-                            )}
-                          </span>
-
-                          <strong>
-                            {formatRupiah(
-                              memberPrice(
-                                item.price
-                              )
-                            )}
-                          </strong>
-
-                          <span
-                            className={
-                              styles.memberPriceLabel
-                            }
-                          >
-                            Member price
-                          </span>
-                        </div>
-
-                        {quantity === 0 ? (
-                          <button
-                            className={
-                              styles.secondaryButton
-                            }
-                            onClick={() =>
-                              increaseQuantity(
-                                item.id
-                              )
-                            }
-                          >
-                            ADD TO ORDER
-                          </button>
-                        ) : (
-                          <div
-                            className={
-                              styles.quantity
-                            }
-                          >
-                            <button
-                              onClick={() =>
-                                decreaseQuantity(
-                                  item.id
-                                )
-                              }
-                            >
-                              −
-                            </button>
-
-                            <span>
-                              {quantity}
-                            </span>
-
-                            <button
-                              onClick={() =>
-                                increaseQuantity(
-                                  item.id
-                                )
-                              }
-                            >
-                              +
-                            </button>
-                          </div>
-                        )}
-                      </div>
-                    </div>
-                  );
-                }
-              )}
-            </div>
-          </div>
-        </section>
-
-        {cartItems.length > 0 && (
-          <section className={styles.orderSection}>
-            <div className={styles.orderCard}>
-              <p className={styles.eyebrow}>
-                YOUR ORDER
+          {!isActiveMember ? (
+            <div className={styles.lockedBox}>
+              <p className={styles.lockedLabel}>
+                LOCKED
               </p>
 
-              <h2>
-                Order Summary
-              </h2>
+              <h3>Member Ordering Is Locked</h3>
 
-              <div className={styles.items}>
-                {cartItems.map(
-                  (item, index) => (
-                    <div
-                      className={styles.item}
-                      key={index}
-                    >
-                      <div>
-                        <span>
-                          {item.name}
-                        </span>
+              <p>
+                Activate your membership to access
+                member pricing and ordering.
+              </p>
+            </div>
+          ) : (
+            <>
+              <div className={styles.addonCategory}>
+                <div className={styles.addonCategoryHeader}>
+                  <div>
+                    <p className={styles.lockedLabel}>
+                      FOOD
+                    </p>
 
-                        <small>
-                          Qty {item.quantity}
-                        </small>
+                    <h3>Snacks & Meals</h3>
+                  </div>
+                </div>
+
+                <div className={styles.addonList}>
+                  {foodAddons.map((item) => {
+                    const quantity = cart[item.id] || 0;
+                    const memberPrice =
+                      getDiscountedPrice(item.price);
+
+                    return (
+                      <div
+                        key={item.id}
+                        className={styles.addonItem}
+                      >
+                        <div className={styles.addonInfo}>
+                          <h4>{item.name}</h4>
+
+                          <div
+                            className={styles.addonPrices}
+                          >
+                            <span
+                              className={
+                                styles.originalPrice
+                              }
+                            >
+                              {formatRupiah(item.price)}
+                            </span>
+
+                            <span>
+                              {formatRupiah(memberPrice)}
+                            </span>
+                          </div>
+
+                          <small
+                            className={
+                              styles.memberPriceLabel
+                            }
+                          >
+                            Member price
+                          </small>
+                        </div>
+
+                        <div className={styles.addonOrder}>
+                          <button
+                            type="button"
+                            className={
+                              styles.secondaryButton
+                            }
+                            onClick={() =>
+                              updateCart(
+                                item.id,
+                                quantity - 1
+                              )
+                            }
+                            disabled={quantity === 0}
+                          >
+                            −
+                          </button>
+
+                          <span className={styles.quantity}>
+                            {quantity}
+                          </span>
+
+                          <button
+                            type="button"
+                            className={
+                              styles.secondaryButton
+                            }
+                            onClick={() =>
+                              updateCart(
+                                item.id,
+                                quantity + 1
+                              )
+                            }
+                          >
+                            +
+                          </button>
+                        </div>
                       </div>
+                    );
+                  })}
+                </div>
+              </div>
+
+              <div className={styles.addonCategory}>
+                <div className={styles.addonCategoryHeader}>
+                  <div>
+                    <p className={styles.lockedLabel}>
+                      BEVERAGE
+                    </p>
+
+                    <h3>Additional Beverages</h3>
+                  </div>
+                </div>
+
+                <div className={styles.addonList}>
+                  {beverageAddons.map((item) => {
+                    const quantity = cart[item.id] || 0;
+                    const memberPrice =
+                      getDiscountedPrice(item.price);
+
+                    return (
+                      <div
+                        key={item.id}
+                        className={styles.addonItem}
+                      >
+                        <div className={styles.addonInfo}>
+                          <h4>{item.name}</h4>
+
+                          <div
+                            className={styles.addonPrices}
+                          >
+                            <span
+                              className={
+                                styles.originalPrice
+                              }
+                            >
+                              {formatRupiah(item.price)}
+                            </span>
+
+                            <span>
+                              {formatRupiah(memberPrice)}
+                            </span>
+                          </div>
+
+                          <small
+                            className={
+                              styles.memberPriceLabel
+                            }
+                          >
+                            Member price
+                          </small>
+                        </div>
+
+                        <div className={styles.addonOrder}>
+                          <button
+                            type="button"
+                            className={
+                              styles.secondaryButton
+                            }
+                            onClick={() =>
+                              updateCart(
+                                item.id,
+                                quantity - 1
+                              )
+                            }
+                            disabled={quantity === 0}
+                          >
+                            −
+                          </button>
+
+                          <span className={styles.quantity}>
+                            {quantity}
+                          </span>
+
+                          <button
+                            type="button"
+                            className={
+                              styles.secondaryButton
+                            }
+                            onClick={() =>
+                              updateCart(
+                                item.id,
+                                quantity + 1
+                              )
+                            }
+                          >
+                            +
+                          </button>
+                        </div>
+                      </div>
+                    );
+                  })}
+                </div>
+              </div>
+
+              {cartItems.length > 0 && (
+                <div className={styles.orderSection}>
+                  <div className={styles.orderCard}>
+                    <div className={styles.items}>
+                      {cartItems.map((item) => (
+                        <div
+                          key={item.id}
+                          className={styles.item}
+                        >
+                          <div>
+                            <strong>{item.name}</strong>
+
+                            <span>
+                              {item.quantity} ×{" "}
+                              {formatRupiah(item.price)}
+                            </span>
+                          </div>
+
+                          <strong>
+                            {formatRupiah(
+                              item.price * item.quantity
+                            )}
+                          </strong>
+                        </div>
+                      ))}
+                    </div>
+
+                    <div className={styles.priceLine}>
+                      <span>Subtotal</span>
 
                       <span>
-                        {formatRupiah(
-                          item.price *
-                            item.quantity
-                        )}
+                        {formatRupiah(subtotal)}
                       </span>
                     </div>
-                  )
-                )}
-              </div>
 
-              <div className={styles.priceLine}>
-                <span>
-                  Subtotal
-                </span>
+                    <div className={styles.priceLine}>
+                      <span>
+                        Service Charge 10%
+                      </span>
 
-                <span>
-                  {formatRupiah(subtotal)}
-                </span>
-              </div>
+                      <span>
+                        {formatRupiah(serviceCharge)}
+                      </span>
+                    </div>
 
-              <div className={styles.priceLine}>
-                <span>
-                  Service Charge (10%)
-                </span>
+                    <div className={styles.priceLine}>
+                      <span>Tax 11%</span>
 
-                <span>
-                  {formatRupiah(
-                    serviceCharge
-                  )}
-                </span>
-              </div>
+                      <span>
+                        {formatRupiah(tax)}
+                      </span>
+                    </div>
 
-              <div className={styles.priceLine}>
-                <span>
-                  Tax (11%)
-                </span>
+                    <div className={styles.total}>
+                      <span>Total</span>
 
-                <span>
-                  {formatRupiah(tax)}
-                </span>
-              </div>
+                      <strong>
+                        {formatRupiah(cartTotal)}
+                      </strong>
+                    </div>
 
-              <div className={styles.total}>
-                <span>
-                  Total
-                </span>
+                    <button
+                      type="button"
+                      className={styles.primaryButton}
+                      onClick={placeAddonOrder}
+                    >
+                      PLACE ORDER
+                    </button>
 
-                <strong>
-                  {formatRupiah(total)}
-                </strong>
-              </div>
-
-              <button
-                className={styles.primaryButton}
-                onClick={placeAddonOrder}
-              >
-                PLACE ORDER
-              </button>
-            </div>
-          </section>
-        )}
+                    {error && (
+                      <p className={styles.error}>
+                        {error}
+                      </p>
+                    )}
+                  </div>
+                </div>
+              )}
+            </>
+          )}
+        </section>
 
         <section className={styles.section}>
           <div className={styles.sectionHeader}>
             <div>
               <p className={styles.eyebrow}>
-                ACTIVITY
+                ORDER HISTORY
               </p>
 
-              <h2>
-                Order History
-              </h2>
+              <h2>Your Orders</h2>
             </div>
           </div>
 
-          <div className={styles.history}>
-            {loadingHistory ? (
-              <div className={styles.historyRow}>
-                <div>
-                  <strong>
-                    Loading orders...
-                  </strong>
+          {loadingHistory ? (
+            <div className={styles.lockedBox}>
+              <p>
+                Loading your order history...
+              </p>
+            </div>
+          ) : orderHistory.length === 0 ? (
+            <div className={styles.lockedBox}>
+              <p className={styles.lockedLabel}>
+                NO ORDERS
+              </p>
 
-                  <span>
-                    Please wait a moment.
-                  </span>
-                </div>
-              </div>
-            ) : orderHistory.length === 0 ? (
-              <div className={styles.historyRow}>
-                <div>
-                  <strong>
-                    No orders yet
-                  </strong>
+              <h3>
+                Your order history is empty.
+              </h3>
 
-                  <span>
-                    Your order history will appear here.
-                  </span>
-                </div>
-              </div>
-            ) : (
-              orderHistory.map((order) => (
+              <p>
+                Your Deckside orders will appear
+                here once you place an order.
+              </p>
+            </div>
+          ) : (
+            <div className={styles.history}>
+              {orderHistory.map((order) => (
                 <div
-                  className={styles.historyRow}
                   key={order.id}
+                  className={styles.historyRow}
                 >
                   <div>
-                    <strong>
-                      {order.items.length > 0
-                        ? order.items
-                            .map((item) =>
-                              item.quantity > 1
-                                ? `${item.name} × ${item.quantity}`
-                                : item.name
-                            )
-                            .join(", ")
-                        : order.orderType ===
-                          "COMPLIMENTARY_BEVERAGE"
-                        ? "Complimentary Beverage"
-                        : "Add-on Order"}
-                    </strong>
+                    <p className={styles.lockedLabel}>
+                      {order.order_number}
+                    </p>
 
-                    <span>
-                      {order.orderType ===
-                      "COMPLIMENTARY_BEVERAGE"
+                    <h3>
+                      {order.order_type ===
+                      "COMPLIMENTARY"
                         ? "Complimentary Beverage"
-                        : "Add-on Order"}
-                    </span>
+                        : "Member Add-on Order"}
+                    </h3>
 
-                    <small>
-                      {order.orderNumber}
-                    </small>
+                    <p>
+                      {formatDateTime(
+                        order.created_at
+                      )}
+                    </p>
+
+                    {order.items.length > 0 && (
+                      <p>
+                        {order.items
+                          .map(
+                            (item) =>
+                              `${item.item_name} × ${item.quantity}`
+                          )
+                          .join(", ")}
+                      </p>
+                    )}
                   </div>
 
                   <div>
-                    <span>
-                      {formatDateTime(
-                        order.createdAt
+                    <strong>
+                      {formatRupiah(
+                        order.total_amount
                       )}
-                    </span>
+                    </strong>
 
-                    <strong
+                    <p
                       className={
-                        order.status ===
-                        "DELIVERED"
+                        order.status === "DELIVERED"
                           ? styles.delivered
-                          : undefined
+                          : ""
                       }
                     >
                       {order.status}
-                    </strong>
+                    </p>
                   </div>
                 </div>
-              ))
-            )}
-          </div>
+              ))}
+            </div>
+          )}
         </section>
       </div>
 
-      {confirmationType && (
+      {scannerOpen && (
         <div className={styles.overlay}>
           <div className={styles.confirmation}>
             <button
-              className={
-                styles.confirmationClose
+              type="button"
+              className={styles.confirmationClose}
+              onClick={closeScanner}
+            >
+              ×
+            </button>
+
+            <p className={styles.confirmationEyebrow}>
+              DECKSIDE QR
+            </p>
+
+            <h2>Scan QR Code</h2>
+
+            <p className={styles.confirmationText}>
+              Scan the QR code displayed by the
+              Deckside cashier.
+            </p>
+
+            <div
+              id="deckside-qr-reader"
+              className={styles.qrReader}
+            />
+
+            {scanError && (
+              <p className={styles.error}>
+                {scanError}
+              </p>
+            )}
+          </div>
+        </div>
+      )}
+
+      {confirmationOpen && (
+        <div className={styles.overlay}>
+          <div className={styles.confirmation}>
+            <button
+              type="button"
+              className={styles.confirmationClose}
+              onClick={() =>
+                setConfirmationOpen(false)
               }
-              onClick={closeConfirmation}
-              aria-label="Close"
             >
               ×
             </button>
@@ -1807,185 +1817,70 @@ export default function DashboardPage() {
               ✓
             </div>
 
-            <p
-              className={
-                styles.confirmationEyebrow
-              }
-            >
-              ORDER RECEIVED
+            <p className={styles.confirmationEyebrow}>
+              THANK YOU
             </p>
 
-            <h2>
-              Thank You,{" "}
-              {memberTitle
-                ? `${memberTitle} `
-                : ""}
-              {memberName.split(" ")[0]}
-            </h2>
+            <h2>Order Confirmed</h2>
 
-            {confirmationType ===
-            "beverage" ? (
-              <>
-                <p
-                  className={
-                    styles.confirmationText
-                  }
-                >
-                  Your complimentary
-                  beverage has been
-                  ordered.
-                </p>
-
-                <p
-                  className={
-                    styles.confirmationText
-                  }
-                >
-                  Please wait while we
-                  prepare your beverage.
-                  It will be delivered
-                  to your table.
-                </p>
-              </>
-            ) : (
-              <>
-                <p
-                  className={
-                    styles.confirmationText
-                  }
-                >
-                  Your order has been
-                  received.
-                </p>
-
-                <p
-                  className={
-                    styles.confirmationText
-                  }
-                >
-                  Please wait while we
-                  prepare your order. It
-                  will be delivered to
-                  your table.
-                </p>
-              </>
-            )}
+            <p className={styles.confirmationText}>
+              Please wait while your order is being
+              prepared and delivered to you.
+            </p>
 
             <div className={styles.orderInfo}>
-              <div>
-                <span>
-                  ORDER ID
-                </span>
+              <span>Order Number</span>
 
-                <strong>
-                  {orderId}
-                </strong>
-              </div>
-
-              <div>
-                <span>
-                  STATUS
-                </span>
-
-                <strong>
-                  ORDER RECEIVED
-                </strong>
-              </div>
-
-              <div>
-                <span>
-                  PREPARATION
-                </span>
-
-                <strong>
-                  10–15 MINUTES
-                </strong>
-              </div>
+              <strong>{orderId}</strong>
             </div>
 
-            <div
-              className={
-                styles.confirmationDetails
-              }
-            >
-              <h3>
-                ORDER DETAILS
-              </h3>
+            {confirmationType === "beverage" ? (
+              <div className={styles.confirmationDetails}>
+                <p>Complimentary Beverage</p>
 
-              {confirmationType ===
-                "beverage" &&
-                confirmedBeverage && (
+                <div className={styles.confirmationItem}>
+                  <span>{confirmedBeverage}</span>
+
+                  <strong>Complimentary</strong>
+                </div>
+              </div>
+            ) : (
+              <div className={styles.confirmationDetails}>
+                {confirmedItems.map((item) => (
                   <div
-                    className={
-                      styles.confirmationItem
-                    }
+                    key={item.id}
+                    className={styles.confirmationItem}
                   >
                     <span>
-                      {confirmedBeverage}
+                      {item.name} × {item.quantity}
                     </span>
 
-                    <span>
-                      Complimentary
-                    </span>
+                    <strong>
+                      {formatRupiah(
+                        item.price * item.quantity
+                      )}
+                    </strong>
                   </div>
-                )}
+                ))}
 
-              {confirmationType ===
-                "addon" &&
-                confirmedItems.map(
-                  (item, index) => (
-                    <div
-                      className={
-                        styles.confirmationItem
-                      }
-                      key={index}
-                    >
-                      <div>
-                        <span>
-                          {item.name}
-                        </span>
-
-                        <small>
-                          Qty{" "}
-                          {item.quantity}
-                        </small>
-                      </div>
-
-                      <span>
-                        {formatRupiah(
-                          item.price *
-                            item.quantity
-                        )}
-                      </span>
-                    </div>
-                  )
-                )}
-
-              {confirmationType ===
-                "addon" && (
-                <div
-                  className={
-                    styles.confirmationTotal
-                  }
-                >
-                  <span>
-                    TOTAL
-                  </span>
+                <div className={styles.confirmationTotal}>
+                  <span>Total</span>
 
                   <strong>
-                    {formatRupiah(
-                      confirmedTotal
-                    )}
+                    {formatRupiah(confirmedTotal)}
                   </strong>
                 </div>
-              )}
-            </div>
+              </div>
+            )}
 
             <button
+              type="button"
               className={styles.primaryButton}
-              onClick={closeConfirmation}
+              onClick={() =>
+                setConfirmationOpen(false)
+              }
             >
-              BACK TO DASHBOARD
+              DONE
             </button>
           </div>
         </div>
@@ -1993,124 +1888,66 @@ export default function DashboardPage() {
 
       {extendOpen && (
         <div className={styles.overlay}>
-          <div className={styles.extendCard}>
+          <div
+            className={`${styles.confirmation} ${styles.extendCard}`}
+          >
             <button
-              className={
-                styles.confirmationClose
+              type="button"
+              className={styles.confirmationClose}
+              onClick={() =>
+                setExtendOpen(false)
               }
-              onClick={closeExtend}
-              aria-label="Close"
             >
               ×
             </button>
 
             {!extendConfirmed ? (
               <>
-                <p
-                  className={
-                    styles.confirmationEyebrow
-                  }
-                >
-                  MEMBERSHIP RENEWAL
+                <p className={styles.confirmationEyebrow}>
+                  MEMBERSHIP
                 </p>
 
-                <h2>
-                  Extend Your Membership
-                </h2>
+                <h2>Extend Your Membership</h2>
 
-                <p
-                  className={
-                    styles.confirmationText
-                  }
-                >
-                  Continue enjoying
-                  your Deckside
-                  membership benefits.
+                <p className={styles.confirmationText}>
+                  Submit an extension request to the
+                  Deckside team.
                 </p>
 
                 <div
-                  className={
-                    styles.currentMembership
-                  }
+                  className={styles.currentMembership}
                 >
-                  <span>
-                    CURRENT MEMBERSHIP
-                  </span>
+                  <p>Current Membership</p>
 
                   <strong>
-                    {formatDate(
-                      startDate
-                    )}{" "}
-                    –{" "}
-                    {formatDate(
-                      endDate
-                    )}
+                    {membershipStatus}
                   </strong>
+
+                  {endDate && (
+                    <span>
+                      Valid until{" "}
+                      {formatDate(endDate)}
+                    </span>
+                  )}
                 </div>
 
-                <div
-                  className={
-                    styles.extensionPlan
-                  }
-                >
-                  <strong>
-                    1 MONTH
-                  </strong>
+                <div className={styles.extensionPlan}>
+                  <p>Extension Plan</p>
+
+                  <strong>1 Month</strong>
 
                   <span>
-                    Extend for one month
+                    The Deckside team will review and
+                    verify your extension request.
                   </span>
-                </div>
-
-                <div
-                  className={
-                    styles.extensionSummary
-                  }
-                >
-                  <div>
-                    <span>
-                      MEMBER ID
-                    </span>
-
-                    <strong>
-                      {memberId}
-                    </strong>
-                  </div>
-
-                  <div>
-                    <span>
-                      CURRENT END DATE
-                    </span>
-
-                    <strong>
-                      {formatDate(
-                        endDate
-                      )}
-                    </strong>
-                  </div>
-
-                  <div>
-                    <span>
-                      NEW END DATE
-                    </span>
-
-                    <strong>
-                      {formatDate(
-                        extendedEndDate
-                      )}
-                    </strong>
-                  </div>
                 </div>
 
                 <button
-                  className={
-                    styles.primaryButton
-                  }
-                  onClick={
-                    extendMembership
-                  }
+                  type="button"
+                  className={styles.primaryButton}
+                  onClick={extendMembership}
                 >
-                  CONTINUE TO PAYMENT
+                  SUBMIT REQUEST
                 </button>
               </>
             ) : (
@@ -2119,94 +1956,26 @@ export default function DashboardPage() {
                   ✓
                 </div>
 
-                <p
-                  className={
-                    styles.confirmationEyebrow
-                  }
-                >
-                  RENEWAL REQUEST
+                <p className={styles.confirmationEyebrow}>
+                  REQUEST SUBMITTED
                 </p>
 
-                <h2>
-                  Membership Extension
-                </h2>
+                <h2>Thank You</h2>
 
-                <p
-                  className={
-                    styles.confirmationText
-                  }
-                >
-                  Your membership extension
-                  request has been created.
-                </p>
-
-                <div
-                  className={
-                    styles.extensionSummary
-                  }
-                >
-                  <div>
-                    <span>
-                      MEMBER ID
-                    </span>
-
-                    <strong>
-                      {memberId}
-                    </strong>
-                  </div>
-
-                  <div>
-                    <span>
-                      EXTENSION
-                    </span>
-
-                    <strong>
-                      1 MONTH
-                    </strong>
-                  </div>
-
-                  <div>
-                    <span>
-                      NEW END DATE
-                    </span>
-
-                    <strong>
-                      {formatDate(
-                        extendedEndDate
-                      )}
-                    </strong>
-                  </div>
-
-                  <div>
-                    <span>
-                      STATUS
-                    </span>
-
-                    <strong>
-                      PAYMENT PENDING
-                    </strong>
-                  </div>
-                </div>
-
-                <p
-                  className={
-                    styles.confirmationText
-                  }
-                >
-                  Please complete the payment.
-                  Your membership will be
-                  extended after the payment has
-                  been verified by the Deckside
-                  team.
+                <p className={styles.confirmationText}>
+                  Your membership extension request
+                  has been submitted. The Deckside team
+                  will verify your request.
                 </p>
 
                 <button
-                  className={
-                    styles.primaryButton
+                  type="button"
+                  className={styles.primaryButton}
+                  onClick={() =>
+                    setExtendOpen(false)
                   }
-                  onClick={closeExtend}
                 >
-                  BACK TO DASHBOARD
+                  DONE
                 </button>
               </>
             )}

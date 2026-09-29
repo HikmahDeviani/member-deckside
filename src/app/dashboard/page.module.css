@@ -5,11 +5,11 @@
   font-family: "Gotham", "Century Gothic", sans-serif;
 }
 
-/* NAVBAR */
+/* ==================== NAVBAR ==================== */
 
 .navbar {
   width: 100%;
-  height: 90px;
+  min-height: 90px;
   padding: 0 60px;
   display: flex;
   align-items: center;
@@ -40,33 +40,42 @@
   gap: 35px;
 }
 
-.navLinks a {
+.navLinks a,
+.navLinks button {
+  padding: 0;
+  border: none;
+  background: transparent;
   color: white;
   text-decoration: none;
   font-family: "Century Gothic", sans-serif;
   font-size: 14px;
   letter-spacing: 1px;
+  cursor: pointer;
 }
 
-.navLinks a:hover {
+.navLinks a:hover,
+.navLinks button:hover {
   color: #c4bfb6;
 }
 
-/* MAIN */
+/* ==================== MAIN ==================== */
 
 .container {
+  width: 100%;
+  max-width: 1500px;
+  margin: 0 auto;
   padding: 70px 8% 100px;
 }
 
-/* WELCOME */
+/* ==================== WELCOME ==================== */
 
 .welcome {
-  max-width: 700px;
+  max-width: 800px;
   margin-bottom: 55px;
 }
 
 .eyebrow {
-  margin-bottom: 15px;
+  margin: 0 0 15px;
   font-family: "Century Gothic", sans-serif;
   font-size: 12px;
   font-weight: bold;
@@ -83,13 +92,14 @@
 }
 
 .welcomeText {
+  max-width: 650px;
   margin-top: 20px;
   font-size: 15px;
   line-height: 1.7;
   color: #776e64;
 }
 
-/* MEMBERSHIP CARD */
+/* ==================== MEMBERSHIP ==================== */
 
 .membershipCard {
   margin-bottom: 85px;
@@ -139,12 +149,19 @@
   transition: all 0.2s ease;
 }
 
-.extendButton:hover {
+.extendButton:hover:not(:disabled) {
   background-color: #42738d;
   color: white;
 }
 
-/* SECTION */
+.extendButton:disabled {
+  border-color: #c4bfb6;
+  background-color: #f5f3ef;
+  color: #93a7ba;
+  cursor: not-allowed;
+}
+
+/* ==================== SECTION ==================== */
 
 .section {
   margin-bottom: 90px;
@@ -190,7 +207,7 @@
   color: #776e64;
 }
 
-/* LOCKED / CLAIMED BEVERAGE */
+/* ==================== LOCKED BOX ==================== */
 
 .lockedBox {
   padding: 55px 40px;
@@ -200,7 +217,7 @@
 }
 
 .lockedLabel {
-  margin-bottom: 15px;
+  margin: 0 0 15px;
   font-family: "Century Gothic", sans-serif;
   font-size: 11px;
   font-weight: bold;
@@ -209,7 +226,7 @@
 }
 
 .lockedBox h3 {
-  margin-bottom: 15px;
+  margin: 0 0 15px;
   font-family: "Century Gothic", sans-serif;
   font-size: 24px;
   color: #00494f;
@@ -223,7 +240,7 @@
   color: #776e64;
 }
 
-/* CLAIMED TODAY */
+/* ==================== CLAIMED ==================== */
 
 .claimedStatus {
   max-width: 520px;
@@ -271,7 +288,7 @@
   color: #776e64;
 }
 
-/* BUTTONS */
+/* ==================== BUTTONS ==================== */
 
 .primaryButton {
   padding: 14px 25px;
@@ -283,19 +300,50 @@
   font-weight: bold;
   letter-spacing: 1.5px;
   cursor: pointer;
-  transition: background-color 0.2s ease;
+  transition:
+    background-color 0.2s ease,
+    transform 0.2s ease;
 }
 
-.primaryButton:hover {
+.primaryButton:hover:not(:disabled) {
   background-color: #00494f;
+  transform: translateY(-1px);
 }
 
 .primaryButton:disabled {
   background-color: #c4bfb6;
+  color: white;
+  cursor: not-allowed;
+  transform: none;
+}
+
+.secondaryButton {
+  min-width: 150px;
+  padding: 11px 14px;
+  border: 1px solid #42738d;
+  background-color: white;
+  color: #42738d;
+  font-family: "Century Gothic", sans-serif;
+  font-size: 10px;
+  font-weight: bold;
+  letter-spacing: 1px;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.secondaryButton:hover:not(:disabled) {
+  background-color: #42738d;
+  color: white;
+}
+
+.secondaryButton:disabled {
+  border-color: #c4bfb6;
+  background-color: #f5f3ef;
+  color: #93a7ba;
   cursor: not-allowed;
 }
 
-/* QR SCANNER */
+/* ==================== QR SCANNER ==================== */
 
 .scanner {
   max-width: 400px;
@@ -308,8 +356,15 @@
   background-color: #3b3b3b;
 }
 
+.qrReader video {
+  width: 100% !important;
+  height: auto !important;
+  display: block;
+}
+
 .error {
-  margin-top: 15px;
+  max-width: 520px;
+  margin: 15px auto 0;
   color: #776e64;
   font-size: 12px;
   line-height: 1.5;
@@ -333,7 +388,7 @@
   color: #42738d;
 }
 
-/* UNLOCKED BEVERAGE */
+/* ==================== UNLOCKED BEVERAGE ==================== */
 
 .unlockedBox {
   padding: 30px;
@@ -354,12 +409,12 @@
 }
 
 .available p {
-  margin-top: 8px;
+  margin: 8px 0 0;
   font-size: 13px;
   color: #776e64;
 }
 
-/* HORIZONTAL MEMBER BEVERAGE */
+/* ==================== BEVERAGE HORIZONTAL ==================== */
 
 .horizontalGrid {
   display: flex;
@@ -376,7 +431,7 @@
   display: none;
 }
 
-/* BEVERAGE CARD */
+/* ==================== BEVERAGE CARD ==================== */
 
 .beverageCard {
   flex: 0 0 330px;
@@ -413,11 +468,13 @@
   margin: 0;
   font-family: "Century Gothic", sans-serif;
   font-size: 19px;
+  line-height: 1.4;
   color: #00494f;
 }
 
 .selected {
   border-color: #42738d;
+  box-shadow: 0 10px 30px rgba(66, 115, 141, 0.18);
 }
 
 .selectedText {
@@ -434,7 +491,7 @@
   margin-top: 25px;
 }
 
-/* ADD-ONS */
+/* ==================== ADD-ONS ==================== */
 
 .addonCategory {
   margin-top: 40px;
@@ -460,8 +517,6 @@
   font-size: 12px;
   color: #776e64;
 }
-
-/* ADD-ON SCROLL */
 
 .addonList {
   max-height: 500px;
@@ -491,8 +546,6 @@
   background-color: #42738d;
 }
 
-/* ADD-ON ITEM */
-
 .addonItem {
   display: flex;
   align-items: center;
@@ -516,12 +569,13 @@
   margin: 0;
   font-family: "Century Gothic", sans-serif;
   font-size: 17px;
+  line-height: 1.4;
   color: #00494f;
 }
 
 .addonInfo p {
   max-width: 700px;
-  margin-top: 8px;
+  margin: 8px 0 0;
   font-size: 12px;
   line-height: 1.6;
   color: #776e64;
@@ -561,26 +615,7 @@
   color: #42738d;
 }
 
-.secondaryButton {
-  min-width: 150px;
-  padding: 11px 14px;
-  border: 1px solid #42738d;
-  background-color: white;
-  color: #42738d;
-  font-family: "Century Gothic", sans-serif;
-  font-size: 10px;
-  font-weight: bold;
-  letter-spacing: 1px;
-  cursor: pointer;
-  transition: all 0.2s ease;
-}
-
-.secondaryButton:hover {
-  background-color: #42738d;
-  color: white;
-}
-
-/* QUANTITY */
+/* ==================== QUANTITY ==================== */
 
 .quantity {
   min-width: 150px;
@@ -588,6 +623,7 @@
   align-items: center;
   justify-content: space-between;
   border: 1px solid #c4bfb6;
+  background-color: white;
 }
 
 .quantity button {
@@ -611,7 +647,7 @@
   color: #00494f;
 }
 
-/* ORDER SUMMARY */
+/* ==================== ORDER SUMMARY ==================== */
 
 .orderSection {
   margin-bottom: 90px;
@@ -681,7 +717,7 @@
   font-size: 20px;
 }
 
-/* ORDER HISTORY */
+/* ==================== ORDER HISTORY ==================== */
 
 .history {
   background-color: white;
@@ -714,6 +750,7 @@
 .historyRow strong {
   font-family: "Century Gothic", sans-serif;
   font-size: 13px;
+  line-height: 1.5;
   color: #00494f;
 }
 
@@ -722,12 +759,18 @@
   color: #776e64;
 }
 
+.historyRow small {
+  font-size: 10px;
+  letter-spacing: 0.5px;
+  color: #93a7ba;
+}
+
 .delivered {
   color: #42738d !important;
   letter-spacing: 1px;
 }
 
-/* OVERLAY */
+/* ==================== OVERLAY ==================== */
 
 .overlay {
   position: fixed;
@@ -741,7 +784,7 @@
   overflow-y: auto;
 }
 
-/* CONFIRMATION */
+/* ==================== CONFIRMATION ==================== */
 
 .confirmation {
   position: relative;
@@ -760,6 +803,7 @@
   background: transparent;
   color: #776e64;
   font-size: 25px;
+  line-height: 1;
   cursor: pointer;
 }
 
@@ -781,7 +825,7 @@
 }
 
 .confirmationEyebrow {
-  margin-bottom: 12px;
+  margin: 0 0 12px;
   font-family: "Century Gothic", sans-serif;
   font-size: 11px;
   font-weight: bold;
@@ -793,11 +837,12 @@
   margin: 0 0 18px;
   font-family: "Century Gothic", sans-serif;
   font-size: 30px;
+  line-height: 1.2;
   color: #00494f;
 }
 
 .confirmationText {
-  margin-bottom: 12px;
+  margin: 0 0 12px;
   font-size: 13px;
   line-height: 1.7;
   color: #776e64;
@@ -841,7 +886,7 @@
 }
 
 .confirmationDetails h3 {
-  margin-bottom: 12px;
+  margin: 0 0 12px;
 }
 
 .confirmationItem {
@@ -849,6 +894,7 @@
   display: flex;
   align-items: center;
   justify-content: space-between;
+  gap: 20px;
   border-top: 1px solid #e5e1db;
   font-size: 12px;
   color: #3b3b3b;
@@ -884,7 +930,7 @@
   margin-top: 25px;
 }
 
-/* EXTEND MEMBERSHIP */
+/* ==================== EXTEND MEMBERSHIP ==================== */
 
 .extendCard {
   position: relative;
@@ -899,6 +945,7 @@
   margin: 0 0 15px;
   font-family: "Century Gothic", sans-serif;
   font-size: 30px;
+  line-height: 1.2;
   color: #00494f;
 }
 
@@ -917,7 +964,7 @@
   color: #00494f;
 }
 
-/* ONE MONTH EXTENSION */
+/* ==================== EXTENSION PLAN ==================== */
 
 .extensionPlan {
   margin-top: 20px;
@@ -941,7 +988,7 @@
   color: #776e64;
 }
 
-/* EXTENSION SUMMARY */
+/* ==================== EXTENSION SUMMARY ==================== */
 
 .extensionSummary {
   margin-top: 20px;
@@ -971,29 +1018,31 @@
   margin-top: 25px;
 }
 
-/* MOBILE */
+/* ==================== MOBILE ==================== */
 
 @media (max-width: 768px) {
   .navbar {
-    height: 75px;
-    padding: 0 25px;
+    min-height: 75px;
+    padding: 0 20px;
   }
 
   .logo {
-    font-size: 25px;
+    font-size: 24px;
+    letter-spacing: 1.5px;
   }
 
   .navLinks {
-    gap: 15px;
+    gap: 12px;
   }
 
-  .navLinks a {
-    font-size: 11px;
-    letter-spacing: 0.5px;
+  .navLinks a,
+  .navLinks button {
+    font-size: 10px;
+    letter-spacing: 0.4px;
   }
 
   .container {
-    padding: 50px 25px 70px;
+    padding: 50px 20px 70px;
   }
 
   .welcome {
@@ -1001,14 +1050,14 @@
   }
 
   .welcome h1 {
-    font-size: 40px;
+    font-size: 38px;
   }
 
   .welcomeText {
     font-size: 14px;
   }
 
-  /* MEMBERSHIP MOBILE */
+  /* MEMBERSHIP */
 
   .membershipCard {
     margin-bottom: 65px;
@@ -1017,12 +1066,16 @@
     gap: 25px 20px;
   }
 
+  .membershipCard strong {
+    font-size: 13px;
+  }
+
   .extendButton {
     grid-column: 1 / -1;
     width: 100%;
   }
 
-  /* SECTION MOBILE */
+  /* SECTION */
 
   .section {
     margin-bottom: 70px;
@@ -1042,7 +1095,7 @@
     font-size: 10px;
   }
 
-  /* BEVERAGE MOBILE */
+  /* LOCKED */
 
   .lockedBox {
     padding: 40px 25px;
@@ -1051,6 +1104,8 @@
   .lockedBox h3 {
     font-size: 21px;
   }
+
+  /* BEVERAGE */
 
   .unlockedBox {
     padding: 20px;
@@ -1068,28 +1123,17 @@
     height: 220px;
   }
 
-  /* CLAIMED MOBILE */
-
-  .claimedStatus {
-    padding: 14px;
-    gap: 12px;
+  .beverageCard h3 {
+    font-size: 17px;
   }
 
-  .claimedStatus > span {
-    width: 28px;
-    height: 28px;
-    font-size: 13px;
+  /* QR */
+
+  .scanner {
+    width: 100%;
   }
 
-  .claimedStatus strong {
-    font-size: 10px;
-  }
-
-  .claimedStatus p {
-    font-size: 11px;
-  }
-
-  /* ADD-ONS MOBILE */
+  /* ADD-ONS */
 
   .addonCategory {
     margin-top: 35px;
@@ -1142,7 +1186,7 @@
     width: 100%;
   }
 
-  /* ORDER SUMMARY MOBILE */
+  /* ORDER SUMMARY */
 
   .orderCard {
     padding: 30px 25px;
@@ -1152,7 +1196,11 @@
     font-size: 27px;
   }
 
-  /* HISTORY MOBILE */
+  .item {
+    align-items: flex-start;
+  }
+
+  /* HISTORY */
 
   .historyRow {
     padding: 20px;
@@ -1165,7 +1213,11 @@
     align-items: flex-start;
   }
 
-  /* MODAL MOBILE */
+  /* MODAL */
+
+  .overlay {
+    padding: 20px 15px;
+  }
 
   .confirmation,
   .extendCard {
@@ -1187,5 +1239,64 @@
 
   .extensionPlan {
     padding: 18px;
+  }
+}
+
+@media (max-width: 480px) {
+  .navbar {
+    min-height: 70px;
+    padding: 0 15px;
+  }
+
+  .logo {
+    font-size: 21px;
+  }
+
+  .navLinks {
+    gap: 8px;
+  }
+
+  .navLinks a,
+  .navLinks button {
+    font-size: 9px;
+  }
+
+  .container {
+    padding: 40px 15px 60px;
+  }
+
+  .welcome h1 {
+    font-size: 32px;
+  }
+
+  .membershipCard {
+    grid-template-columns: 1fr;
+    gap: 20px;
+  }
+
+  .extendButton {
+    grid-column: auto;
+  }
+
+  .beverageCard {
+    flex-basis: 260px;
+  }
+
+  .beverageCard img {
+    height: 205px;
+  }
+
+  .orderCard {
+    padding: 25px 20px;
+  }
+
+  .confirmation,
+  .extendCard {
+    padding: 30px 20px;
+  }
+
+  .confirmation h2,
+  .extendCard h2 {
+    font-size: 24px;
   }
 }
