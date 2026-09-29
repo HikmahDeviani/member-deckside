@@ -97,7 +97,7 @@ type MembershipRow = {
 
 type ProfileRow = {
   id: string;
-  member_id: string;
+  member_id: string | null;
   title: string | null;
   full_name: string;
   email: string;
@@ -162,6 +162,8 @@ const formatDate = (value: string) => {
 };
 
 const formatTime = (value: string) => {
+  if (!value) return "-";
+
   return new Intl.DateTimeFormat("en-GB", {
     hour: "2-digit",
     minute: "2-digit",
@@ -244,74 +246,116 @@ export default function AdminPage() {
     loadAdminData();
   }, []);
 
+  const showNotification = (message: string) => {
+    setNotification(message);
+
+    window.setTimeout(() => {
+      setNotification("");
+    }, 3000);
+  };
+
   const loadAdminData = async () => {
     setLoading(true);
     setErrorMessage("");
 
-    const {
-      data: { user },
-      error: userError,
-    } = await supabase.auth.getUser();
+    try {
+      const {
+        data: { user },
+        error: userError,
+      } = await supabase.auth.getUser();
 
-    if (userError || !user) {
-      window.location.href = "/sign-in";
-      return;
-    }
+      if (userError || !user) {
+        window.location.href = "/sign-in";
+        return;
+      }
 
-    const { data: profile, error: profileError } =
-      await supabase
+      const {
+        data: profile,
+        error: profileError,
+      } = await supabase
         .from("profiles")
         .select("role")
         .eq("id", user.id)
-        .single();
+        .maybeSingle();
 
-    if (
-      profileError ||
-      !profile ||
-      profile.role !== "admin"
-    ) {
-      window.location.href = "/dashboard";
-      return;
+      if (profileError) {
+        console.error("ADMIN PROFILE ERROR:", profileError);
+
+        setErrorMessage(
+          `Unable to verify admin access: ${profileError.message}`
+        );
+
+        setLoading(false);
+        return;
+      }
+
+      if (!profile) {
+        setErrorMessage(
+          "Admin profile was not found."
+        );
+
+        setLoading(false);
+        return;
+      }
+
+      if (profile.role !== "admin") {
+        window.location.href = "/dashboard";
+        return;
+      }
+
+      await Promise.all([
+        loadMembers(),
+        loadOrders(),
+        loadClaims(),
+      ]);
+    } catch (error) {
+      console.error("ADMIN DASHBOARD ERROR:", error);
+
+      setErrorMessage(
+        "Something went wrong while loading the admin dashboard."
+      );
+    } finally {
+      setLoading(false);
     }
-
-    await Promise.all([
-      loadMembers(),
-      loadOrders(),
-      loadClaims(),
-    ]);
-
-    setLoading(false);
   };
 
   const loadMembers = async () => {
-    const { data: profiles, error } =
-      await supabase
-        .from("profiles")
-        .select(
-          "id, member_id, title, full_name, email, phone, role, created_at"
-        )
-        .eq("role", "member")
-        .order("created_at", {
-          ascending: false,
-        });
+    const {
+      data: profiles,
+      error: profileError,
+    } = await supabase
+      .from("profiles")
+      .select(
+        "id, member_id, title, full_name, email, phone, role, created_at"
+      )
+      .eq("role", "member")
+      .order("created_at", {
+        ascending: false,
+      });
 
-    if (error) {
-      console.error(error);
+    if (profileError) {
+      console.error(
+        "MEMBER PROFILE ERROR:",
+        profileError
+      );
+
+      setMembers([]);
 
       setErrorMessage(
-        "Unable to load member data."
+        `Unable to load member data: ${profileError.message}`
       );
 
       return;
     }
 
-    const userIds =
-      profiles?.map((profile) => profile.id) ?? [];
-
-    if (userIds.length === 0) {
+    if (!profiles || profiles.length === 0) {
       setMembers([]);
       return;
     }
+
+    const userIds = profiles.map(
+      (profile) => profile.id
+    );
 
     const {
       data: memberships,
@@ -323,11 +367,49 @@ export default function AdminPage() {
       )
       .in("user_id", userIds);
 
+    /*
+      IMPORTANT:
+      Kalau membership gagal dibaca karena RLS,
+      member tetap ditampilkan sebagai PENDING.
+    */
     if (membershipError) {
-      console.error(membershipError);
+      console.error(
+        "MEMBERSHIP ERROR:",
+        membershipError
+      );
+
+      const mappedMembers: Member[] =
+        (profiles as ProfileRow[]).map(
+          (profile) => ({
+            id: profile.id,
+            userId: profile.id,
+            memberId:
+              profile.member_id ?? "-",
+            title:
+              profile.title ?? "",
+            name:
+              profile.full_name ?? "",
+            email:
+              profile.email ?? "",
+            phone:
+              profile.phone ?? "",
+            registrationDate:
+              profile.created_at.slice(
+                0,
+                10
+              ),
+            startDate: "",
+            endDate: "",
+            paymentStatus: "PENDING",
+            membershipStatus: "PENDING",
+            source: "ONLINE",
+          })
+        );
+
+      setMembers(mappedMembers);
 
       setErrorMessage(
-        "Unable to load membership data."
+        `Members loaded, but membership data could not be read: ${membershipError.message}`
       );
 
       return;
@@ -354,7 +436,8 @@ export default function AdminPage() {
             membershipMap.get(profile.id);
 
           let status: MembershipStatus =
-            membership?.status ?? "PENDING";
+            membership?.status ??
+            "PENDING";
 
           if (
             status === "ACTIVE" &&
@@ -378,11 +461,16 @@ export default function AdminPage() {
             phone:
               profile.phone ?? "",
             registrationDate:
-              profile.created_at.slice(0, 10),
+              profile.created_at.slice(
+                0,
+                10
+              ),
             startDate:
-              membership?.start_date ?? "",
+              membership?.start_date ??
+              "",
             endDate:
-              membership?.end_date ?? "",
+              membership?.end_date ??
+              "",
             paymentStatus:
               membership?.payment_status ??
               "PENDING",
@@ -397,21 +485,28 @@ export default function AdminPage() {
   };
 
   const loadOrders = async () => {
-    const { data: orderRows, error } =
-      await supabase
-        .from("orders")
-        .select(
-          "id, user_id, order_number, order_type, status, total_amount, created_at"
-        )
-        .order("created_at", {
-          ascending: false,
-        });
+    const {
+      data: orderRows,
+      error,
+    } = await supabase
+      .from("orders")
+      .select(
+        "id, user_id, order_number, order_type, status, total_amount, created_at"
+      )
+      .order("created_at", {
+        ascending: false,
+      });
 
     if (error) {
-      console.error(error);
+      console.error(
+        "ORDER ERROR:",
+        error
+      );
+
+      setOrders([]);
 
       setErrorMessage(
-        "Unable to load order data."
+        `Unable to load order data: ${error.message}`
       );
 
       return;
@@ -435,8 +530,14 @@ export default function AdminPage() {
     );
 
     const [
-      { data: profiles },
-      { data: items },
+      {
+        data: profiles,
+        error: profileError,
+      },
+      {
+        data: items,
+        error: itemError,
+      },
     ] = await Promise.all([
       supabase
         .from("profiles")
@@ -453,10 +554,24 @@ export default function AdminPage() {
         .in("order_id", orderIds),
     ]);
 
+    if (profileError) {
+      console.error(
+        "ORDER PROFILE ERROR:",
+        profileError
+      );
+    }
+
+    if (itemError) {
+      console.error(
+        "ORDER ITEM ERROR:",
+        itemError
+      );
+    }
+
     const profileMap = new Map<
       string,
       {
-        member_id: string;
+        member_id: string | null;
         full_name: string;
       }
     >();
@@ -523,14 +638,16 @@ export default function AdminPage() {
             userId:
               order.user_id,
             memberId:
-              profile?.member_id ?? "-",
+              profile?.member_id ??
+              "-",
             memberName:
               profile?.full_name ??
               "Unknown Member",
             items: itemText,
             total:
-              Number(order.total_amount) ||
-              0,
+              Number(
+                order.total_amount
+              ) || 0,
             date:
               order.created_at.slice(
                 0,
@@ -549,21 +666,28 @@ export default function AdminPage() {
   };
 
   const loadClaims = async () => {
-    const { data: claimRows, error } =
-      await supabase
-        .from("beverage_claims")
-        .select(
-          "id, user_id, beverage_name, claim_date, created_at"
-        )
-        .order("created_at", {
-          ascending: false,
-        });
+    const {
+      data: claimRows,
+      error,
+    } = await supabase
+      .from("beverage_claims")
+      .select(
+        "id, user_id, beverage_name, claim_date, created_at"
+      )
+      .order("created_at", {
+        ascending: false,
+      });
 
     if (error) {
-      console.error(error);
+      console.error(
+        "CLAIM ERROR:",
+        error
+      );
+
+      setClaims([]);
 
       setErrorMessage(
-        "Unable to load beverage claim data."
+        `Unable to load beverage claim data: ${error.message}`
       );
 
       return;
@@ -582,18 +706,27 @@ export default function AdminPage() {
       ),
     ];
 
-    const { data: profiles } =
-      await supabase
-        .from("profiles")
-        .select(
-          "id, member_id, full_name"
-        )
-        .in("id", userIds);
+    const {
+      data: profiles,
+      error: profileError,
+    } = await supabase
+      .from("profiles")
+      .select(
+        "id, member_id, full_name"
+      )
+      .in("id", userIds);
+
+    if (profileError) {
+      console.error(
+        "CLAIM PROFILE ERROR:",
+        profileError
+      );
+    }
 
     const profileMap = new Map<
       string,
       {
-        member_id: string;
+        member_id: string | null;
         full_name: string;
       }
     >();
@@ -622,7 +755,8 @@ export default function AdminPage() {
             userId:
               claim.user_id,
             memberId:
-              profile?.member_id ?? "-",
+              profile?.member_id ??
+              "-",
             memberName:
               profile?.full_name ??
               "Unknown Member",
@@ -695,7 +829,10 @@ export default function AdminPage() {
 
     if (dateFilter === "THIS_MONTH") {
       return {
-        from: `${today.slice(0, 8)}01`,
+        from: `${today.slice(
+          0,
+          8
+        )}01`,
         to: today,
       };
     }
@@ -736,38 +873,39 @@ export default function AdminPage() {
     today,
   ]);
 
-  const filteredOrders =
-    useMemo(() => {
-      return orders.filter(
-        (order) =>
-          order.date >=
-            dateRange.from &&
-          order.date <=
-            dateRange.to
-      );
-    }, [orders, dateRange]);
+  const filteredOrders = useMemo(() => {
+    return orders.filter(
+      (order) =>
+        order.date >=
+          dateRange.from &&
+        order.date <=
+          dateRange.to
+    );
+  }, [orders, dateRange]);
 
-  const filteredClaims =
-    useMemo(() => {
-      return claims.filter(
-        (claim) =>
-          claim.date >=
-            dateRange.from &&
-          claim.date <=
-            dateRange.to
-      );
-    }, [claims, dateRange]);
+  const filteredClaims = useMemo(() => {
+    return claims.filter(
+      (claim) =>
+        claim.date >=
+          dateRange.from &&
+        claim.date <=
+          dateRange.to
+    );
+  }, [claims, dateRange]);
 
-  const filteredMembers =
-    useMemo(() => {
-      return members.filter(
-        (member) =>
-          member.registrationDate >=
-            dateRange.from &&
-          member.registrationDate <=
-            dateRange.to
-      );
-    }, [members, dateRange]);
+  /*
+    Member Database sengaja menggunakan
+    semua members, bukan filteredMembers.
+  */
+  const filteredMembers = useMemo(() => {
+    return members.filter(
+      (member) =>
+        member.registrationDate >=
+          dateRange.from &&
+        member.registrationDate <=
+          dateRange.to
+    );
+  }, [members, dateRange]);
 
   const activeMembers =
     members.filter(
@@ -789,16 +927,6 @@ export default function AdminPage() {
         sum + order.total,
       0
     );
-
-  const showNotification = (
-    message: string
-  ) => {
-    setNotification(message);
-
-    window.setTimeout(() => {
-      setNotification("");
-    }, 3000);
-  };
 
   const handleFormChange = (
     field: keyof MemberForm,
@@ -843,14 +971,13 @@ export default function AdminPage() {
     setEditMemberOpen(true);
   };
 
-  const closeMemberModal =
-    () => {
-      setEditMemberOpen(false);
-      setSelectedMember(null);
-      setMemberForm(
-        emptyMemberForm
-      );
-    };
+  const closeMemberModal = () => {
+    setEditMemberOpen(false);
+    setSelectedMember(null);
+    setMemberForm(
+      emptyMemberForm
+    );
+  };
 
   const saveEditedMember =
     async () => {
@@ -871,8 +998,10 @@ export default function AdminPage() {
 
       setActionLoading(true);
 
-      const { error: profileError } =
-        await supabase
+      try {
+        const {
+          error: profileError,
+        } = await supabase
           .from("profiles")
           .update({
             title:
@@ -889,18 +1018,13 @@ export default function AdminPage() {
             selectedMember.userId
           );
 
-      if (profileError) {
-        setActionLoading(false);
+        if (profileError) {
+          throw profileError;
+        }
 
-        showNotification(
-          profileError.message
-        );
-
-        return;
-      }
-
-      const { error: membershipError } =
-        await supabase
+        const {
+          error: membershipError,
+        } = await supabase
           .from("memberships")
           .update({
             status:
@@ -919,25 +1043,31 @@ export default function AdminPage() {
             selectedMember.userId
           );
 
-      if (membershipError) {
-        setActionLoading(false);
+        if (membershipError) {
+          throw membershipError;
+        }
+
+        await loadMembers();
+
+        closeMemberModal();
 
         showNotification(
-          membershipError.message
+          "Member information has been updated."
+        );
+      } catch (error) {
+        console.error(
+          "SAVE MEMBER ERROR:",
+          error
         );
 
-        return;
+        showNotification(
+          error instanceof Error
+            ? error.message
+            : "Unable to update member."
+        );
+      } finally {
+        setActionLoading(false);
       }
-
-      await loadMembers();
-
-      closeMemberModal();
-
-      setActionLoading(false);
-
-      showNotification(
-        "Member information has been updated."
-      );
     };
 
   const approveMember = async (
@@ -946,59 +1076,90 @@ export default function AdminPage() {
     setActionLoading(true);
     setErrorMessage("");
 
-    const startDate = today;
+    try {
+      const startDate = today;
 
-    const endDateObject =
-      new Date(
-        `${startDate}T12:00:00`
+      const endDateObject =
+        new Date(
+          `${startDate}T12:00:00`
+        );
+
+      endDateObject.setMonth(
+        endDateObject.getMonth() + 1
       );
 
-    endDateObject.setMonth(
-      endDateObject.getMonth() + 1
-    );
+      endDateObject.setDate(
+        endDateObject.getDate() - 1
+      );
 
-    endDateObject.setDate(
-      endDateObject.getDate() - 1
-    );
+      const endDate =
+        endDateObject
+          .toISOString()
+          .slice(0, 10);
 
-    const endDate =
-      endDateObject
-        .toISOString()
-        .slice(0, 10);
-
-    const { error } =
-      await supabase
+      const {
+        data,
+        error,
+      } = await supabase
         .from("memberships")
         .update({
           status: "ACTIVE",
-          payment_status: "VERIFIED",
-          start_date: startDate,
-          end_date: endDate,
+          payment_status:
+            "VERIFIED",
+          start_date:
+            startDate,
+          end_date:
+            endDate,
         })
         .eq(
           "user_id",
           userId
+        )
+        .select(
+          "id, user_id, status, payment_status, start_date, end_date"
+        )
+        .maybeSingle();
+
+      if (error) {
+        console.error(
+          "APPROVE MEMBER ERROR:",
+          error
         );
 
-    if (error) {
-      console.error(error);
+        showNotification(
+          `Unable to approve member: ${error.message}`
+        );
 
-      setActionLoading(false);
+        return;
+      }
+
+      if (!data) {
+        showNotification(
+          "Membership record was not found. Please check the memberships table."
+        );
+
+        return;
+      }
+
+      await loadMembers();
 
       showNotification(
-        `Unable to approve member: ${error.message}`
+        "Member has been approved and activated."
+      );
+    } catch (error) {
+      console.error(
+        "APPROVE MEMBER ERROR:",
+        error
       );
 
-      return;
+      showNotification(
+        error instanceof Error
+          ? error.message
+          : "Unable to approve member."
+      );
+    } finally {
+      setActionLoading(false);
     }
-
-    await loadMembers();
-
-    setActionLoading(false);
-
-    showNotification(
-      "Member has been approved and activated."
-    );
   };
 
   const updateOrderStatus =
@@ -1013,35 +1174,42 @@ export default function AdminPage() {
 
       setActionLoading(true);
 
-      const { error } =
-        await supabase
-          .from("orders")
-          .update({
-            status:
-              nextStatus,
-          })
-          .eq(
-            "id",
-            orderId
-          );
+      try {
+        const { error } =
+          await supabase
+            .from("orders")
+            .update({
+              status:
+                nextStatus,
+            })
+            .eq(
+              "id",
+              orderId
+            );
 
-      if (error) {
-        setActionLoading(false);
+        if (error) {
+          throw error;
+        }
+
+        await loadOrders();
 
         showNotification(
-          error.message
+          "Order status has been updated."
+        );
+      } catch (error) {
+        console.error(
+          "ORDER STATUS ERROR:",
+          error
         );
 
-        return;
+        showNotification(
+          error instanceof Error
+            ? error.message
+            : "Unable to update order status."
+        );
+      } finally {
+        setActionLoading(false);
       }
-
-      await loadOrders();
-
-      setActionLoading(false);
-
-      showNotification(
-        "Order status has been updated."
-      );
     };
 
   const getOrderAction = (
@@ -1096,8 +1264,9 @@ export default function AdminPage() {
     if (!svg) return;
 
     const svgData =
-      new XMLSerializer()
-        .serializeToString(svg);
+      new XMLSerializer().serializeToString(
+        svg
+      );
 
     const canvas =
       document.createElement(
@@ -1690,7 +1859,9 @@ export default function AdminPage() {
     return (
       <main className={styles.page}>
         <div
-          className={styles.container}
+          className={
+            styles.container
+          }
           style={{
             paddingTop: "120px",
             textAlign: "center",
@@ -1704,15 +1875,25 @@ export default function AdminPage() {
 
   return (
     <main className={styles.page}>
-      <nav className={styles.navbar}>
+      <nav
+        className={
+          styles.navbar
+        }
+      >
         <a
           href="/"
-          className={styles.logo}
+          className={
+            styles.logo
+          }
         >
           Deckside
         </a>
 
-        <div className={styles.navLinks}>
+        <div
+          className={
+            styles.navLinks
+          }
+        >
           <a href="/menu">
             MENU
           </a>
@@ -1725,6 +1906,7 @@ export default function AdminPage() {
             type="button"
             onClick={async () => {
               await supabase.auth.signOut();
+
               window.location.href =
                 "/sign-in";
             }}
@@ -1734,10 +1916,22 @@ export default function AdminPage() {
         </div>
       </nav>
 
-      <div className={styles.container}>
-        <section className={styles.header}>
+      <div
+        className={
+          styles.container
+        }
+      >
+        <section
+          className={
+            styles.header
+          }
+        >
           <div>
-            <p className={styles.eyebrow}>
+            <p
+              className={
+                styles.eyebrow
+              }
+            >
               DECKSIDE ADMINISTRATION
             </p>
 
@@ -1893,7 +2087,8 @@ export default function AdminPage() {
                   }
                   onChange={(event) =>
                     setCustomFrom(
-                      event.target.value
+                      event.target
+                        .value
                     )
                   }
                 />
@@ -1911,7 +2106,8 @@ export default function AdminPage() {
                   }
                   onChange={(event) =>
                     setCustomTo(
-                      event.target.value
+                      event.target
+                        .value
                     )
                   }
                 />
@@ -2225,7 +2421,9 @@ export default function AdminPage() {
                   className={
                     styles.memberTableRow
                   }
-                  key={member.id}
+                  key={
+                    member.id
+                  }
                 >
                   <div
                     className={
@@ -2323,7 +2521,9 @@ export default function AdminPage() {
                           actionLoading
                         }
                       >
-                        ACC MEMBER
+                        {actionLoading
+                          ? "PROCESSING..."
+                          : "ACC MEMBER"}
                       </button>
                     )}
                   </div>
@@ -2373,7 +2573,9 @@ export default function AdminPage() {
                 styles.sectionCount
               }
             >
-              {filteredOrders.length}{" "}
+              {
+                filteredOrders.length
+              }{" "}
               ORDERS
             </span>
           </div>
@@ -2423,7 +2625,9 @@ export default function AdminPage() {
                   className={
                     styles.orderRow
                   }
-                  key={order.id}
+                  key={
+                    order.id
+                  }
                 >
                   <div>
                     <strong>
@@ -2564,7 +2768,9 @@ export default function AdminPage() {
                 styles.sectionCount
               }
             >
-              {filteredClaims.length}{" "}
+              {
+                filteredClaims.length
+              }{" "}
               CLAIMS
             </span>
           </div>
@@ -2610,7 +2816,9 @@ export default function AdminPage() {
                   className={
                     styles.claimRow
                   }
-                  key={claim.id}
+                  key={
+                    claim.id
+                  }
                 >
                   <button
                     className={
@@ -2984,7 +3192,9 @@ export default function AdminPage() {
                       className={
                         styles.historyItem
                       }
-                      key={order.id}
+                      key={
+                        order.id
+                      }
                     >
                       <div>
                         <strong>
@@ -3072,7 +3282,9 @@ export default function AdminPage() {
                       className={
                         styles.historyItem
                       }
-                      key={claim.id}
+                      key={
+                        claim.id
+                      }
                     >
                       <div>
                         <strong>
@@ -3294,7 +3506,9 @@ export default function AdminPage() {
                     value={
                       memberForm.title
                     }
-                    onChange={(event) =>
+                    onChange={(
+                      event
+                    ) =>
                       handleFormChange(
                         "title",
                         event.target
@@ -3330,7 +3544,9 @@ export default function AdminPage() {
                     value={
                       memberForm.name
                     }
-                    onChange={(event) =>
+                    onChange={(
+                      event
+                    ) =>
                       handleFormChange(
                         "name",
                         event.target
@@ -3350,7 +3566,9 @@ export default function AdminPage() {
                     value={
                       memberForm.email
                     }
-                    onChange={(event) =>
+                    onChange={(
+                      event
+                    ) =>
                       handleFormChange(
                         "email",
                         event.target
@@ -3370,7 +3588,9 @@ export default function AdminPage() {
                     value={
                       memberForm.phone
                     }
-                    onChange={(event) =>
+                    onChange={(
+                      event
+                    ) =>
                       handleFormChange(
                         "phone",
                         event.target
@@ -3390,7 +3610,9 @@ export default function AdminPage() {
                     value={
                       memberForm.startDate
                     }
-                    onChange={(event) =>
+                    onChange={(
+                      event
+                    ) =>
                       handleFormChange(
                         "startDate",
                         event.target
@@ -3410,7 +3632,9 @@ export default function AdminPage() {
                     value={
                       memberForm.endDate
                     }
-                    onChange={(event) =>
+                    onChange={(
+                      event
+                    ) =>
                       handleFormChange(
                         "endDate",
                         event.target
@@ -3429,7 +3653,9 @@ export default function AdminPage() {
                     value={
                       memberForm.paymentStatus
                     }
-                    onChange={(event) =>
+                    onChange={(
+                      event
+                    ) =>
                       handleFormChange(
                         "paymentStatus",
                         event.target
@@ -3456,7 +3682,9 @@ export default function AdminPage() {
                     value={
                       memberForm.membershipStatus
                     }
-                    onChange={(event) =>
+                    onChange={(
+                      event
+                    ) =>
                       handleFormChange(
                         "membershipStatus",
                         event.target
@@ -3520,4 +3748,3 @@ export default function AdminPage() {
     </main>
   );
 }
-
