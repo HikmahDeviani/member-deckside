@@ -38,22 +38,19 @@ export default function SignIn() {
       });
 
     if (signInError) {
-      console.error("Sign in error:", signInError);
-
-      setLoading(false);
-
       setError("Email or password is incorrect.");
+      setLoading(false);
       return;
     }
 
     if (!data.user) {
-      setLoading(false);
       setError("Unable to sign in. Please try again.");
+      setLoading(false);
       return;
     }
 
     /*
-     * Check the user's role from profiles table.
+     * Get the user's role from profiles table.
      */
     const { data: profile, error: profileError } =
       await supabase
@@ -62,20 +59,11 @@ export default function SignIn() {
         .eq("id", data.user.id)
         .single();
 
-    if (profileError) {
-      console.error("Profile error:", profileError);
-
-      /*
-       * The account can still be signed in even if
-       * the profile has not been created yet.
-       *
-       * The user will be treated as a normal member.
-       */
+    if (profileError || !profile) {
+      setError(
+        "Your account profile could not be loaded. Please contact Deckside."
+      );
       setLoading(false);
-
-      router.push("/dashboard");
-      router.refresh();
-
       return;
     }
 
@@ -83,21 +71,14 @@ export default function SignIn() {
      * Admin → Admin Dashboard
      */
     if (profile.role === "admin") {
-      setLoading(false);
-
-      router.push("/admin");
-      router.refresh();
-
+      router.replace("/admin");
       return;
     }
 
     /*
      * Member → Member Dashboard
      */
-    setLoading(false);
-
-    router.push("/dashboard");
-    router.refresh();
+    router.replace("/dashboard");
   };
 
   return (

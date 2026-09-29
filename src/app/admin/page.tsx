@@ -10,6 +10,7 @@ import { createClient } from "../../lib/supabase/client";
 
 type MembershipStatus = "PENDING" | "ACTIVE" | "EXPIRED";
 type PaymentStatus = "PENDING" | "VERIFIED";
+
 type OrderStatus =
   | "NEW"
   | "PREPARING"
@@ -169,18 +170,6 @@ const formatTime = (value: string) => {
   }).format(new Date(value));
 };
 
-const formatDateTime = (value: string) => {
-  return new Intl.DateTimeFormat("en-GB", {
-    day: "2-digit",
-    month: "short",
-    year: "numeric",
-    hour: "2-digit",
-    minute: "2-digit",
-    hour12: false,
-    timeZone: "Asia/Jakarta",
-  }).format(new Date(value));
-};
-
 const getTodayJakarta = () => {
   return new Intl.DateTimeFormat("en-CA", {
     timeZone: "Asia/Jakarta",
@@ -227,9 +216,6 @@ export default function AdminPage() {
 
   const [reportType, setReportType] =
     useState<ReportType>("ALL");
-
-  const [addMemberOpen, setAddMemberOpen] =
-    useState(false);
 
   const [editMemberOpen, setEditMemberOpen] =
     useState(false);
@@ -311,9 +297,11 @@ export default function AdminPage() {
 
     if (error) {
       console.error(error);
+
       setErrorMessage(
         "Unable to load member data."
       );
+
       return;
     }
 
@@ -337,9 +325,11 @@ export default function AdminPage() {
 
     if (membershipError) {
       console.error(membershipError);
+
       setErrorMessage(
         "Unable to load membership data."
       );
+
       return;
     }
 
@@ -388,10 +378,7 @@ export default function AdminPage() {
             phone:
               profile.phone ?? "",
             registrationDate:
-              profile.created_at.slice(
-                0,
-                10
-              ),
+              profile.created_at.slice(0, 10),
             startDate:
               membership?.start_date ?? "",
             endDate:
@@ -422,9 +409,11 @@ export default function AdminPage() {
 
     if (error) {
       console.error(error);
+
       setErrorMessage(
         "Unable to load order data."
       );
+
       return;
     }
 
@@ -536,7 +525,8 @@ export default function AdminPage() {
             memberId:
               profile?.member_id ?? "-",
             memberName:
-              profile?.full_name ?? "Unknown Member",
+              profile?.full_name ??
+              "Unknown Member",
             items: itemText,
             total:
               Number(order.total_amount) ||
@@ -571,9 +561,11 @@ export default function AdminPage() {
 
     if (error) {
       console.error(error);
+
       setErrorMessage(
         "Unable to load beverage claim data."
       );
+
       return;
     }
 
@@ -638,10 +630,9 @@ export default function AdminPage() {
               claim.beverage_name,
             date:
               claim.claim_date,
-            time:
-              formatTime(
-                claim.created_at
-              ),
+            time: formatTime(
+              claim.created_at
+            ),
           };
         }
       );
@@ -704,10 +695,7 @@ export default function AdminPage() {
 
     if (dateFilter === "THIS_MONTH") {
       return {
-        from: `${today.slice(
-          0,
-          8
-        )}01`,
+        from: `${today.slice(0, 8)}01`,
         to: today,
       };
     }
@@ -857,7 +845,6 @@ export default function AdminPage() {
 
   const closeMemberModal =
     () => {
-      setAddMemberOpen(false);
       setEditMemberOpen(false);
       setSelectedMember(null);
       setMemberForm(
@@ -878,6 +865,7 @@ export default function AdminPage() {
         showNotification(
           "Please complete the member information."
         );
+
         return;
       }
 
@@ -892,11 +880,9 @@ export default function AdminPage() {
             full_name:
               memberForm.name.trim(),
             email:
-              memberForm.email
-                .trim(),
+              memberForm.email.trim(),
             phone:
-              memberForm.phone
-                .trim(),
+              memberForm.phone.trim(),
           })
           .eq(
             "id",
@@ -905,9 +891,11 @@ export default function AdminPage() {
 
       if (profileError) {
         setActionLoading(false);
+
         showNotification(
           profileError.message
         );
+
         return;
       }
 
@@ -933,9 +921,11 @@ export default function AdminPage() {
 
       if (membershipError) {
         setActionLoading(false);
+
         showNotification(
           membershipError.message
         );
+
         return;
       }
 
@@ -950,100 +940,66 @@ export default function AdminPage() {
       );
     };
 
-  const verifyPayment =
-    async (
-      userId: string
-    ) => {
-      setActionLoading(true);
+  const approveMember = async (
+    userId: string
+  ) => {
+    setActionLoading(true);
+    setErrorMessage("");
 
-      const { error } =
-        await supabase
-          .from("memberships")
-          .update({
-            payment_status:
-              "VERIFIED",
-          })
-          .eq(
-            "user_id",
-            userId
-          );
+    const startDate = today;
 
-      if (error) {
-        setActionLoading(false);
-        showNotification(
-          error.message
+    const endDateObject =
+      new Date(
+        `${startDate}T12:00:00`
+      );
+
+    endDateObject.setMonth(
+      endDateObject.getMonth() + 1
+    );
+
+    endDateObject.setDate(
+      endDateObject.getDate() - 1
+    );
+
+    const endDate =
+      endDateObject
+        .toISOString()
+        .slice(0, 10);
+
+    const { error } =
+      await supabase
+        .from("memberships")
+        .update({
+          status: "ACTIVE",
+          payment_status: "VERIFIED",
+          start_date: startDate,
+          end_date: endDate,
+        })
+        .eq(
+          "user_id",
+          userId
         );
-        return;
-      }
 
-      await loadMembers();
+    if (error) {
+      console.error(error);
 
       setActionLoading(false);
 
       showNotification(
-        "Payment has been verified."
-      );
-    };
-
-  const activateMembership =
-    async (
-      userId: string
-    ) => {
-      setActionLoading(true);
-
-      const startDate =
-        today;
-
-      const end =
-        new Date(
-          `${startDate}T12:00:00`
-        );
-
-      end.setMonth(
-        end.getMonth() + 1
+        `Unable to approve member: ${error.message}`
       );
 
-      end.setDate(
-        end.getDate() - 1
-      );
+      return;
+    }
 
-      const endDate =
-        end
-          .toISOString()
-          .slice(0, 10);
+    await loadMembers();
 
-      const { error } =
-        await supabase
-          .from("memberships")
-          .update({
-            status:
-              "ACTIVE",
-            start_date:
-              startDate,
-            end_date:
-              endDate,
-          })
-          .eq(
-            "user_id",
-            userId
-          );
+    setActionLoading(false);
 
-      if (error) {
-        setActionLoading(false);
-        showNotification(
-          error.message
-        );
-        return;
-      }
-
-      await loadMembers();
-
-      setActionLoading(false);
-
-      showNotification(
-        "Membership has been activated."
-      );
-    };
+    showNotification(
+      "Member has been approved and activated."
+    );
+  };
 
   const updateOrderStatus =
     async (
@@ -1071,9 +1027,11 @@ export default function AdminPage() {
 
       if (error) {
         setActionLoading(false);
+
         showNotification(
           error.message
         );
+
         return;
       }
 
@@ -1091,8 +1049,7 @@ export default function AdminPage() {
   ) => {
     if (
       status === "NEW" ||
-      status ===
-        "ORDER RECEIVED"
+      status === "ORDER RECEIVED"
     ) {
       return "START PREPARING";
     }
@@ -1205,8 +1162,7 @@ export default function AdminPage() {
       XLSX.utils.book_new();
 
     if (
-      reportType ===
-        "SUMMARY" ||
+      reportType === "SUMMARY" ||
       reportType === "ALL"
     ) {
       const summaryData = [
@@ -1261,8 +1217,7 @@ export default function AdminPage() {
     }
 
     if (
-      reportType ===
-        "MEMBERS" ||
+      reportType === "MEMBERS" ||
       reportType === "ALL"
     ) {
       const data =
@@ -1303,8 +1258,7 @@ export default function AdminPage() {
     }
 
     if (
-      reportType ===
-        "ORDERS" ||
+      reportType === "ORDERS" ||
       reportType === "ALL"
     ) {
       const data =
@@ -1339,8 +1293,7 @@ export default function AdminPage() {
     }
 
     if (
-      reportType ===
-        "CLAIMS" ||
+      reportType === "CLAIMS" ||
       reportType === "ALL"
     ) {
       const data =
@@ -1421,11 +1374,11 @@ export default function AdminPage() {
     let y = 32;
 
     if (
-      reportType ===
-        "SUMMARY" ||
+      reportType === "SUMMARY" ||
       reportType === "ALL"
     ) {
       pdf.setFontSize(12);
+
       pdf.setFont(
         "helvetica",
         "bold"
@@ -1500,8 +1453,7 @@ export default function AdminPage() {
     }
 
     if (
-      reportType ===
-        "MEMBERS" ||
+      reportType === "MEMBERS" ||
       reportType === "ALL"
     ) {
       if (y > 160) {
@@ -1583,8 +1535,7 @@ export default function AdminPage() {
     }
 
     if (
-      reportType ===
-        "ORDERS" ||
+      reportType === "ORDERS" ||
       reportType === "ALL"
     ) {
       if (y > 160) {
@@ -1661,8 +1612,7 @@ export default function AdminPage() {
     }
 
     if (
-      reportType ===
-        "CLAIMS" ||
+      reportType === "CLAIMS" ||
       reportType === "ALL"
     ) {
       if (y > 160) {
@@ -1767,13 +1717,20 @@ export default function AdminPage() {
             MENU
           </a>
 
-          <a href="/dashboard">
-            DASHBOARD
+          <a href="/admin">
+            ADMIN DASHBOARD
           </a>
 
-          <a href="/sign-in">
+          <button
+            type="button"
+            onClick={async () => {
+              await supabase.auth.signOut();
+              window.location.href =
+                "/sign-in";
+            }}
+          >
             SIGN OUT
-          </a>
+          </button>
         </div>
       </nav>
 
@@ -2220,6 +2177,15 @@ export default function AdminPage() {
                 Member Database
               </h2>
             </div>
+
+            <span
+              className={
+                styles.sectionCount
+              }
+            >
+              {members.length}{" "}
+              MEMBERS
+            </span>
           </div>
 
           <div
@@ -2253,7 +2219,7 @@ export default function AdminPage() {
               </span>
             </div>
 
-            {filteredMembers.map(
+            {members.map(
               (member) => (
                 <div
                   className={
@@ -2342,14 +2308,14 @@ export default function AdminPage() {
                       EDIT
                     </button>
 
-                    {member.paymentStatus ===
+                    {member.membershipStatus ===
                       "PENDING" && (
                       <button
                         className={
-                          styles.secondaryButton
+                          styles.primarySmallButton
                         }
                         onClick={() =>
-                          verifyPayment(
+                          approveMember(
                             member.userId
                           )
                         }
@@ -2357,44 +2323,22 @@ export default function AdminPage() {
                           actionLoading
                         }
                       >
-                        VERIFY
+                        ACC MEMBER
                       </button>
                     )}
-
-                    {member.paymentStatus ===
-                      "VERIFIED" &&
-                      member.membershipStatus ===
-                        "PENDING" && (
-                        <button
-                          className={
-                            styles.primarySmallButton
-                          }
-                          onClick={() =>
-                            activateMembership(
-                              member.userId
-                            )
-                          }
-                          disabled={
-                            actionLoading
-                          }
-                        >
-                          ACTIVATE
-                        </button>
-                      )}
                   </div>
                 </div>
               )
             )}
 
-            {filteredMembers.length ===
+            {members.length ===
               0 && (
               <div
                 className={
                   styles.emptyState
                 }
               >
-                No members found in
-                the selected period.
+                No members registered yet.
               </div>
             )}
           </div>
@@ -3270,6 +3214,310 @@ export default function AdminPage() {
           </div>
         </div>
       )}
+
+      {editMemberOpen &&
+        selectedMember && (
+          <div
+            className={
+              styles.overlay
+            }
+          >
+            <div
+              className={
+                styles.historyModal
+              }
+            >
+              <button
+                className={
+                  styles.closeButton
+                }
+                onClick={
+                  closeMemberModal
+                }
+              >
+                ×
+              </button>
+
+              <p
+                className={
+                  styles.sectionLabel
+                }
+              >
+                MEMBER MANAGEMENT
+              </p>
+
+              <h2>
+                Edit Member
+              </h2>
+
+              <div
+                className={
+                  styles.profileGrid
+                }
+              >
+                <div>
+                  <span>
+                    MEMBER ID
+                  </span>
+
+                  <strong>
+                    {
+                      memberForm.memberId
+                    }
+                  </strong>
+                </div>
+
+                <div>
+                  <span>
+                    REGISTRATION
+                  </span>
+
+                  <strong>
+                    {formatDate(
+                      memberForm.registrationDate
+                    )}
+                  </strong>
+                </div>
+              </div>
+
+              <div
+                className={
+                  styles.memberForm
+                }
+              >
+                <div>
+                  <label>
+                    TITLE
+                  </label>
+
+                  <select
+                    value={
+                      memberForm.title
+                    }
+                    onChange={(event) =>
+                      handleFormChange(
+                        "title",
+                        event.target
+                          .value
+                      )
+                    }
+                  >
+                    <option value="">
+                      Select
+                    </option>
+
+                    <option value="Mr.">
+                      Mr.
+                    </option>
+
+                    <option value="Mrs.">
+                      Mrs.
+                    </option>
+
+                    <option value="Ms.">
+                      Ms.
+                    </option>
+                  </select>
+                </div>
+
+                <div>
+                  <label>
+                    FULL NAME
+                  </label>
+
+                  <input
+                    type="text"
+                    value={
+                      memberForm.name
+                    }
+                    onChange={(event) =>
+                      handleFormChange(
+                        "name",
+                        event.target
+                          .value
+                      )
+                    }
+                  />
+                </div>
+
+                <div>
+                  <label>
+                    EMAIL
+                  </label>
+
+                  <input
+                    type="email"
+                    value={
+                      memberForm.email
+                    }
+                    onChange={(event) =>
+                      handleFormChange(
+                        "email",
+                        event.target
+                          .value
+                      )
+                    }
+                  />
+                </div>
+
+                <div>
+                  <label>
+                    PHONE
+                  </label>
+
+                  <input
+                    type="text"
+                    value={
+                      memberForm.phone
+                    }
+                    onChange={(event) =>
+                      handleFormChange(
+                        "phone",
+                        event.target
+                          .value
+                      )
+                    }
+                  />
+                </div>
+
+                <div>
+                  <label>
+                    MEMBERSHIP START
+                  </label>
+
+                  <input
+                    type="date"
+                    value={
+                      memberForm.startDate
+                    }
+                    onChange={(event) =>
+                      handleFormChange(
+                        "startDate",
+                        event.target
+                          .value
+                      )
+                    }
+                  />
+                </div>
+
+                <div>
+                  <label>
+                    MEMBERSHIP END
+                  </label>
+
+                  <input
+                    type="date"
+                    value={
+                      memberForm.endDate
+                    }
+                    onChange={(event) =>
+                      handleFormChange(
+                        "endDate",
+                        event.target
+                          .value
+                      )
+                    }
+                  />
+                </div>
+
+                <div>
+                  <label>
+                    PAYMENT STATUS
+                  </label>
+
+                  <select
+                    value={
+                      memberForm.paymentStatus
+                    }
+                    onChange={(event) =>
+                      handleFormChange(
+                        "paymentStatus",
+                        event.target
+                          .value
+                      )
+                    }
+                  >
+                    <option value="PENDING">
+                      PENDING
+                    </option>
+
+                    <option value="VERIFIED">
+                      VERIFIED
+                    </option>
+                  </select>
+                </div>
+
+                <div>
+                  <label>
+                    MEMBERSHIP STATUS
+                  </label>
+
+                  <select
+                    value={
+                      memberForm.membershipStatus
+                    }
+                    onChange={(event) =>
+                      handleFormChange(
+                        "membershipStatus",
+                        event.target
+                          .value
+                      )
+                    }
+                  >
+                    <option value="PENDING">
+                      PENDING
+                    </option>
+
+                    <option value="ACTIVE">
+                      ACTIVE
+                    </option>
+
+                    <option value="EXPIRED">
+                      EXPIRED
+                    </option>
+                  </select>
+                </div>
+              </div>
+
+              <div
+                className={
+                  styles.qrModalActions
+                }
+              >
+                <button
+                  className={
+                    styles.primaryButton
+                  }
+                  onClick={
+                    saveEditedMember
+                  }
+                  disabled={
+                    actionLoading
+                  }
+                >
+                  {actionLoading
+                    ? "SAVING..."
+                    : "SAVE CHANGES"}
+                </button>
+
+                <button
+                  className={
+                    styles.secondaryButton
+                  }
+                  onClick={
+                    closeMemberModal
+                  }
+                  disabled={
+                    actionLoading
+                  }
+                >
+                  CANCEL
+                </button>
+              </div>
+            </div>
+          </div>
+        )}
     </main>
   );
 }
+
