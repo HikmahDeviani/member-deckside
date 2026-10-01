@@ -176,7 +176,6 @@ export default function MenuPage() {
         <div className={styles.menu}>
           <Link href="/membership">Membership</Link>
           <Link href="/menu">Menu</Link>
-          <Link href="/about">About</Link>
         </div>
       </nav>
 
@@ -191,21 +190,28 @@ export default function MenuPage() {
           </h1>
 
           <p className={styles.description}>
-            Explore our selection of complimentary member beverages and
-            additional food and beverage options available at Deckside.
+            Explore our selection of complimentary member beverages
+            and additional food and beverage options available at
+            Deckside.
           </p>
         </section>
+
+        {/* MEMBER BEVERAGE */}
 
         <section className={styles.category}>
           <div className={styles.categoryHeader}>
             <div>
-              <div className={styles.categoryLabel}>MEMBER BENEFIT</div>
+              <div className={styles.categoryLabel}>
+                MEMBER BENEFIT
+              </div>
 
               <h2>Member Beverage</h2>
             </div>
 
             <div className={styles.categoryInfo}>
-              <div>Choose one complimentary beverage every day.</div>
+              <div>
+                Choose one complimentary beverage every day.
+              </div>
 
               <div className={styles.discount}>
                 1 beverage / day
@@ -237,16 +243,22 @@ export default function MenuPage() {
           </div>
         </section>
 
+        {/* ADD-ONS */}
+
         <section className={styles.category}>
           <div className={styles.categoryHeader}>
             <div>
-              <div className={styles.categoryLabel}>ADDITIONAL MENU</div>
+              <div className={styles.categoryLabel}>
+                ADDITIONAL MENU
+              </div>
 
               <h2>Add-ons</h2>
             </div>
 
             <div className={styles.categoryInfo}>
-              <div>Enjoy more from our selection.</div>
+              <div>
+                Enjoy more from our selection.
+              </div>
 
               <div className={styles.discount}>
                 21% member discount
@@ -254,11 +266,15 @@ export default function MenuPage() {
             </div>
           </div>
 
+          {/* FOOD */}
+
           <div className={styles.addonCategory}>
             <div className={styles.addonCategoryHeader}>
               <h3>Food Add-ons</h3>
 
-              <span>Available for Deckside Members</span>
+              <span>
+                Available for Deckside Members
+              </span>
             </div>
 
             <div className={styles.addonList}>
@@ -271,13 +287,16 @@ export default function MenuPage() {
                     <h3>{item.name}</h3>
 
                     <p>
-                      Enjoy this selection as an additional item to
-                      your complimentary daily beverage.
+                      Enjoy this selection as an additional
+                      item to your complimentary daily
+                      beverage.
                     </p>
                   </div>
 
                   <div className={styles.addonPrice}>
-                    <strong>{formatPrice(item.price)}</strong>
+                    <strong>
+                      {formatPrice(item.price)}
+                    </strong>
 
                     <span className={styles.memberPriceLabel}>
                       Member price available
@@ -288,11 +307,15 @@ export default function MenuPage() {
             </div>
           </div>
 
+          {/* BEVERAGE */}
+
           <div className={styles.addonCategory}>
             <div className={styles.addonCategoryHeader}>
               <h3>Beverage Add-ons</h3>
 
-              <span>Available for Deckside Members</span>
+              <span>
+                Available for Deckside Members
+              </span>
             </div>
 
             <div className={styles.addonList}>
@@ -305,13 +328,15 @@ export default function MenuPage() {
                     <h3>{item.name}</h3>
 
                     <p>
-                      Explore another beverage option beyond your
-                      complimentary daily selection.
+                      Explore another beverage option beyond
+                      your complimentary daily selection.
                     </p>
                   </div>
 
                   <div className={styles.addonPrice}>
-                    <strong>{formatPrice(item.price)}</strong>
+                    <strong>
+                      {formatPrice(item.price)}
+                    </strong>
 
                     <span className={styles.memberPriceLabel}>
                       Member price available
