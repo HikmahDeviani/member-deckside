@@ -348,9 +348,14 @@ export default function Dashboard() {
 
   const [extendOpen, setExtendOpen] = useState(false);
   const [extendConfirmed, setExtendConfirmed] = useState(false);
+  const [extensionSubmitting, setExtensionSubmitting] =
+    useState(false);
+  const [extensionError, setExtensionError] = useState("");
 
   const [claimSubmitting, setClaimSubmitting] = useState(false);
   const [orderSubmitting, setOrderSubmitting] = useState(false);
+
+  const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
 
   const isActiveMember =
     membershipStatus === "ACTIVE" &&
@@ -634,6 +639,7 @@ export default function Dashboard() {
 
     return () => {
       mounted = false;
+
       window.clearInterval(interval);
 
       if (scannerRef.current) {
@@ -720,7 +726,12 @@ export default function Dashboard() {
             // QR scan frame without a valid result.
           }
         );
-      } catch {
+      } catch (scannerError) {
+        console.error(
+          "QR SCANNER ERROR:",
+          scannerError
+        );
+
         if (!cancelled) {
           setScanError(
             "Unable to access the camera. Please allow camera permission and try again."
@@ -1155,12 +1166,62 @@ export default function Dashboard() {
   };
 
   const extendMembership = async () => {
-    setError(
-      "Membership extension requests are not available yet. Please contact the Deckside team."
-    );
+    if (extensionSubmitting) {
+      return;
+    }
+
+    setExtensionSubmitting(true);
+    setExtensionError("");
+
+    try {
+      const {
+        data: { session },
+      } = await supabase.auth.getSession();
+
+      if (!session?.access_token) {
+        router.replace("/sign-in");
+        return;
+      }
+
+      const response = await fetch(
+        "/api/admin/extensions",
+        {
+          method: "POST",
+          headers: {
+            Authorization: `Bearer ${session.access_token}`,
+            "Content-Type": "application/json",
+          },
+        }
+      );
+
+      const result = await response.json();
+
+      if (!response.ok) {
+        setExtensionError(
+          result?.error ||
+            "Unable to submit your membership extension request."
+        );
+        return;
+      }
+
+      setExtendConfirmed(true);
+    } catch (extensionRequestError) {
+      console.error(
+        "EXTENSION REQUEST ERROR:",
+        extensionRequestError
+      );
+
+      setExtensionError(
+        "Unable to submit your extension request. Please try again."
+      );
+    } finally {
+      setExtensionSubmitting(false);
+    }
   };
 
   const handleSignOut = async () => {
+    setMobileMenuOpen(false);
+
     if (scannerRef.current) {
       await scannerRef.current
         .stop()
@@ -1178,6 +1239,16 @@ export default function Dashboard() {
     await supabase.auth.signOut();
 
     router.replace("/sign-in");
+  };
+
+  const closeExtensionModal = () => {
+    if (extensionSubmitting) {
+      return;
+    }
+
+    setExtendOpen(false);
+    setExtendConfirmed(false);
+    setExtensionError("");
   };
 
   if (loading) {
@@ -1272,12 +1343,44 @@ export default function Dashboard() {
         <a
           href="/"
           className={styles.logo}
+          onClick={() =>
+            setMobileMenuOpen(false)
+          }
         >
           Deckside
         </a>
 
-        <div className={styles.menu}>
-          <a href="/">HOME</a>
+        <button
+          type="button"
+          className={styles.mobileMenuButton}
+          onClick={() =>
+            setMobileMenuOpen(
+              (previous) => !previous
+            )
+          }
+          aria-label="Toggle navigation menu"
+          aria-expanded={mobileMenuOpen}
+        >
+          <span />
+          <span />
+          <span />
+        </button>
+
+        <div
+          className={`${styles.menu} ${
+            mobileMenuOpen
+              ? styles.menuOpen
+              : ""
+          }`}
+        >
+          <a
+            href="/"
+            onClick={() =>
+              setMobileMenuOpen(false)
+            }
+          >
+            HOME
+          </a>
 
           <button
             type="button"
@@ -1382,10 +1485,11 @@ export default function Dashboard() {
                   styles.extendButton
                 }
                 onClick={() => {
-                  setExtendOpen(true);
+                  setExtensionError("");
                   setExtendConfirmed(
                     false
                   );
+                  setExtendOpen(true);
                 }}
               >
                 EXTEND MEMBERSHIP
@@ -2556,8 +2660,11 @@ export default function Dashboard() {
               className={
                 styles.confirmationClose
               }
-              onClick={() =>
-                setExtendOpen(false)
+              onClick={
+                closeExtensionModal
+              }
+              disabled={
+                extensionSubmitting
               }
             >
               ×
@@ -2583,10 +2690,9 @@ export default function Dashboard() {
                     styles.confirmationText
                   }
                 >
-                  Please contact the
-                  Deckside team to
-                  arrange your
-                  membership extension.
+                  Submit your membership
+                  extension request to
+                  the Deckside team.
                 </p>
 
                 <div
@@ -2624,12 +2730,21 @@ export default function Dashboard() {
                   </strong>
 
                   <span>
-                    The Deckside team
-                    will review and
-                    verify your
-                    extension request.
+                    Your request will be
+                    reviewed and verified
+                    by the Deckside team.
                   </span>
                 </div>
+
+                {extensionError && (
+                  <p
+                    className={
+                      styles.error
+                    }
+                  >
+                    {extensionError}
+                  </p>
+                )}
 
                 <button
                   type="button"
@@ -2639,8 +2754,13 @@ export default function Dashboard() {
                   onClick={
                     extendMembership
                   }
+                  disabled={
+                    extensionSubmitting
+                  }
                 >
-                  CONTACT DECKSIDE
+                  {extensionSubmitting
+                    ? "SUBMITTING..."
+                    : "SUBMIT REQUEST"}
                 </button>
               </>
             ) : (
@@ -2682,11 +2802,13 @@ export default function Dashboard() {
                   className={
                     styles.primaryButton
                   }
-                  onClick={() =>
-                    setExtendOpen(
+                  onClick={() => {
+                    setExtendOpen(false);
+                    setExtendConfirmed(
                       false
-                    )
-                  }
+                    );
+                    setExtensionError("");
+                  }}
                 >
                   DONE
                 </button>
