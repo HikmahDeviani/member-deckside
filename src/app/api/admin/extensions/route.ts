@@ -1,16 +1,25 @@
 import { NextRequest, NextResponse } from "next/server";
 import { createClient } from "@supabase/supabase-js";
 
-const supabaseAdmin = createClient(
-  process.env.NEXT_PUBLIC_SUPABASE_URL!,
-  process.env.SUPABASE_SERVICE_ROLE_KEY!,
-  {
+function getSupabaseAdmin() {
+  const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL;
+  const serviceRoleKey = process.env.SUPABASE_SERVICE_ROLE_KEY;
+
+  if (!supabaseUrl) {
+    throw new Error("NEXT_PUBLIC_SUPABASE_URL belum tersedia.");
+  }
+
+  if (!serviceRoleKey) {
+    throw new Error("SUPABASE_SERVICE_ROLE_KEY belum tersedia.");
+  }
+
+  return createClient(supabaseUrl, serviceRoleKey, {
     auth: {
       autoRefreshToken: false,
       persistSession: false,
     },
-  }
-);
+  });
+}
 
 function getJakartaDate(): string {
   return new Intl.DateTimeFormat("en-CA", {
@@ -32,6 +41,7 @@ function getEndDateOneMonth(startDate: string): string {
 }
 
 async function getAuthenticatedUser(request: NextRequest) {
+  const supabaseAdmin = getSupabaseAdmin();
   const authorization = request.headers.get("authorization");
 
   if (!authorization?.startsWith("Bearer ")) {
@@ -69,6 +79,8 @@ async function getAuthenticatedUser(request: NextRequest) {
 }
 
 async function checkAdmin(userId: string): Promise<boolean> {
+  const supabaseAdmin = getSupabaseAdmin();
+
   const { data, error } = await supabaseAdmin
     .from("profiles")
     .select("role")
@@ -89,6 +101,7 @@ async function checkAdmin(userId: string): Promise<boolean> {
 
 export async function GET(request: NextRequest) {
   try {
+    const supabaseAdmin = getSupabaseAdmin();
     const { user, error: authError } =
       await getAuthenticatedUser(request);
 
@@ -299,6 +312,7 @@ export async function GET(request: NextRequest) {
 
 export async function POST(request: NextRequest) {
   try {
+    const supabaseAdmin = getSupabaseAdmin();
     const { user, error: authError } =
       await getAuthenticatedUser(request);
 
@@ -458,6 +472,7 @@ export async function POST(request: NextRequest) {
 
 export async function PUT(request: NextRequest) {
   try {
+    const supabaseAdmin = getSupabaseAdmin();
     const { user, error: authError } =
       await getAuthenticatedUser(request);
 
