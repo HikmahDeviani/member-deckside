@@ -4,40 +4,40 @@ import Link from "next/link";
 import styles from "./page.module.css";
 
 const memberBeverages = [
-  {
+   {
     id: 1,
-    name: "Matcha Colada",
+    name: "Lemon Peach Iced Tea",
     image: "/images/menu_1.png",
   },
   {
     id: 2,
-    name: "Butterscotch Creamy Latte",
-    image: "/images/menu_8.png",
-  },
-  {
-    id: 3,
-    name: "Sun Kiss Coffee",
+    name: "Mango Matcha Latte",
     image: "/images/menu_3.png",
   },
   {
-    id: 4,
-    name: "Mood Monday",
+    id: 3,
+    name: "Strawberry Splash",
     image: "/images/menu_4.png",
   },
   {
-    id: 5,
-    name: "Lemon Peach Iced Tea",
+    id: 4,
+    name: "Coffee Boom",
     image: "/images/menu_5.png",
   },
   {
-    id: 6,
-    name: "Coffee Boom",
+    id: 5,
+    name:"Matcha Colada",
     image: "/images/menu_6.png",
   },
   {
-    id: 7,
-    name: "Mango Matcha Latte",
+    id: 6,
+    name: "Sunkiss Coffee",
     image: "/images/menu_7.png",
+  },
+  {
+    id: 7,
+    name: "Salted Caramel Crème Brule",
+    image: "/images/menu_8.png",
   },
 ];
 
