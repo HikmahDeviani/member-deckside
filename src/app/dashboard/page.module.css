@@ -1,1029 +1,116 @@
 .page {
-  min-height: 100vh;
-  background-color: #f5f3ef;
-  color: #00494f;
-  font-family: "Gotham", "Century Gothic", sans-serif;
+min-height: 100vh;
+background: #f5f3ef;
+color: #3b3b3b;
+font-family: "Gotham", "Century Gothic", sans-serif;
 }
 
-/* ==================== NAVBAR ==================== */
+
+/* NAVBAR */
 
 .navbar {
   width: 100%;
-  min-height: 90px;
+  height: 90px;
   padding: 0 60px;
   display: flex;
   align-items: center;
   justify-content: space-between;
   background-color: #00494f;
+  box-sizing: border-box;
 }
 
 .logo {
-  color: white;
+  color: #ffffff;
   text-decoration: none;
   font-family: "Century Gothic", sans-serif;
   font-size: 32px;
   font-weight: bold;
   letter-spacing: 2px;
+  white-space: nowrap;
 }
 
 .logo:visited {
-  color: white;
+  color: #ffffff;
 }
 
 .logo:hover {
   color: #c4bfb6;
 }
 
-.navLinks {
+.menu {
   display: flex;
   align-items: center;
   gap: 35px;
 }
 
+/* SEMUA ITEM NAVBAR */
+.menu a,
+.menu button,
 .navLinks a,
 .navLinks button {
-  padding: 0;
-  border: none;
-  background: transparent;
-  color: white;
-  text-decoration: none;
+  color: #ffffff !important;
+  background: transparent !important;
+  background-color: transparent !important;
+  text-decoration: none !important;
   font-family: "Century Gothic", sans-serif;
   font-size: 14px;
   letter-spacing: 1px;
+  border: none !important;
+  outline: none !important;
+  box-shadow: none !important;
+  padding: 0 !important;
+  margin: 0 !important;
+  appearance: none;
+  -webkit-appearance: none;
   cursor: pointer;
 }
 
+/* HOVER */
+.menu a:hover,
+.menu button:hover,
 .navLinks a:hover,
 .navLinks button:hover {
-  color: #c4bfb6;
+  color: #c4bfb6 !important;
+  background: transparent !important;
+  background-color: transparent !important;
 }
 
-/* ==================== MAIN ==================== */
-
-.container {
-  width: 100%;
-  max-width: 1500px;
-  margin: 0 auto;
-  padding: 70px 8% 100px;
-}
-
-/* ==================== WELCOME ==================== */
-
-.welcome {
-  max-width: 800px;
-  margin-bottom: 55px;
-}
-
-.eyebrow {
-  margin: 0 0 15px;
-  font-family: "Century Gothic", sans-serif;
-  font-size: 12px;
-  font-weight: bold;
-  letter-spacing: 2px;
-  color: #42738d;
-}
-
-.welcome h1 {
-  margin: 0;
-  font-family: "Century Gothic", sans-serif;
-  font-size: 52px;
-  line-height: 1.1;
-  color: #00494f;
-}
-
-.welcomeText {
-  max-width: 650px;
-  margin-top: 20px;
-  font-size: 15px;
-  line-height: 1.7;
-  color: #776e64;
-}
-
-/* ==================== MEMBERSHIP ==================== */
-
-.membershipCard {
-  margin-bottom: 85px;
-  padding: 30px 35px;
-  display: grid;
-  grid-template-columns: repeat(4, 1fr) auto;
-  align-items: center;
-  gap: 30px;
-  background-color: white;
-  box-shadow: 0 8px 25px rgba(0, 73, 79, 0.07);
-}
-
-.membershipCard > div {
-  display: flex;
-  flex-direction: column;
-  gap: 8px;
-}
-
-.membershipCard span {
-  font-family: "Century Gothic", sans-serif;
-  font-size: 10px;
-  font-weight: bold;
-  letter-spacing: 1.5px;
-  color: #93a7ba;
-}
-
-.membershipCard strong {
-  font-family: "Century Gothic", sans-serif;
-  font-size: 15px;
-  color: #00494f;
-}
-
-.active {
-  color: #42738d !important;
-}
-
-.extendButton {
-  padding: 12px 18px;
-  border: 1px solid #42738d;
-  background-color: white;
-  color: #42738d;
-  font-family: "Century Gothic", sans-serif;
-  font-size: 10px;
-  font-weight: bold;
-  letter-spacing: 1px;
-  cursor: pointer;
-  transition: all 0.2s ease;
-}
-
-.extendButton:hover:not(:disabled) {
-  background-color: #42738d;
-  color: white;
-}
-
-.extendButton:disabled {
-  border-color: #c4bfb6;
-  background-color: #f5f3ef;
-  color: #93a7ba;
-  cursor: not-allowed;
-}
-
-/* ==================== SECTION ==================== */
-
-.section {
-  margin-bottom: 90px;
-}
-
-.sectionHeader {
-  margin-bottom: 30px;
-  display: flex;
-  align-items: flex-end;
-  justify-content: space-between;
-  gap: 20px;
-}
-
-.sectionHeader .eyebrow {
-  margin-bottom: 8px;
-}
-
-.sectionHeader h2 {
-  margin: 0;
-  font-family: "Century Gothic", sans-serif;
-  font-size: 30px;
-  color: #00494f;
-}
-
-.badge {
-  padding: 8px 14px;
-  background-color: #e7eeee;
-  color: #42738d;
-  font-family: "Century Gothic", sans-serif;
-  font-size: 11px;
-  font-weight: bold;
-  letter-spacing: 1px;
-  white-space: nowrap;
-}
-
-.badgeAvailable {
-  background-color: #e7eeee;
-  color: #42738d;
-}
-
-.badgeClosed {
-  background-color: #ece9e4;
-  color: #776e64;
-}
-
-/* ==================== LOCKED BOX ==================== */
-
-.lockedBox {
-  padding: 55px 40px;
-  background-color: white;
-  text-align: center;
-  box-shadow: 0 8px 25px rgba(0, 73, 79, 0.07);
-}
-
-.lockedLabel {
-  margin: 0 0 15px;
-  font-family: "Century Gothic", sans-serif;
-  font-size: 11px;
-  font-weight: bold;
-  letter-spacing: 2px;
-  color: #93a7ba;
-}
-
-.lockedBox h3 {
-  margin: 0 0 15px;
-  font-family: "Century Gothic", sans-serif;
-  font-size: 24px;
-  color: #00494f;
-}
-
-.lockedBox > p:not(.lockedLabel) {
-  max-width: 520px;
-  margin: 0 auto 25px;
-  font-size: 13px;
-  line-height: 1.7;
-  color: #776e64;
-}
-
-/* ==================== CLAIMED ==================== */
-
-.claimedStatus {
-  max-width: 520px;
-  margin: 0 auto 25px;
-  padding: 16px 18px;
-  display: flex;
-  align-items: flex-start;
-  gap: 14px;
-  text-align: left;
-  background-color: #f5f8f9;
-  border: 1px solid #93a7ba;
-}
-
-.claimedStatus > span {
-  width: 30px;
-  height: 30px;
-  flex-shrink: 0;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  border-radius: 50%;
-  background-color: #00494f;
-  color: white;
-  font-size: 14px;
-  font-weight: bold;
-}
-
-.claimedStatus div {
-  flex: 1;
-}
-
-.claimedStatus strong {
-  display: block;
-  margin-bottom: 5px;
-  font-family: "Century Gothic", sans-serif;
-  font-size: 11px;
-  letter-spacing: 1.2px;
-  color: #00494f;
-}
-
-.claimedStatus p {
-  margin: 0;
-  font-size: 12px;
-  line-height: 1.5;
-  color: #776e64;
-}
-
-/* ==================== BUTTONS ==================== */
-
-.primaryButton {
-  padding: 14px 25px;
-  border: none;
-  background-color: #42738d;
-  color: white;
-  font-family: "Gotham", "Century Gothic", sans-serif;
-  font-size: 11px;
-  font-weight: bold;
-  letter-spacing: 1.5px;
-  cursor: pointer;
-  transition:
-    background-color 0.2s ease,
-    transform 0.2s ease;
-}
-
-.primaryButton:hover:not(:disabled) {
-  background-color: #00494f;
-  transform: translateY(-1px);
-}
-
-.primaryButton:disabled {
-  background-color: #c4bfb6;
-  color: white;
-  cursor: not-allowed;
-  transform: none;
-}
-
-.secondaryButton {
-  min-width: 150px;
-  padding: 11px 14px;
-  border: 1px solid #42738d;
-  background-color: white;
-  color: #42738d;
-  font-family: "Century Gothic", sans-serif;
-  font-size: 10px;
-  font-weight: bold;
-  letter-spacing: 1px;
-  cursor: pointer;
-  transition: all 0.2s ease;
-}
-
-.secondaryButton:hover:not(:disabled) {
-  background-color: #42738d;
-  color: white;
-}
-
-.secondaryButton:disabled {
-  border-color: #c4bfb6;
-  background-color: #f5f3ef;
-  color: #93a7ba;
-  cursor: not-allowed;
-}
-
-/* ==================== QR SCANNER ==================== */
-
-.scanner {
-  max-width: 400px;
-  margin: 30px auto 0;
-}
-
-.qrReader {
-  width: 100%;
-  overflow: hidden;
-  background-color: #3b3b3b;
-}
-
-.qrReader video {
-  width: 100% !important;
-  height: auto !important;
-  display: block;
-}
-
-.error {
-  max-width: 520px;
-  margin: 15px auto 0;
-  color: #776e64;
-  font-size: 12px;
-  line-height: 1.5;
-}
-
-.closeButton {
-  margin-top: 15px;
-  padding: 12px 20px;
-  border: 1px solid #c4bfb6;
-  background-color: white;
-  color: #3b3b3b;
-  font-family: "Century Gothic", sans-serif;
-  font-size: 10px;
-  font-weight: bold;
-  letter-spacing: 1px;
-  cursor: pointer;
-}
-
-.closeButton:hover {
-  border-color: #42738d;
-  color: #42738d;
-}
-
-/* ==================== UNLOCKED BEVERAGE ==================== */
-
-.unlockedBox {
-  padding: 30px;
-  background-color: white;
-  box-shadow: 0 8px 25px rgba(0, 73, 79, 0.07);
-}
-
-.available {
-  margin-bottom: 25px;
-}
-
-.available span {
-  font-family: "Century Gothic", sans-serif;
-  font-size: 11px;
-  font-weight: bold;
-  letter-spacing: 1.5px;
-  color: #42738d;
-}
-
-.available p {
-  margin: 8px 0 0;
-  font-size: 13px;
-  color: #776e64;
-}
-
-/* ==================== BEVERAGE HORIZONTAL ==================== */
-
-.horizontalGrid {
-  display: flex;
-  gap: 25px;
-  overflow-x: auto;
-  overflow-y: hidden;
-  padding-bottom: 12px;
-  scroll-behavior: smooth;
-  scrollbar-width: none;
-  -webkit-overflow-scrolling: touch;
-}
-
-.horizontalGrid::-webkit-scrollbar {
-  display: none;
-}
-
-/* ==================== BEVERAGE CARD ==================== */
-
-.beverageCard {
-  flex: 0 0 330px;
-  padding: 0;
-  border: 2px solid transparent;
-  background-color: white;
-  overflow: hidden;
-  text-align: left;
-  cursor: pointer;
-  box-shadow: 0 8px 25px rgba(0, 73, 79, 0.07);
-  transition:
-    transform 0.2s ease,
-    box-shadow 0.2s ease,
-    border-color 0.2s ease;
-}
-
-.beverageCard:hover {
-  transform: translateY(-4px);
-  box-shadow: 0 12px 30px rgba(0, 73, 79, 0.12);
-}
-
-.beverageCard img {
-  width: 100%;
-  height: 230px;
-  display: block;
-  object-fit: cover;
-}
-
-.beverageCard > div {
-  padding: 20px 22px 22px;
-}
-
-.beverageCard h3 {
-  margin: 0;
-  font-family: "Century Gothic", sans-serif;
-  font-size: 19px;
-  line-height: 1.4;
-  color: #00494f;
-}
-
-.selected {
-  border-color: #42738d;
-  box-shadow: 0 10px 30px rgba(66, 115, 141, 0.18);
-}
-
-.selectedText {
-  display: block;
-  margin-top: 8px;
-  font-family: "Century Gothic", sans-serif;
-  font-size: 10px;
-  font-weight: bold;
-  letter-spacing: 1.5px;
-  color: #42738d;
-}
-
-.unlockedBox > .primaryButton {
-  margin-top: 25px;
-}
-
-/* ==================== ADD-ONS ==================== */
-
-.addonCategory {
-  margin-top: 40px;
-}
-
-.addonCategoryHeader {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  margin-bottom: 18px;
-  padding-bottom: 12px;
-  border-bottom: 1px solid #c4bfb6;
-}
-
-.addonCategoryHeader h3 {
-  margin: 0;
-  font-family: "Century Gothic", sans-serif;
-  font-size: 20px;
-  color: #00494f;
-}
-
-.addonCategoryHeader span {
-  font-size: 12px;
-  color: #776e64;
-}
-
-.addonList {
-  max-height: 500px;
-  overflow-y: auto;
-  overflow-x: hidden;
-  display: flex;
-  flex-direction: column;
-  background-color: white;
-  box-shadow: 0 8px 25px rgba(0, 73, 79, 0.07);
-  scrollbar-width: thin;
-  scrollbar-color: #93a7ba #f5f3ef;
-}
-
-.addonList::-webkit-scrollbar {
-  width: 6px;
-}
-
-.addonList::-webkit-scrollbar-track {
-  background-color: #f5f3ef;
+/* VISITED / ACTIVE */
+.menu a:visited,
+.navLinks a:visited {
+  background: transparent !important;
+  background-color: transparent !important;
 }
 
-.addonList::-webkit-scrollbar-thumb {
-  background-color: #93a7ba;
+/* FOCUS */
+.menu a:focus,
+.menu button:focus,
+.navLinks a:focus,
+.navLinks button:focus {
+  color: #ffffff !important;
+  background: transparent !important;
+  background-color: transparent !important;
+  outline: none !important;
+  box-shadow: none !important;
 }
 
-.addonList::-webkit-scrollbar-thumb:hover {
-  background-color: #42738d;
+/* ACTIVE */
+.menu a:active,
+.menu button:active,
+.navLinks a:active,
+.navLinks button:active {
+  color: #ffffff !important;
+  background: transparent !important;
+  background-color: transparent !important;
 }
 
-.addonItem {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  gap: 40px;
-  padding: 25px 30px;
-  border-bottom: 1px solid #eeeae5;
-  flex-shrink: 0;
-}
-
-.addonItem:last-child {
-  border-bottom: none;
-}
-
-.addonInfo {
-  flex: 1;
-  min-width: 0;
-}
-
-.addonInfo h3 {
-  margin: 0;
-  font-family: "Century Gothic", sans-serif;
-  font-size: 17px;
-  line-height: 1.4;
-  color: #00494f;
-}
-
-.addonInfo p {
-  max-width: 700px;
-  margin: 8px 0 0;
-  font-size: 12px;
-  line-height: 1.6;
-  color: #776e64;
-}
-
-.addonOrder {
-  min-width: 180px;
-  display: flex;
-  flex-direction: column;
-  align-items: flex-end;
-  gap: 14px;
-}
-
-.addonPrices {
-  display: flex;
-  flex-direction: column;
-  align-items: flex-end;
-}
-
-.originalPrice {
-  font-family: "Century Gothic", sans-serif;
-  font-size: 12px;
-  color: #93a7ba;
-  text-decoration: line-through;
-}
-
-.addonPrices strong {
-  margin-top: 3px;
-  font-family: "Century Gothic", sans-serif;
-  font-size: 17px;
-  color: #00494f;
-}
-
-.memberPriceLabel {
-  margin-top: 4px;
-  font-size: 10px;
-  color: #42738d;
-}
-
-/* ==================== QUANTITY ==================== */
-
-.quantity {
-  min-width: 150px;
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  border: 1px solid #c4bfb6;
-  background-color: white;
-}
-
-.quantity button {
-  width: 40px;
-  height: 36px;
-  border: none;
-  background-color: white;
-  color: #42738d;
-  font-size: 18px;
-  cursor: pointer;
-}
-
-.quantity button:hover {
-  background-color: #f5f3ef;
-}
-
-.quantity span {
-  font-family: "Century Gothic", sans-serif;
-  font-size: 13px;
-  font-weight: bold;
-  color: #00494f;
-}
-
-/* ==================== ORDER SUMMARY ==================== */
-
-.orderSection {
-  margin-bottom: 90px;
-}
-
-.orderCard {
-  max-width: 700px;
-  margin-left: auto;
-  padding: 35px 40px;
-  background-color: white;
-  box-shadow: 0 8px 25px rgba(0, 73, 79, 0.07);
-}
-
-.orderCard h2 {
-  margin: 0 0 25px;
-  font-family: "Century Gothic", sans-serif;
-  font-size: 30px;
-  color: #00494f;
-}
-
-.items {
-  border-top: 1px solid #e5e1db;
-}
-
-.item {
-  padding: 17px 0;
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  gap: 20px;
-  border-bottom: 1px solid #e5e1db;
-  font-size: 13px;
-  color: #3b3b3b;
-}
-
-.item > div {
-  display: flex;
-  flex-direction: column;
-  gap: 5px;
-}
-
-.item small {
-  color: #93a7ba;
-  font-size: 11px;
-}
-
-.priceLine {
-  padding-top: 15px;
-  display: flex;
-  justify-content: space-between;
-  font-size: 12px;
-  color: #776e64;
-}
-
-.total {
-  margin-top: 20px;
-  padding-top: 20px;
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  border-top: 1px solid #c4bfb6;
-  font-family: "Century Gothic", sans-serif;
-  color: #00494f;
-}
-
-.total strong {
-  font-size: 20px;
-}
-
-/* ==================== ORDER HISTORY ==================== */
-
-.history {
-  background-color: white;
-  box-shadow: 0 8px 25px rgba(0, 73, 79, 0.07);
-}
-
-.historyRow {
-  padding: 23px 30px;
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  gap: 30px;
-  border-bottom: 1px solid #e5e1db;
-}
-
-.historyRow:last-child {
-  border-bottom: none;
-}
-
-.historyRow > div {
-  display: flex;
-  flex-direction: column;
-  gap: 6px;
-}
-
-.historyRow > div:last-child {
-  align-items: flex-end;
-}
-
-.historyRow strong {
-  font-family: "Century Gothic", sans-serif;
-  font-size: 13px;
-  line-height: 1.5;
-  color: #00494f;
-}
-
-.historyRow span {
-  font-size: 11px;
-  color: #776e64;
-}
-
-.historyRow small {
-  font-size: 10px;
-  letter-spacing: 0.5px;
-  color: #93a7ba;
-}
-
-.delivered {
-  color: #42738d !important;
-  letter-spacing: 1px;
-}
-
-/* ==================== OVERLAY ==================== */
-
-.overlay {
-  position: fixed;
-  inset: 0;
-  z-index: 1000;
-  padding: 30px 20px;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  background-color: rgba(0, 73, 79, 0.55);
-  overflow-y: auto;
-}
-
-/* ==================== CONFIRMATION ==================== */
-
-.confirmation {
-  position: relative;
-  width: 100%;
-  max-width: 550px;
-  padding: 45px;
-  background-color: white;
-  box-shadow: 0 15px 50px rgba(0, 73, 79, 0.2);
-}
-
-.confirmationClose {
-  position: absolute;
-  top: 15px;
-  right: 18px;
-  border: none;
-  background: transparent;
-  color: #776e64;
-  font-size: 25px;
-  line-height: 1;
-  cursor: pointer;
-}
-
-.confirmationClose:hover {
-  color: #00494f;
-}
-
-.check {
-  width: 45px;
-  height: 45px;
-  margin-bottom: 20px;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  border-radius: 50%;
-  background-color: #e7eeee;
-  color: #42738d;
-  font-size: 20px;
-}
-
-.confirmationEyebrow {
-  margin: 0 0 12px;
-  font-family: "Century Gothic", sans-serif;
-  font-size: 11px;
-  font-weight: bold;
-  letter-spacing: 2px;
-  color: #42738d;
-}
-
-.confirmation h2 {
-  margin: 0 0 18px;
-  font-family: "Century Gothic", sans-serif;
-  font-size: 30px;
-  line-height: 1.2;
-  color: #00494f;
-}
-
-.confirmationText {
-  margin: 0 0 12px;
-  font-size: 13px;
-  line-height: 1.7;
-  color: #776e64;
-}
-
-.orderInfo {
-  margin-top: 25px;
-  padding: 20px;
-  display: grid;
-  grid-template-columns: repeat(3, 1fr);
-  gap: 15px;
-  background-color: #f5f3ef;
-}
-
-.orderInfo div {
-  display: flex;
-  flex-direction: column;
-  gap: 7px;
-}
-
-.orderInfo span,
-.confirmationDetails h3,
-.currentMembership span,
-.extensionSummary span,
-.extensionPlan span {
-  font-family: "Century Gothic", sans-serif;
-  font-size: 9px;
-  font-weight: bold;
-  letter-spacing: 1.3px;
-  color: #93a7ba;
-}
-
-.orderInfo strong {
-  font-family: "Century Gothic", sans-serif;
-  font-size: 11px;
-  color: #00494f;
-}
-
-.confirmationDetails {
-  margin-top: 25px;
-}
-
-.confirmationDetails h3 {
-  margin: 0 0 12px;
-}
-
-.confirmationItem {
-  padding: 13px 0;
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  gap: 20px;
-  border-top: 1px solid #e5e1db;
-  font-size: 12px;
-  color: #3b3b3b;
-}
-
-.confirmationItem > div {
-  display: flex;
-  flex-direction: column;
-  gap: 4px;
-}
-
-.confirmationItem small {
-  color: #93a7ba;
-  font-size: 10px;
-}
-
-.confirmationTotal {
-  padding-top: 15px;
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  border-top: 1px solid #c4bfb6;
-  font-family: "Century Gothic", sans-serif;
-  color: #00494f;
-}
-
-.confirmationTotal strong {
-  font-size: 18px;
-}
-
-.confirmation > .primaryButton {
-  width: 100%;
-  margin-top: 25px;
-}
-
-/* ==================== EXTEND MEMBERSHIP ==================== */
-
-.extendCard {
-  position: relative;
-  width: 100%;
-  max-width: 550px;
-  padding: 45px;
-  background-color: white;
-  box-shadow: 0 15px 50px rgba(0, 73, 79, 0.2);
-}
-
-.extendCard h2 {
-  margin: 0 0 15px;
-  font-family: "Century Gothic", sans-serif;
-  font-size: 30px;
-  line-height: 1.2;
-  color: #00494f;
-}
-
-.currentMembership {
-  margin-top: 25px;
-  padding: 20px;
-  display: flex;
-  flex-direction: column;
-  gap: 8px;
-  background-color: #f5f3ef;
-}
-
-.currentMembership strong {
-  font-family: "Century Gothic", sans-serif;
-  font-size: 14px;
-  color: #00494f;
-}
-
-/* ==================== EXTENSION PLAN ==================== */
-
-.extensionPlan {
-  margin-top: 20px;
-  padding: 20px;
-  border: 2px solid #42738d;
-  background-color: #f5f8f9;
-}
-
-.extensionPlan strong {
-  display: block;
-  margin-bottom: 8px;
-  font-family: "Century Gothic", sans-serif;
-  font-size: 12px;
-  letter-spacing: 1px;
-  color: #00494f;
-}
-
-.extensionPlan span {
-  font-size: 11px;
-  line-height: 1.5;
-  color: #776e64;
-}
-
-/* ==================== EXTENSION SUMMARY ==================== */
-
-.extensionSummary {
-  margin-top: 20px;
-  display: grid;
-  grid-template-columns: 1fr 1fr;
-  border-top: 1px solid #e5e1db;
-  border-left: 1px solid #e5e1db;
-}
-
-.extensionSummary div {
-  padding: 15px;
-  display: flex;
-  flex-direction: column;
-  gap: 7px;
-  border-right: 1px solid #e5e1db;
-  border-bottom: 1px solid #e5e1db;
-}
-
-.extensionSummary strong {
-  font-family: "Century Gothic", sans-serif;
-  font-size: 12px;
-  color: #00494f;
-}
-
-.extendCard > .primaryButton {
-  width: 100%;
-  margin-top: 25px;
-}
 
-/* ==================== MOBILE ==================== */
+/* MOBILE */
 
 @media (max-width: 768px) {
   .navbar {
-    min-height: 75px;
-    padding: 0 20px;
+    height: 76px;
+    padding: 0 24px;
   }
 
   .logo {
@@ -1031,272 +118,1490 @@
     letter-spacing: 1.5px;
   }
 
-  .navLinks {
-    gap: 12px;
+  .menu {
+    gap: 22px;
   }
 
-  .navLinks a,
-  .navLinks button {
+  .menu a {
     font-size: 10px;
-    letter-spacing: 0.4px;
-  }
-
-  .container {
-    padding: 50px 20px 70px;
-  }
-
-  .welcome {
-    margin-bottom: 45px;
-  }
-
-  .welcome h1 {
-    font-size: 38px;
-  }
-
-  .welcomeText {
-    font-size: 14px;
-  }
-
-  /* MEMBERSHIP */
-
-  .membershipCard {
-    margin-bottom: 65px;
-    padding: 25px;
-    grid-template-columns: 1fr 1fr;
-    gap: 25px 20px;
-  }
-
-  .membershipCard strong {
-    font-size: 13px;
-  }
-
-  .extendButton {
-    grid-column: 1 / -1;
-    width: 100%;
-  }
-
-  /* SECTION */
-
-  .section {
-    margin-bottom: 70px;
-  }
-
-  .sectionHeader {
-    align-items: flex-start;
-    flex-direction: column;
-    gap: 12px;
-  }
-
-  .sectionHeader h2 {
-    font-size: 27px;
-  }
-
-  .badge {
-    font-size: 10px;
-  }
-
-  /* LOCKED */
-
-  .lockedBox {
-    padding: 40px 25px;
-  }
-
-  .lockedBox h3 {
-    font-size: 21px;
-  }
-
-  /* BEVERAGE */
-
-  .unlockedBox {
-    padding: 20px;
-  }
-
-  .horizontalGrid {
-    gap: 15px;
-  }
-
-  .beverageCard {
-    flex: 0 0 280px;
-  }
-
-  .beverageCard img {
-    height: 220px;
-  }
-
-  .beverageCard h3 {
-    font-size: 17px;
-  }
-
-  /* QR */
-
-  .scanner {
-    width: 100%;
-  }
-
-  /* ADD-ONS */
-
-  .addonCategory {
-    margin-top: 35px;
-  }
-
-  .addonCategoryHeader h3 {
-    font-size: 18px;
-  }
-
-  .addonCategoryHeader span {
-    font-size: 10px;
-  }
-
-  .addonList {
-    max-height: 460px;
-  }
-
-  .addonItem {
-    align-items: flex-start;
-    flex-direction: column;
-    gap: 18px;
-    padding: 22px 20px;
-  }
-
-  .addonInfo h3 {
-    font-size: 16px;
-    line-height: 1.4;
-  }
-
-  .addonInfo p {
-    font-size: 11px;
-    line-height: 1.6;
-  }
-
-  .addonOrder {
-    width: 100%;
-    min-width: 0;
-    align-items: stretch;
-  }
-
-  .addonPrices {
-    align-items: flex-start;
-  }
-
-  .secondaryButton {
-    width: 100%;
-  }
-
-  .quantity {
-    width: 100%;
-  }
-
-  /* ORDER SUMMARY */
-
-  .orderCard {
-    padding: 30px 25px;
-  }
-
-  .orderCard h2 {
-    font-size: 27px;
-  }
-
-  .item {
-    align-items: flex-start;
-  }
-
-  /* HISTORY */
-
-  .historyRow {
-    padding: 20px;
-    align-items: flex-start;
-    flex-direction: column;
-    gap: 15px;
-  }
-
-  .historyRow > div:last-child {
-    align-items: flex-start;
-  }
-
-  /* MODAL */
-
-  .overlay {
-    padding: 20px 15px;
-  }
-
-  .confirmation,
-  .extendCard {
-    padding: 35px 25px;
-  }
-
-  .confirmation h2,
-  .extendCard h2 {
-    font-size: 27px;
-  }
-
-  .orderInfo {
-    grid-template-columns: 1fr;
-  }
-
-  .extensionSummary {
-    grid-template-columns: 1fr;
-  }
-
-  .extensionPlan {
-    padding: 18px;
+    letter-spacing: 0.7px;
   }
 }
 
 @media (max-width: 480px) {
   .navbar {
-    min-height: 70px;
-    padding: 0 15px;
+    height: 70px;
+    padding: 0 18px;
   }
 
   .logo {
     font-size: 21px;
+    letter-spacing: 1px;
   }
 
-  .navLinks {
-    gap: 8px;
+  .menu {
+    gap: 16px;
   }
 
-  .navLinks a,
-  .navLinks button {
+  .menu a {
     font-size: 9px;
+    letter-spacing: 0.5px;
   }
+}
 
-  .container {
-    padding: 40px 15px 60px;
-  }
+  
+/* CONTAINER */
 
-  .welcome h1 {
-    font-size: 32px;
-  }
+.container {
+width: min(1120px, calc(100% - 48px));
+margin: 0 auto;
+padding: 55px 0 90px;
+box-sizing: border-box;
+}
 
-  .membershipCard {
-    grid-template-columns: 1fr;
-    gap: 20px;
-  }
+/* WELCOME */
 
-  .extendButton {
-    grid-column: auto;
-  }
+.welcome {
+margin-bottom: 42px;
+text-align: center;
+}
 
-  .beverageCard {
-    flex-basis: 260px;
-  }
+.eyebrow {
+margin: 0 0 9px;
 
-  .beverageCard img {
-    height: 205px;
-  }
+color: #42738d;
 
-  .orderCard {
-    padding: 25px 20px;
-  }
+font-size: 10px;
+font-weight: 600;
+letter-spacing: 2px;
+line-height: 1.4;
 
-  .confirmation,
-  .extendCard {
-    padding: 30px 20px;
-  }
+text-transform: uppercase;
+}
 
-  .confirmation h2,
-  .extendCard h2 {
-    font-size: 24px;
-  }
+.welcome h1 {
+margin: 0;
+
+color: #00494f;
+
+font-family: "Century Gothic", sans-serif;
+font-size: 32px;
+font-weight: 600;
+line-height: 1.3;
+}
+
+.welcome > p:last-child {
+margin: 10px auto 0;
+
+color: #776e64;
+
+font-size: 13px;
+line-height: 1.6;
+}
+
+/* SECTION */
+
+.section {
+margin-top: 55px;
+}
+
+.sectionHeader {
+margin-bottom: 24px;
+
+display: flex;
+align-items: flex-end;
+justify-content: space-between;
+
+gap: 20px;
+}
+
+.sectionHeader > div {
+text-align: left;
+}
+
+.sectionHeader h2 {
+margin: 0;
+
+color: #00494f;
+
+font-family: "Century Gothic", sans-serif;
+font-size: 24px;
+font-weight: 600;
+line-height: 1.3;
+}
+
+.badgeAvailable,
+.badgeClosed {
+flex-shrink: 0;
+
+padding: 8px 13px;
+
+border-radius: 20px;
+
+font-size: 9px;
+font-weight: 600;
+letter-spacing: 0.5px;
+
+white-space: nowrap;
+}
+
+.badgeAvailable {
+background: #42738d;
+color: #ffffff;
+}
+
+.badgeClosed {
+background: #c4bfb6;
+color: #3b3b3b;
+}
+
+/* MEMBERSHIP */
+
+.membershipCard {
+min-height: 210px;
+
+padding: 32px 35px;
+
+display: grid;
+grid-template-columns: 1fr 1fr;
+gap: 45px;
+align-items: center;
+
+background: #00494f;
+
+border-radius: 18px;
+
+box-sizing: border-box;
+}
+
+.membershipCard > div {
+text-align: left;
+}
+
+.membershipCard h2 {
+margin: 0 0 12px;
+
+color: #ffffff;
+
+font-family: "Century Gothic", sans-serif;
+font-size: 27px;
+font-weight: 600;
+}
+
+.membershipCard h3 {
+margin: 0 0 10px;
+
+color: #ffffff;
+
+font-family: "Century Gothic", sans-serif;
+font-size: 20px;
+font-weight: 600;
+}
+
+.membershipCard p {
+margin: 6px 0;
+
+color: #c4bfb6;
+
+font-size: 11px;
+line-height: 1.5;
+}
+
+.membershipCard strong {
+color: #ffffff;
+font-weight: 600;
+}
+
+.membershipCard .eyebrow {
+color: #93a7ba;
+}
+
+.extendButton {
+min-height: 38px;
+
+margin-top: 12px;
+padding: 0 16px;
+
+border: 1px solid #93a7ba;
+border-radius: 8px;
+
+background: transparent;
+
+color: #ffffff;
+
+font-family: inherit;
+font-size: 9px;
+font-weight: 600;
+
+cursor: pointer;
+}
+
+.extendButton:hover {
+background: #42738d;
+border-color: #42738d;
+}
+
+/* LOCKED */
+
+.lockedBox {
+padding: 35px 25px;
+
+background: #ffffff;
+
+border: 1px solid #c4bfb6;
+border-radius: 16px;
+
+text-align: center;
+
+box-sizing: border-box;
+}
+
+.lockedBox h3 {
+margin: 7px 0 0;
+
+color: #00494f;
+
+font-family: "Century Gothic", sans-serif;
+font-size: 19px;
+font-weight: 600;
+line-height: 1.4;
+}
+
+.lockedBox > p:last-child {
+max-width: 560px;
+
+margin: 10px auto 0;
+
+color: #776e64;
+
+font-size: 12px;
+line-height: 1.7;
+}
+
+.lockedLabel {
+margin: 0;
+
+color: #42738d;
+
+font-size: 9px;
+font-weight: 600;
+letter-spacing: 1.5px;
+
+text-transform: uppercase;
+}
+
+/* COMPLIMENTARY BEVERAGE */
+
+.unlockedBox {
+padding: 28px;
+
+background: #ffffff;
+
+border: 1px solid #c4bfb6;
+border-radius: 16px;
+
+box-sizing: border-box;
+}
+
+.available {
+margin-bottom: 25px;
+text-align: center;
+}
+
+.available p:last-child {
+margin: 7px auto 0;
+
+color: #776e64;
+
+font-size: 12px;
+line-height: 1.6;
+}
+
+.horizontalGrid {
+width: 100%;
+
+display: flex;
+gap: 15px;
+
+overflow-x: auto;
+
+padding: 4px 3px 15px;
+
+scroll-snap-type: x proximity;
+scrollbar-width: thin;
+
+box-sizing: border-box;
+}
+
+.horizontalGrid::-webkit-scrollbar {
+height: 5px;
+}
+
+.horizontalGrid::-webkit-scrollbar-thumb {
+background: #93a7ba;
+border-radius: 10px;
+}
+
+.beverageCard {
+position: relative;
+
+width: 165px;
+min-width: 165px;
+
+padding: 0 0 16px;
+
+display: flex;
+flex-direction: column;
+align-items: center;
+
+background: #ffffff;
+
+border: 1px solid #c4bfb6;
+border-radius: 13px;
+
+overflow: hidden;
+
+color: #3b3b3b;
+
+font-family: inherit;
+text-align: center;
+
+cursor: pointer;
+
+scroll-snap-align: start;
+
+transition:
+border-color 0.2s ease,
+transform 0.2s ease;
+}
+
+.beverageCard:hover {
+border-color: #42738d;
+transform: translateY(-2px);
+}
+
+.beverageCard.selected {
+border: 2px solid #00494f;
+}
+
+.beverageCard img {
+width: 100%;
+height: 145px;
+
+display: block;
+
+object-fit: cover;
+}
+
+.beverageCard > div {
+width: 100%;
+
+padding: 0 10px;
+
+display: flex;
+flex-direction: column;
+align-items: center;
+
+box-sizing: border-box;
+}
+
+.beverageCard h3 {
+width: 100%;
+
+margin: 13px 0 7px;
+
+color: #00494f;
+
+font-size: 12px;
+font-weight: 600;
+line-height: 1.4;
+
+text-align: center;
+}
+
+.selectedText {
+display: inline-flex;
+align-items: center;
+justify-content: center;
+
+min-height: 19px;
+
+padding: 0 8px;
+
+border-radius: 10px;
+
+background: #00494f;
+color: #ffffff;
+
+font-size: 7px;
+font-weight: 600;
+letter-spacing: 0.7px;
+}
+
+/* SCANNER */
+
+.scanner {
+margin-top: 25px;
+padding: 23px;
+
+background: #f5f3ef;
+
+border-radius: 12px;
+
+text-align: center;
+}
+
+.scanner > p {
+max-width: 500px;
+
+margin: 0 auto 15px;
+
+color: #776e64;
+
+font-size: 11px;
+line-height: 1.6;
+}
+
+.primaryButton {
+min-width: 155px;
+min-height: 40px;
+
+padding: 0 20px;
+
+display: inline-flex;
+align-items: center;
+justify-content: center;
+
+border: 0;
+border-radius: 8px;
+
+background: #00494f;
+color: #ffffff;
+
+font-family: inherit;
+font-size: 10px;
+font-weight: 600;
+letter-spacing: 0.5px;
+
+cursor: pointer;
+}
+
+.primaryButton:hover {
+background: #42738d;
+}
+
+.primaryButton:disabled {
+opacity: 0.45;
+cursor: not-allowed;
+}
+
+.error {
+margin: 13px auto 0;
+
+color: #776e64;
+
+font-size: 10px;
+line-height: 1.5;
+}
+
+/* CLAIMED */
+
+.claimedStatus {
+padding: 38px 25px;
+
+background: #ffffff;
+
+border: 1px solid #c4bfb6;
+border-radius: 16px;
+
+text-align: center;
+}
+
+.claimedStatus h3 {
+margin: 8px 0;
+
+color: #00494f;
+
+font-family: "Century Gothic", sans-serif;
+font-size: 20px;
+font-weight: 600;
+}
+
+.claimedStatus p {
+max-width: 550px;
+
+margin: 8px auto;
+
+color: #776e64;
+
+font-size: 12px;
+line-height: 1.6;
+}
+
+.claimedStatus strong {
+color: #00494f;
+}
+
+/* ADD-ON CATEGORY */
+
+.addonCategory {
+margin-bottom: 32px;
+}
+
+.addonCategoryHeader {
+margin-bottom: 14px;
+padding: 0 3px;
+}
+
+.addonCategoryHeader h3 {
+margin: 5px 0 0;
+
+color: #00494f;
+
+font-family: "Century Gothic", sans-serif;
+font-size: 18px;
+font-weight: 600;
+}
+
+/* MENU LIST */
+
+.addonList {
+display: flex;
+flex-direction: column;
+gap: 10px;
+}
+
+.addonItem {
+width: 100%;
+min-height: 92px;
+
+padding: 18px 20px;
+
+display: grid;
+grid-template-columns: 1fr auto;
+
+align-items: center;
+
+gap: 30px;
+
+background: #ffffff;
+
+border: 1px solid #c4bfb6;
+border-radius: 12px;
+
+box-sizing: border-box;
+}
+
+/* MENU INFO */
+
+.addonInfo {
+min-width: 0;
+text-align: left;
+}
+
+.addonInfo h4 {
+margin: 0;
+
+color: #00494f;
+
+font-size: 14px;
+font-weight: 600;
+line-height: 1.4;
+}
+
+.addonPrices {
+margin-top: 6px;
+
+display: flex;
+align-items: center;
+
+gap: 8px;
+}
+
+.addonPrices > span:last-child {
+color: #00494f;
+
+font-size: 13px;
+font-weight: 600;
+}
+
+.originalPrice {
+color: #93a7ba !important;
+
+font-size: 10px !important;
+font-weight: 400 !important;
+
+text-decoration: line-through;
+}
+
+.memberPriceLabel {
+display: block;
+
+margin-top: 3px;
+
+color: #42738d;
+
+font-size: 8px;
+font-weight: 600;
+letter-spacing: 0.3px;
+}
+
+/* QUANTITY */
+
+.addonOrder {
+width: 105px;
+height: 38px;
+
+display: grid;
+grid-template-columns: 32px 41px 32px;
+
+align-items: center;
+justify-items: center;
+
+border: 1px solid #c4bfb6;
+border-radius: 8px;
+
+background: #f5f3ef;
+
+overflow: hidden;
+
+box-sizing: border-box;
+}
+
+.addonOrder .secondaryButton {
+width: 32px;
+height: 38px;
+
+min-width: 0;
+min-height: 38px;
+
+margin: 0;
+padding: 0;
+
+display: flex;
+align-items: center;
+justify-content: center;
+
+border: 0;
+border-radius: 0;
+
+background: transparent;
+
+color: #00494f;
+
+font-family: inherit;
+font-size: 17px;
+font-weight: 400;
+line-height: 1;
+
+cursor: pointer;
+}
+
+.addonOrder .secondaryButton:hover {
+background: #93a7ba;
+color: #ffffff;
+}
+
+.addonOrder .secondaryButton:disabled {
+opacity: 0.3;
+cursor: not-allowed;
+}
+
+.quantity {
+width: 41px;
+height: 38px;
+
+display: flex;
+align-items: center;
+justify-content: center;
+
+color: #3b3b3b;
+
+font-size: 11px;
+font-weight: 600;
+
+text-align: center;
+line-height: 1;
+}
+
+/* ORDER */
+
+.orderSection {
+margin-top: 25px;
+}
+
+.orderCard {
+max-width: 620px;
+
+margin: 0 auto;
+padding: 25px;
+
+background: #ffffff;
+
+border: 1px solid #c4bfb6;
+border-radius: 15px;
+
+box-sizing: border-box;
+}
+
+.items {
+display: flex;
+flex-direction: column;
+}
+
+.item {
+padding: 13px 0;
+
+display: flex;
+align-items: center;
+justify-content: space-between;
+
+gap: 20px;
+
+border-bottom: 1px solid #c4bfb6;
+}
+
+.item > div {
+display: flex;
+flex-direction: column;
+
+gap: 4px;
+
+text-align: left;
+}
+
+.item strong {
+color: #00494f;
+
+font-size: 11px;
+font-weight: 600;
+}
+
+.item span {
+color: #776e64;
+
+font-size: 10px;
+}
+
+.item > strong {
+white-space: nowrap;
+text-align: right;
+}
+
+.priceLine {
+padding-top: 10px;
+
+display: flex;
+align-items: center;
+justify-content: space-between;
+
+gap: 20px;
+
+color: #776e64;
+
+font-size: 11px;
+}
+
+.priceLine:first-of-type {
+margin-top: 12px;
+}
+
+.total {
+margin-top: 15px;
+padding-top: 15px;
+
+display: flex;
+align-items: center;
+justify-content: space-between;
+
+border-top: 1px solid #c4bfb6;
+
+color: #00494f;
+
+font-size: 14px;
+font-weight: 600;
+}
+
+.total strong {
+font-size: 16px;
+}
+
+.orderCard > .primaryButton {
+width: 100%;
+margin-top: 20px;
+}
+
+/* HISTORY */
+
+.history {
+display: flex;
+flex-direction: column;
+gap: 10px;
+}
+
+.historyRow {
+padding: 19px 21px;
+
+display: grid;
+grid-template-columns: 1fr auto;
+
+align-items: center;
+
+gap: 25px;
+
+background: #ffffff;
+
+border: 1px solid #c4bfb6;
+border-radius: 12px;
+
+box-sizing: border-box;
+}
+
+.historyRow > div:first-child {
+min-width: 0;
+text-align: left;
+}
+
+.historyRow > div:last-child {
+min-width: 110px;
+text-align: right;
+}
+
+.historyRow h3 {
+margin: 5px 0;
+
+color: #00494f;
+
+font-family: "Century Gothic", sans-serif;
+font-size: 14px;
+font-weight: 600;
+}
+
+.historyRow p {
+margin: 4px 0;
+
+color: #776e64;
+
+font-size: 10px;
+line-height: 1.5;
+}
+
+.historyRow > div:last-child > strong {
+color: #00494f;
+
+font-size: 13px;
+font-weight: 600;
+}
+
+.delivered {
+color: #42738d !important;
+font-weight: 600;
+}
+
+/* MODAL */
+
+.overlay {
+position: fixed;
+inset: 0;
+
+z-index: 1000;
+
+padding: 20px;
+
+display: flex;
+align-items: center;
+justify-content: center;
+
+background: rgba(59, 59, 59, 0.55);
+
+box-sizing: border-box;
+}
+
+.confirmation {
+position: relative;
+
+width: 100%;
+max-width: 460px;
+max-height: 90vh;
+
+padding: 32px;
+
+background: #ffffff;
+
+border-radius: 17px;
+
+box-sizing: border-box;
+
+overflow-y: auto;
+
+text-align: center;
+}
+
+.confirmationClose {
+position: absolute;
+
+top: 13px;
+right: 15px;
+
+width: 30px;
+height: 30px;
+
+padding: 0;
+
+display: flex;
+align-items: center;
+justify-content: center;
+
+border: 0;
+background: transparent;
+
+color: #776e64;
+
+font-size: 24px;
+font-weight: 300;
+
+cursor: pointer;
+}
+
+.confirmationClose:hover {
+color: #00494f;
+}
+
+.confirmationEyebrow {
+margin: 0 0 8px;
+
+color: #42738d;
+
+font-size: 9px;
+font-weight: 600;
+letter-spacing: 2px;
+}
+
+.confirmation h2 {
+margin: 0;
+
+color: #00494f;
+
+font-family: "Century Gothic", sans-serif;
+font-size: 23px;
+font-weight: 600;
+}
+
+.confirmationText {
+max-width: 360px;
+
+margin: 10px auto 0;
+
+color: #776e64;
+
+font-size: 11px;
+line-height: 1.6;
+}
+
+.check {
+width: 48px;
+height: 48px;
+
+margin: 0 auto 15px;
+
+display: flex;
+align-items: center;
+justify-content: center;
+
+border-radius: 50%;
+
+background: #00494f;
+color: #ffffff;
+
+font-size: 22px;
+}
+
+.orderInfo {
+margin: 23px auto 0;
+padding: 13px 15px;
+
+display: flex;
+align-items: center;
+justify-content: space-between;
+
+gap: 15px;
+
+background: #f5f3ef;
+
+border-radius: 9px;
+
+text-align: left;
+}
+
+.orderInfo span {
+color: #776e64;
+font-size: 10px;
+}
+
+.orderInfo strong {
+color: #00494f;
+font-size: 10px;
+text-align: right;
+}
+
+.confirmationDetails {
+margin-top: 15px;
+text-align: left;
+}
+
+.confirmationDetails > p {
+margin: 0 0 10px;
+
+color: #00494f;
+
+font-size: 11px;
+font-weight: 600;
+}
+
+.confirmationItem {
+padding: 10px 0;
+
+display: flex;
+align-items: center;
+justify-content: space-between;
+
+gap: 15px;
+
+border-bottom: 1px solid #c4bfb6;
+}
+
+.confirmationItem span {
+color: #3b3b3b;
+font-size: 10px;
+}
+
+.confirmationItem strong {
+color: #00494f;
+font-size: 10px;
+white-space: nowrap;
+}
+
+.confirmationTotal {
+margin-top: 12px;
+padding-top: 12px;
+
+display: flex;
+align-items: center;
+justify-content: space-between;
+
+border-top: 1px solid #c4bfb6;
+
+color: #00494f;
+
+font-size: 12px;
+font-weight: 600;
+}
+
+.confirmation > .primaryButton {
+width: 100%;
+margin-top: 22px;
+}
+
+/* QR */
+
+.qrReader {
+width: 100%;
+max-width: 320px;
+min-height: 280px;
+
+margin: 22px auto 0;
+
+border: 1px solid #c4bfb6;
+border-radius: 12px;
+
+overflow: hidden;
+
+background: #f5f3ef;
+
+box-sizing: border-box;
+}
+
+.qrReader video {
+width: 100% !important;
+height: auto !important;
+}
+
+.qrReader button {
+margin: 8px;
+padding: 8px 12px;
+
+border: 1px solid #00494f;
+border-radius: 7px;
+
+background: #ffffff;
+color: #00494f;
+
+font-family: inherit;
+font-size: 10px;
+}
+
+/* EXTENSION */
+
+.extendCard {
+max-width: 430px;
+}
+
+.currentMembership,
+.extensionPlan {
+margin-top: 17px;
+padding: 17px;
+
+background: #f5f3ef;
+
+border-radius: 10px;
+
+text-align: center;
+}
+
+.currentMembership p,
+.extensionPlan p {
+margin: 0 0 5px;
+
+color: #776e64;
+
+font-size: 9px;
+
+text-transform: uppercase;
+letter-spacing: 1px;
+}
+
+.currentMembership strong,
+.extensionPlan strong {
+display: block;
+
+color: #00494f;
+
+font-family: "Century Gothic", sans-serif;
+font-size: 17px;
+}
+
+.currentMembership span,
+.extensionPlan span {
+display: block;
+
+margin-top: 5px;
+
+color: #776e64;
+
+font-size: 10px;
+line-height: 1.5;
+}
+
+.extendCard > .primaryButton {
+width: 100%;
+margin-top: 20px;
+}
+
+/* LOADING / ERROR */
+
+.container > .lockedBox {
+margin-top: 20px;
+}
+
+.container > .lockedBox .primaryButton {
+margin-top: 18px;
+}
+
+/* TABLET */
+
+@media (max-width: 1000px) {
+.navbar {
+padding: 0 35px;
+}
+
+.navLinks {
+gap: 25px;
+}
+
+.registration {
+gap: 50px;
+}
+}
+
+@media (max-width: 800px) {
+.container {
+width: min(100% - 36px, 680px);
+padding-top: 42px;
+}
+
+.membershipCard {
+grid-template-columns: 1fr;
+gap: 25px;
+
+
+text-align: center;
+
+
+}
+
+.membershipCard > div {
+text-align: center;
+}
+
+.membershipCard .eyebrow {
+text-align: center;
+}
+
+.addonItem {
+grid-template-columns: 1fr;
+
+
+gap: 15px;
+
+text-align: center;
+
+
+}
+
+.addonInfo {
+text-align: center;
+}
+
+.addonPrices {
+justify-content: center;
+}
+
+.addonOrder {
+margin: 0 auto;
+}
+
+.historyRow {
+grid-template-columns: 1fr;
+text-align: center;
+}
+
+.historyRow > div:first-child,
+.historyRow > div:last-child {
+text-align: center;
+}
+
+.historyRow > div:last-child {
+min-width: 0;
+}
+}
+
+/* MOBILE */
+
+@media (max-width: 768px) {
+.navbar {
+height: 76px;
+
+
+padding: 0 24px;
+
+gap: 20px;
+
+overflow: hidden;
+
+
+}
+
+.logo {
+font-size: 24px;
+letter-spacing: 1.5px;
+}
+
+.navLinks {
+flex: 1;
+
+
+justify-content: flex-start;
+
+gap: 24px;
+
+overflow-x: auto;
+overflow-y: hidden;
+
+white-space: nowrap;
+
+scrollbar-width: none;
+
+-webkit-overflow-scrolling: touch;
+
+
+}
+
+.navLinks::-webkit-scrollbar {
+display: none;
+}
+
+.navLinks a,
+.navLinks button {
+font-size: 11px;
+letter-spacing: 0.7px;
+}
+
+.container {
+width: calc(100% - 28px);
+
+
+padding: 34px 0 65px;
+
+
+}
+
+.welcome {
+margin-bottom: 30px;
+}
+
+.welcome h1 {
+font-size: 24px;
+}
+
+.welcome > p:last-child {
+font-size: 11px;
+}
+
+.section {
+margin-top: 38px;
+}
+
+.sectionHeader {
+margin-bottom: 18px;
+
+
+align-items: center;
+flex-direction: column;
+
+gap: 11px;
+
+text-align: center;
+
+
+}
+
+.sectionHeader > div {
+text-align: center;
+}
+
+.sectionHeader h2 {
+font-size: 20px;
+}
+
+.membershipCard {
+padding: 25px 18px;
+border-radius: 15px;
+}
+
+.membershipCard h2 {
+font-size: 23px;
+}
+
+.membershipCard h3 {
+font-size: 18px;
+}
+
+.unlockedBox {
+padding: 18px 12px;
+}
+
+.horizontalGrid {
+gap: 12px;
+}
+
+.beverageCard {
+width: 150px;
+min-width: 150px;
+}
+
+.beverageCard img {
+height: 130px;
+}
+
+.beverageCard h3 {
+font-size: 11px;
+}
+
+.addonItem {
+padding: 18px 13px;
+}
+
+.addonInfo h4 {
+font-size: 13px;
+}
+
+.addonPrices > span:last-child {
+font-size: 12px;
+}
+
+.orderCard {
+padding: 19px 15px;
+}
+
+.item {
+gap: 10px;
+}
+
+.item > strong {
+font-size: 10px;
+}
+
+.historyRow {
+padding: 17px 14px;
+}
+
+.overlay {
+padding: 13px;
+}
+
+.confirmation {
+padding: 27px 17px;
+border-radius: 15px;
+}
+}
+
+/* SMALL MOBILE */
+
+@media (max-width: 380px) {
+.navbar {
+padding: 0 13px;
+}
+
+.logo {
+font-size: 20px;
+}
+
+.navLinks {
+gap: 20px;
+}
+
+.navLinks a,
+.navLinks button {
+font-size: 10px;
+}
+
+.container {
+width: calc(100% - 22px);
+}
+
+.welcome h1 {
+font-size: 21px;
+}
+
+.beverageCard {
+width: 140px;
+min-width: 140px;
+}
+
+.beverageCard img {
+height: 120px;
+}
+
+.addonOrder {
+width: 100px;
+grid-template-columns: 30px 40px 30px;
+}
+
+.addonOrder .secondaryButton {
+width: 30px;
+}
+
+.quantity {
+width: 40px;
+}
 }

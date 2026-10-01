@@ -54,70 +54,159 @@ type HistoryOrder = {
 const memberBeverages = [
   {
     id: 1,
-    name: "Lemon Peach Ice Tea",
+    name: "Matcha Colada",
     image: "/images/menu_1.png",
   },
   {
+    id: 2,
+    name: "Butterscotch Creamy Latte",
+    image: "/images/menu_2.png",
+  },
+  {
     id: 3,
-    name: "Mango Matcha Latte",
+    name: "Sun Kiss Coffee",
     image: "/images/menu_3.png",
   },
   {
     id: 4,
-    name: "Strawberry Splash",
+    name: "Mood Monday",
     image: "/images/menu_4.png",
   },
   {
     id: 5,
-    name: "Coffee Boom",
+    name: "Lemon Peach Iced Tea",
     image: "/images/menu_5.png",
   },
   {
     id: 6,
-    name: "Matcha Passion",
+    name: "Coffee Boom",
     image: "/images/menu_6.png",
   },
   {
     id: 7,
-    name: "Sun Kiss Coffee",
+    name: "Mango Matcha Latte",
     image: "/images/menu_7.png",
-  },
-  {
-    id: 8,
-    name: "Butterscotch Creamy Latte",
-    image: "/images/menu_8.png",
   },
 ];
 
 const foodAddons = [
-  { id: 101, name: "French Fries", price: 35000 },
-  { id: 102, name: "Chicken Wings", price: 45000 },
-  { id: 103, name: "Chicken Popcorn", price: 40000 },
-  { id: 104, name: "Onion Rings", price: 35000 },
-  { id: 105, name: "Nachos", price: 40000 },
-  { id: 106, name: "Club Sandwich", price: 55000 },
-  { id: 107, name: "Beef Burger", price: 65000 },
-  { id: 108, name: "Chicken Sandwich", price: 50000 },
-  { id: 109, name: "Caesar Salad", price: 50000 },
-  { id: 110, name: "Chocolate Cake", price: 40000 },
-  { id: 111, name: "Cheese Cake", price: 45000 },
-  { id: 112, name: "Croissant", price: 30000 },
+  {
+    id: 101,
+    name: "Blueberry Cheesecake",
+    price: 58000,
+  },
+  {
+    id: 102,
+    name: "Tofu Salt Chili",
+    price: 48000,
+  },
+  {
+    id: 103,
+    name: "Spring Roll Oakwood",
+    price: 48000,
+  },
+  {
+    id: 104,
+    name: "Mixed Sampler",
+    price: 58000,
+  },
+  {
+    id: 105,
+    name: "Chili Baba Fries with Cheese",
+    price: 58000,
+  },
+  {
+    id: 106,
+    name: "Cheese French Fries",
+    price: 58000,
+  },
+  {
+    id: 107,
+    name: "Crispy Corn Salted Egg",
+    price: 58000,
+  },
+  {
+    id: 108,
+    name: "Chicken Karage",
+    price: 58000,
+  },
+  {
+    id: 109,
+    name: "Fried Cakwe Prawn with Beef Floss",
+    price: 58000,
+  },
+  {
+    id: 110,
+    name: "Tempe Mendoan Sambal Kecap",
+    price: 58000,
+  },
+  {
+    id: 111,
+    name: "Pisang Goreng Gula Aren",
+    price: 58000,
+  },
+  {
+    id: 112,
+    name: "French Toast",
+    price: 58000,
+  },
 ];
 
 const beverageAddons = [
-  { id: 201, name: "Americano", price: 35000 },
-  { id: 202, name: "Cappuccino", price: 40000 },
-  { id: 203, name: "Cafe Latte", price: 40000 },
-  { id: 204, name: "Mocha", price: 45000 },
-  { id: 205, name: "Matcha Latte", price: 45000 },
-  { id: 206, name: "Chocolate", price: 40000 },
-  { id: 207, name: "Iced Tea", price: 25000 },
-  { id: 208, name: "Lemon Tea", price: 30000 },
-  { id: 209, name: "Mineral Water", price: 15000 },
-  { id: 210, name: "Orange Juice", price: 35000 },
+  {
+    id: 201,
+    name: "Matcha Colada",
+    price: 58000,
+  },
+  {
+    id: 202,
+    name: "Butterscotch Creamy Latte",
+    price: 68000,
+  },
+  {
+    id: 203,
+    name: "Sun Kiss Coffee",
+    price: 68000,
+  },
+  {
+    id: 204,
+    name: "Mood Monday",
+    price: 68000,
+  },
+  {
+    id: 205,
+    name: "Lemon Peach Iced Tea",
+    price: 58000,
+  },
+  {
+    id: 206,
+    name: "Coffee Boom",
+    price: 68000,
+  },
+  {
+    id: 207,
+    name: "Mango Matcha Latte",
+    price: 58000,
+  },
+  {
+    id: 208,
+    name: "Matcha Passion",
+    price: 58000,
+  },
+  {
+    id: 209,
+    name: "Strawberry Splash",
+    price: 58000,
+  },
+  {
+    id: 210,
+    name: "Salted Caramel Crème Brule",
+    price: 68000,
+  },
 ];
 
 const CLAIM_QR_VALUE = "DECKSIDE-CLAIM-BEVERAGE";
+
 const DISCOUNT_RATE = 0.21;
 const SERVICE_RATE = 0.1;
 const TAX_RATE = 0.11;
@@ -140,7 +229,7 @@ function formatDate(value: string | null) {
     month: "short",
     year: "numeric",
     timeZone: "Asia/Jakarta",
-  }).format(new Date(`${value}T00:00:00`));
+  }).format(new Date(`${value}T00:00:00+07:00`));
 }
 
 function formatDateTime(value: string) {
@@ -162,6 +251,20 @@ function getJakartaDateKey() {
     month: "2-digit",
     day: "2-digit",
   }).format(new Date());
+}
+
+function getJakartaDayBounds() {
+  const today = getJakartaDateKey();
+
+  const start = new Date(`${today}T00:00:00+07:00`);
+
+  const nextDay = new Date(start);
+  nextDay.setUTCDate(nextDay.getUTCDate() + 1);
+
+  return {
+    start: start.toISOString(),
+    end: nextDay.toISOString(),
+  };
 }
 
 function isBeverageClaimTime() {
@@ -245,6 +348,9 @@ export default function Dashboard() {
 
   const [extendOpen, setExtendOpen] = useState(false);
   const [extendConfirmed, setExtendConfirmed] = useState(false);
+
+  const [claimSubmitting, setClaimSubmitting] = useState(false);
+  const [orderSubmitting, setOrderSubmitting] = useState(false);
 
   const isActiveMember =
     membershipStatus === "ACTIVE" &&
@@ -358,7 +464,6 @@ export default function Dashboard() {
           .from("memberships")
           .update({
             status: "EXPIRED",
-            updated_at: new Date().toISOString(),
           })
           .eq("id", membership.id);
       }
@@ -371,29 +476,53 @@ export default function Dashboard() {
   };
 
   const loadTodayClaim = async (userId: string) => {
-    const today = getJakartaDateKey();
+    const { start, end } = getJakartaDayBounds();
 
-    const { data, error: claimError } = await supabase
-      .from("beverage_claims")
-      .select("id, beverage_name, claim_date")
+    const { data: orders, error: claimError } = await supabase
+      .from("orders")
+      .select("id, order_number, created_at")
       .eq("user_id", userId)
-      .eq("claim_date", today)
+      .eq("order_type", "COMPLIMENTARY_BEVERAGE")
+      .gte("created_at", start)
+      .lt("created_at", end)
+      .order("created_at", {
+        ascending: false,
+      })
       .limit(1);
 
-    if (claimError || !data || data.length === 0) {
+    if (
+      claimError ||
+      !orders ||
+      orders.length === 0
+    ) {
       setClaimedToday(false);
       setClaimedBeverage("");
       return;
     }
 
+    const order = orders[0];
+
+    const { data: items } = await supabase
+      .from("order_items")
+      .select("item_name, quantity, unit_price")
+      .eq("order_id", order.id)
+      .limit(1);
+
     setClaimedToday(true);
-    setClaimedBeverage(String(data[0].beverage_name));
+    setClaimedBeverage(
+      items && items.length > 0
+        ? String(items[0].item_name)
+        : ""
+    );
   };
 
   const loadOrderHistory = async (userId: string) => {
     setLoadingHistory(true);
 
-    const { data: orders, error: ordersError } = await supabase
+    const {
+      data: orders,
+      error: ordersError,
+    } = await supabase
       .from("orders")
       .select(
         "id, order_number, order_type, status, total_amount, created_at"
@@ -403,13 +532,19 @@ export default function Dashboard() {
         ascending: false,
       });
 
-    if (ordersError || !orders || orders.length === 0) {
+    if (
+      ordersError ||
+      !orders ||
+      orders.length === 0
+    ) {
       setOrderHistory([]);
       setLoadingHistory(false);
       return;
     }
 
-    const orderIds = orders.map((order) => order.id);
+    const orderIds = orders.map(
+      (order) => order.id
+    );
 
     const { data: items } = await supabase
       .from("order_items")
@@ -420,25 +555,31 @@ export default function Dashboard() {
 
     const safeItems = items || [];
 
-    const formattedOrders: HistoryOrder[] = orders.map(
-      (order) => ({
+    const formattedOrders: HistoryOrder[] =
+      orders.map((order) => ({
         id: String(order.id),
         order_number: String(order.order_number),
         order_type: String(order.order_type),
         status: String(order.status),
-        total_amount: Number(order.total_amount || 0),
+        total_amount: Number(
+          order.total_amount || 0
+        ),
         created_at: String(order.created_at),
         items: safeItems
           .filter(
-            (item) => item.order_id === order.id
+            (item) =>
+              item.order_id === order.id
           )
           .map((item) => ({
             item_name: String(item.item_name),
-            quantity: Number(item.quantity || 0),
-            unit_price: Number(item.unit_price || 0),
+            quantity: Number(
+              item.quantity || 0
+            ),
+            unit_price: Number(
+              item.unit_price || 0
+            ),
           })),
-      })
-    );
+      }));
 
     setOrderHistory(formattedOrders);
     setLoadingHistory(false);
@@ -500,7 +641,12 @@ export default function Dashboard() {
           .stop()
           .catch(() => undefined);
 
-        scannerRef.current.clear();
+        try {
+          scannerRef.current.clear();
+        } catch {
+          // Nothing to do.
+        }
+
         scannerRef.current = null;
       }
     };
@@ -542,7 +688,10 @@ export default function Dashboard() {
             },
           },
           async (decodedText) => {
-            if (decodedText.trim() !== CLAIM_QR_VALUE) {
+            if (
+              decodedText.trim() !==
+              CLAIM_QR_VALUE
+            ) {
               setScanError(
                 "Invalid QR code. Please scan the Deckside cashier QR code."
               );
@@ -685,124 +834,150 @@ export default function Dashboard() {
       return;
     }
 
+    if (claimSubmitting) {
+      return;
+    }
+
     const beverage = memberBeverages.find(
-      (item) => item.id === selectedBeverage
+      (item) =>
+        item.id === selectedBeverage
     );
 
     if (!beverage) {
       return;
     }
 
+    setClaimSubmitting(true);
     setScanError("");
 
-    const orderNumber = generateOrderNumber();
+    try {
+      const {
+        data: { user },
+      } = await supabase.auth.getUser();
 
-    const {
-      data: orderData,
-      error: orderError,
-    } = await supabase
-      .from("orders")
-      .insert({
-        user_id: currentUserId,
-        order_number: orderNumber,
-        order_type: "COMPLIMENTARY",
-        status: "NEW",
-        subtotal: 0,
-        service_charge: 0,
-        tax: 0,
-        total_amount: 0,
-      })
-      .select("id")
-      .limit(1);
+      if (!user) {
+        router.replace("/sign-in");
+        return;
+      }
 
-    if (
-      orderError ||
-      !orderData ||
-      orderData.length === 0
-    ) {
-      setScanError(
-        orderError?.message ||
-          "Unable to create your order."
-      );
-      return;
-    }
+      const { start, end } =
+        getJakartaDayBounds();
 
-    const createdOrder = orderData[0];
-
-    const { error: itemError } = await supabase
-      .from("order_items")
-      .insert({
-        order_id: createdOrder.id,
-        item_name: beverage.name,
-        quantity: 1,
-        unit_price: 0,
-        item_type: "COMPLIMENTARY",
-      });
-
-    if (itemError) {
-      await supabase
+      const {
+        data: existingClaims,
+        error: existingClaimError,
+      } = await supabase
         .from("orders")
-        .delete()
-        .eq("id", createdOrder.id);
+        .select("id")
+        .eq("user_id", user.id)
+        .eq(
+          "order_type",
+          "COMPLIMENTARY_BEVERAGE"
+        )
+        .gte("created_at", start)
+        .lt("created_at", end)
+        .limit(1);
 
-      setScanError(
-        "Unable to create your order item."
-      );
-      return;
-    }
+      if (existingClaimError) {
+        setScanError(
+          existingClaimError.message ||
+            "Unable to verify today's beverage claim."
+        );
+        return;
+      }
 
-    const today = getJakartaDateKey();
-
-    const { error: claimError } = await supabase
-      .from("beverage_claims")
-      .insert({
-        user_id: currentUserId,
-        order_id: createdOrder.id,
-        beverage_name: beverage.name,
-        claim_date: today,
-      });
-
-    if (claimError) {
-      await supabase
-        .from("order_items")
-        .delete()
-        .eq("order_id", createdOrder.id);
-
-      await supabase
-        .from("orders")
-        .delete()
-        .eq("id", createdOrder.id);
-
-      if (claimError.code === "23505") {
+      if (
+        existingClaims &&
+        existingClaims.length > 0
+      ) {
         setClaimedToday(true);
         setScanError(
           "You have already claimed your complimentary beverage today."
         );
-      } else {
-        setScanError(
-          "Unable to complete your beverage claim."
-        );
+        await loadTodayClaim(user.id);
+        return;
       }
 
-      return;
+      const orderNumber =
+        generateOrderNumber();
+
+      const {
+        data: orderData,
+        error: orderError,
+      } = await supabase
+        .from("orders")
+        .insert({
+          user_id: user.id,
+          order_number: orderNumber,
+          order_type:
+            "COMPLIMENTARY_BEVERAGE",
+          status: "ORDER RECEIVED",
+          total_amount: 0,
+        })
+        .select("id")
+        .single();
+
+      if (
+        orderError ||
+        !orderData
+      ) {
+        setScanError(
+          orderError?.message ||
+            "Unable to create your complimentary beverage order."
+        );
+        return;
+      }
+
+      const {
+        error: itemError,
+      } = await supabase
+        .from("order_items")
+        .insert({
+          order_id: orderData.id,
+          item_name: beverage.name,
+          quantity: 1,
+          unit_price: 0,
+        });
+
+      if (itemError) {
+        await supabase
+          .from("orders")
+          .delete()
+          .eq("id", orderData.id);
+
+        setScanError(
+          itemError.message ||
+            "Unable to save your complimentary beverage."
+        );
+        return;
+      }
+
+      setClaimedToday(true);
+      setClaimedBeverage(beverage.name);
+      setQrScanned(false);
+      setSelectedBeverage(null);
+
+      setConfirmationType("beverage");
+      setOrderId(orderNumber);
+      setConfirmedBeverage(
+        beverage.name
+      );
+      setConfirmedItems([]);
+      setConfirmedTotal(0);
+      setConfirmationOpen(true);
+
+      await Promise.all([
+        loadTodayClaim(user.id),
+        loadOrderHistory(user.id),
+      ]);
+    } finally {
+      setClaimSubmitting(false);
     }
-
-    setClaimedToday(true);
-    setClaimedBeverage(beverage.name);
-    setQrScanned(false);
-    setSelectedBeverage(null);
-
-    setConfirmationType("beverage");
-    setOrderId(orderNumber);
-    setConfirmedBeverage(beverage.name);
-    setConfirmedItems([]);
-    setConfirmedTotal(0);
-    setConfirmationOpen(true);
-
-    await loadOrderHistory(currentUserId);
   };
 
-  const getDiscountedPrice = (price: number) => {
+  const getDiscountedPrice = (
+    price: number
+  ) => {
     return Math.round(
       price * (1 - DISCOUNT_RATE)
     );
@@ -813,13 +988,16 @@ export default function Dashboard() {
 
     [...foodAddons, ...beverageAddons].forEach(
       (item) => {
-        const quantity = cart[item.id] || 0;
+        const quantity =
+          cart[item.id] || 0;
 
         if (quantity > 0) {
           items.push({
             id: item.id,
             name: item.name,
-            price: getDiscountedPrice(item.price),
+            price: getDiscountedPrice(
+              item.price
+            ),
             quantity,
             type:
               item.id >= 200
@@ -854,7 +1032,8 @@ export default function Dashboard() {
 
   const subtotal = cartItems.reduce(
     (total, item) =>
-      total + item.price * item.quantity,
+      total +
+      item.price * item.quantity,
     0
   );
 
@@ -863,11 +1042,14 @@ export default function Dashboard() {
   );
 
   const tax = Math.round(
-    (subtotal + serviceCharge) * TAX_RATE
+    (subtotal + serviceCharge) *
+      TAX_RATE
   );
 
   const cartTotal =
-    subtotal + serviceCharge + tax;
+    subtotal +
+    serviceCharge +
+    tax;
 
   const placeAddonOrder = async () => {
     if (!isActiveMember) {
@@ -884,118 +1066,98 @@ export default function Dashboard() {
       return;
     }
 
+    if (orderSubmitting) {
+      return;
+    }
+
+    setOrderSubmitting(true);
     setError("");
 
-    const orderNumber = generateOrderNumber();
+    try {
+      const {
+        data: { user },
+      } = await supabase.auth.getUser();
 
-    const {
-      data: orderData,
-      error: orderError,
-    } = await supabase
-      .from("orders")
-      .insert({
-        user_id: currentUserId,
-        order_number: orderNumber,
-        order_type: "ADD_ON",
-        status: "NEW",
-        subtotal,
-        service_charge: serviceCharge,
-        tax,
-        total_amount: cartTotal,
-      })
-      .select("id")
-      .limit(1);
+      if (!user) {
+        router.replace("/sign-in");
+        return;
+      }
 
-    if (
-      orderError ||
-      !orderData ||
-      orderData.length === 0
-    ) {
-      setError(
-        orderError?.message ||
-          "Unable to create your order."
-      );
-      return;
-    }
+      const orderNumber =
+        generateOrderNumber();
 
-    const createdOrder = orderData[0];
-
-    const itemsToInsert = cartItems.map(
-      (item) => ({
-        order_id: createdOrder.id,
-        item_name: item.name,
-        quantity: item.quantity,
-        unit_price: item.price,
-        item_type: item.type,
-      })
-    );
-
-    const { error: itemError } = await supabase
-      .from("order_items")
-      .insert(itemsToInsert);
-
-    if (itemError) {
-      await supabase
+      const {
+        data: orderData,
+        error: orderError,
+      } = await supabase
         .from("orders")
-        .delete()
-        .eq("id", createdOrder.id);
+        .insert({
+          user_id: user.id,
+          order_number: orderNumber,
+          order_type: "ADD_ON",
+          status: "ORDER RECEIVED",
+          total_amount: cartTotal,
+        })
+        .select("id")
+        .single();
 
-      setError(
-        "Unable to add the items to your order."
-      );
-      return;
+      if (
+        orderError ||
+        !orderData
+      ) {
+        setError(
+          orderError?.message ||
+            "Unable to create your order."
+        );
+        return;
+      }
+
+      const itemsToInsert =
+        cartItems.map((item) => ({
+          order_id: orderData.id,
+          item_name: item.name,
+          quantity: item.quantity,
+          unit_price: item.price,
+        }));
+
+      const {
+        error: itemError,
+      } = await supabase
+        .from("order_items")
+        .insert(itemsToInsert);
+
+      if (itemError) {
+        await supabase
+          .from("orders")
+          .delete()
+          .eq("id", orderData.id);
+
+        setError(
+          itemError.message ||
+            "Unable to add the items to your order."
+        );
+        return;
+      }
+
+      setConfirmationType("addon");
+      setOrderId(orderNumber);
+      setConfirmedBeverage("");
+      setConfirmedItems(cartItems);
+      setConfirmedTotal(cartTotal);
+      setConfirmationOpen(true);
+
+      setCart({});
+
+      await loadOrderHistory(user.id);
+    } finally {
+      setOrderSubmitting(false);
     }
-
-    setConfirmationType("addon");
-    setOrderId(orderNumber);
-    setConfirmedBeverage("");
-    setConfirmedItems(cartItems);
-    setConfirmedTotal(cartTotal);
-    setConfirmationOpen(true);
-
-    setCart({});
-
-    await loadOrderHistory(currentUserId);
   };
 
   const extendMembership = async () => {
-    if (!currentUserId) {
-      return;
-    }
-
-    if (extendConfirmed) {
-      setExtendOpen(false);
-      return;
-    }
-
-    const requestedEndDate = new Date();
-
-    requestedEndDate.setMonth(
-      requestedEndDate.getMonth() + 1
+    setError(
+      "Membership extension requests are not available yet. Please contact the Deckside team."
     );
-
-    const formattedDate = requestedEndDate
-      .toISOString()
-      .split("T")[0];
-
-    const { error: extensionError } =
-      await supabase
-        .from("membership_extensions")
-        .insert({
-          user_id: currentUserId,
-          requested_end_date: formattedDate,
-          status: "PENDING",
-        });
-
-    if (extensionError) {
-      setError(
-        extensionError.message ||
-          "Unable to submit membership extension."
-      );
-      return;
-    }
-
-    setExtendConfirmed(true);
   };
 
   const handleSignOut = async () => {
@@ -1022,22 +1184,34 @@ export default function Dashboard() {
     return (
       <main className={styles.page}>
         <nav className={styles.navbar}>
-          <a href="/" className={styles.logo}>
+          <a
+            href="/"
+            className={styles.logo}
+          >
             Deckside
           </a>
         </nav>
 
         <div className={styles.container}>
-          <section className={styles.lockedBox}>
-            <p className={styles.lockedLabel}>
+          <section
+            className={styles.lockedBox}
+          >
+            <p
+              className={
+                styles.lockedLabel
+              }
+            >
               DECKSIDE MEMBERSHIP
             </p>
 
-            <h3>Loading Your Dashboard</h3>
+            <h3>
+              Loading Your Dashboard
+            </h3>
 
             <p>
-              Please wait while we load your
-              membership information.
+              Please wait while we load
+              your membership
+              information.
             </p>
           </section>
         </div>
@@ -1045,28 +1219,41 @@ export default function Dashboard() {
     );
   }
 
-  if (error) {
+  if (error && !currentUserId) {
     return (
       <main className={styles.page}>
         <nav className={styles.navbar}>
-          <a href="/" className={styles.logo}>
+          <a
+            href="/"
+            className={styles.logo}
+          >
             Deckside
           </a>
         </nav>
 
         <div className={styles.container}>
-          <section className={styles.lockedBox}>
-            <p className={styles.lockedLabel}>
+          <section
+            className={styles.lockedBox}
+          >
+            <p
+              className={
+                styles.lockedLabel
+              }
+            >
               PROFILE ERROR
             </p>
 
-            <h3>Unable to Load Your Profile</h3>
+            <h3>
+              Unable to Load Your Profile
+            </h3>
 
             <p>{error}</p>
 
             <button
               type="button"
-              className={styles.primaryButton}
+              className={
+                styles.primaryButton
+              }
               onClick={() =>
                 window.location.reload()
               }
@@ -1082,11 +1269,14 @@ export default function Dashboard() {
   return (
     <main className={styles.page}>
       <nav className={styles.navbar}>
-        <a href="/" className={styles.logo}>
+        <a
+          href="/"
+          className={styles.logo}
+        >
           Deckside
         </a>
 
-        <div className={styles.navLinks}>
+        <div className={styles.menu}>
           <a href="/">HOME</a>
 
           <button
@@ -1109,20 +1299,30 @@ export default function Dashboard() {
             {memberTitle
               ? `${memberTitle
                   .charAt(0)
-                  .toUpperCase()}${memberTitle.slice(1)}`
+                  .toUpperCase()}${memberTitle.slice(
+                  1
+                )}`
               : ""}{" "}
             {memberName}
           </h1>
 
           <p>
-            Your cozy corner for your productive
-            space.
+            Your cozy corner for your
+            productive space.
           </p>
         </section>
 
-        <section className={styles.membershipCard}>
+        <section
+          className={
+            styles.membershipCard
+          }
+        >
           <div>
-            <p className={styles.eyebrow}>
+            <p
+              className={
+                styles.eyebrow
+              }
+            >
               MEMBERSHIP
             </p>
 
@@ -1130,21 +1330,30 @@ export default function Dashboard() {
 
             <p>
               Member ID:{" "}
-              <strong>{memberId}</strong>
+              <strong>
+                {memberId}
+              </strong>
             </p>
 
             <p>{memberEmail}</p>
           </div>
 
           <div>
-            <p className={styles.eyebrow}>
+            <p
+              className={
+                styles.eyebrow
+              }
+            >
               STATUS
             </p>
 
-            <h3>{membershipStatus}</h3>
+            <h3>
+              {membershipStatus}
+            </h3>
 
             <p>
-              Payment: {paymentStatus}
+              Payment:{" "}
+              {paymentStatus}
             </p>
 
             {startDate && (
@@ -1161,15 +1370,22 @@ export default function Dashboard() {
               </p>
             )}
 
-            {(membershipStatus === "EXPIRED" ||
-              (membershipStatus === "PENDING" &&
-                paymentStatus === "VERIFIED")) && (
+            {(membershipStatus ===
+              "EXPIRED" ||
+              (membershipStatus ===
+                "PENDING" &&
+                paymentStatus ===
+                  "VERIFIED")) && (
               <button
                 type="button"
-                className={styles.extendButton}
+                className={
+                  styles.extendButton
+                }
                 onClick={() => {
                   setExtendOpen(true);
-                  setExtendConfirmed(false);
+                  setExtendConfirmed(
+                    false
+                  );
                 }}
               >
                 EXTEND MEMBERSHIP
@@ -1179,23 +1395,36 @@ export default function Dashboard() {
         </section>
 
         {!isActiveMember && (
-          <section className={styles.section}>
-            <div className={styles.lockedBox}>
-              <p className={styles.lockedLabel}>
+          <section
+            className={styles.section}
+          >
+            <div
+              className={
+                styles.lockedBox
+              }
+            >
+              <p
+                className={
+                  styles.lockedLabel
+                }
+              >
                 MEMBERSHIP NOT ACTIVE
               </p>
 
               <h3>
                 Your Membership Is{" "}
-                {membershipStatus === "PENDING"
+                {membershipStatus ===
+                "PENDING"
                   ? "Pending Verification"
                   : membershipStatus}
               </h3>
 
               <p>
-                {paymentStatus === "PENDING"
+                {paymentStatus ===
+                "PENDING"
                   ? "Please wait for the Deckside team to verify your payment."
-                  : membershipStatus === "EXPIRED"
+                  : membershipStatus ===
+                      "EXPIRED"
                     ? "Your membership has expired. Please extend your membership to continue using member benefits."
                     : "Your membership will become active after the activation process is completed."}
               </p>
@@ -1203,14 +1432,26 @@ export default function Dashboard() {
           </section>
         )}
 
-        <section className={styles.section}>
-          <div className={styles.sectionHeader}>
+        <section
+          className={styles.section}
+        >
+          <div
+            className={
+              styles.sectionHeader
+            }
+          >
             <div>
-              <p className={styles.eyebrow}>
+              <p
+                className={
+                  styles.eyebrow
+                }
+              >
                 MEMBER BENEFIT
               </p>
 
-              <h2>Complimentary Beverage</h2>
+              <h2>
+                Complimentary Beverage
+              </h2>
             </div>
 
             <span
@@ -1227,122 +1468,198 @@ export default function Dashboard() {
           </div>
 
           {!isActiveMember ? (
-            <div className={styles.lockedBox}>
-              <p className={styles.lockedLabel}>
+            <div
+              className={
+                styles.lockedBox
+              }
+            >
+              <p
+                className={
+                  styles.lockedLabel
+                }
+              >
                 LOCKED
               </p>
 
-              <h3>Activate Your Membership</h3>
+              <h3>
+                Activate Your
+                Membership
+              </h3>
 
               <p>
-                Complimentary beverage benefits
-                are available only for active
-                members.
+                Complimentary
+                beverage benefits
+                are available only
+                for active members.
               </p>
             </div>
           ) : claimedToday ? (
-            <div className={styles.claimedStatus}>
-              <p className={styles.lockedLabel}>
+            <div
+              className={
+                styles.claimedStatus
+              }
+            >
+              <p
+                className={
+                  styles.lockedLabel
+                }
+              >
                 CLAIM COMPLETED
               </p>
 
               <h3>
-                Your Beverage Has Been Claimed
+                Your Beverage Has
+                Been Claimed
               </h3>
 
               <p>
-                Today&apos;s complimentary
+                Today&apos;s
+                complimentary
                 beverage:{" "}
-                <strong>{claimedBeverage}</strong>
+                <strong>
+                  {claimedBeverage}
+                </strong>
               </p>
 
               <p>
-                You can claim one complimentary
-                beverage every day from 15:00 to
-                19:00 WIB.
+                You can claim one
+                complimentary
+                beverage every day
+                from 15:00 to 19:00
+                WIB.
               </p>
             </div>
           ) : !claimWindowOpen ? (
-            <div className={styles.lockedBox}>
-              <p className={styles.lockedLabel}>
+            <div
+              className={
+                styles.lockedBox
+              }
+            >
+              <p
+                className={
+                  styles.lockedLabel
+                }
+              >
                 BENEFIT CLOSED
               </p>
 
               <h3>
-                Come Back Between 15:00 – 19:00
+                Come Back Between
+                15:00 – 19:00
               </h3>
 
               <p>
-                Your complimentary beverage can
-                be claimed every day during the
-                claim window.
+                Your complimentary
+                beverage can be
+                claimed every day
+                during the claim
+                window.
               </p>
             </div>
           ) : (
-            <div className={styles.unlockedBox}>
-              <div className={styles.available}>
-                <p className={styles.lockedLabel}>
+            <div
+              className={
+                styles.unlockedBox
+              }
+            >
+              <div
+                className={
+                  styles.available
+                }
+              >
+                <p
+                  className={
+                    styles.lockedLabel
+                  }
+                >
                   AVAILABLE TODAY
                 </p>
 
                 <p>
-                  Select one beverage, then scan
-                  the Deckside QR code at the
-                  cashier.
+                  Select one beverage,
+                  then scan the Deckside
+                  QR code at the cashier.
                 </p>
               </div>
 
-              <div className={styles.horizontalGrid}>
-                {memberBeverages.map((beverage) => (
-                  <button
-                    key={beverage.id}
-                    type="button"
-                    className={`${styles.beverageCard} ${
-                      selectedBeverage === beverage.id
-                        ? styles.selected
-                        : ""
-                    }`}
-                    onClick={() =>
-                      setSelectedBeverage(beverage.id)
-                    }
-                  >
-                    <img
-                      src={beverage.image}
-                      alt={beverage.name}
-                    />
+              <div
+                className={
+                  styles.horizontalGrid
+                }
+              >
+                {memberBeverages.map(
+                  (beverage) => (
+                    <button
+                      key={beverage.id}
+                      type="button"
+                      className={`${styles.beverageCard} ${
+                        selectedBeverage ===
+                        beverage.id
+                          ? styles.selected
+                          : ""
+                      }`}
+                      onClick={() =>
+                        setSelectedBeverage(
+                          beverage.id
+                        )
+                      }
+                    >
+                      <img
+                        src={
+                          beverage.image
+                        }
+                        alt={
+                          beverage.name
+                        }
+                      />
 
-                    <div>
-                      <h3>{beverage.name}</h3>
+                      <div>
+                        <h3>
+                          {beverage.name}
+                        </h3>
 
-                      {selectedBeverage ===
-                        beverage.id && (
-                        <span
-                          className={
-                            styles.selectedText
-                          }
-                        >
-                          SELECTED
-                        </span>
-                      )}
-                    </div>
-                  </button>
-                ))}
+                        {selectedBeverage ===
+                          beverage.id && (
+                          <span
+                            className={
+                              styles.selectedText
+                            }
+                          >
+                            SELECTED
+                          </span>
+                        )}
+                      </div>
+                    </button>
+                  )
+                )}
               </div>
 
-              {selectedBeverage !== null && (
-                <div className={styles.scanner}>
+              {selectedBeverage !==
+                null && (
+                <div
+                  className={
+                    styles.scanner
+                  }
+                >
                   {!qrScanned ? (
                     <>
                       <p>
-                        Scan the Deckside QR code
-                        at the cashier before
-                        confirming your beverage.
+                        Scan the
+                        Deckside QR code
+                        at the cashier
+                        before
+                        confirming your
+                        beverage.
                       </p>
 
                       <button
                         type="button"
-                        className={styles.primaryButton}
-                        onClick={openScanner}
+                        className={
+                          styles.primaryButton
+                        }
+                        onClick={
+                          openScanner
+                        }
                       >
                         SCAN QR CODE
                       </button>
@@ -1350,23 +1667,38 @@ export default function Dashboard() {
                   ) : (
                     <>
                       <p>
-                        QR code verified. Your
-                        complimentary beverage is
-                        ready to be claimed.
+                        QR code verified.
+                        Your
+                        complimentary
+                        beverage is ready
+                        to be claimed.
                       </p>
 
                       <button
                         type="button"
-                        className={styles.primaryButton}
-                        onClick={confirmBeverage}
+                        className={
+                          styles.primaryButton
+                        }
+                        onClick={
+                          confirmBeverage
+                        }
+                        disabled={
+                          claimSubmitting
+                        }
                       >
-                        CLAIM BEVERAGE
+                        {claimSubmitting
+                          ? "PROCESSING..."
+                          : "CLAIM BEVERAGE"}
                       </button>
                     </>
                   )}
 
                   {scanError && (
-                    <p className={styles.error}>
+                    <p
+                      className={
+                        styles.error
+                      }
+                    >
                       {scanError}
                     </p>
                   )}
@@ -1376,291 +1708,480 @@ export default function Dashboard() {
           )}
         </section>
 
-        <section className={styles.section}>
-          <div className={styles.sectionHeader}>
+        <section
+          className={styles.section}
+        >
+          <div
+            className={
+              styles.sectionHeader
+            }
+          >
             <div>
-              <p className={styles.eyebrow}>
+              <p
+                className={
+                  styles.eyebrow
+                }
+              >
                 MEMBER PRIVILEGE
               </p>
 
-              <h2>Food & Beverage Add-ons</h2>
+              <h2>
+                Food & Beverage
+                Add-ons
+              </h2>
             </div>
 
-            <span className={styles.badgeAvailable}>
+            <span
+              className={
+                styles.badgeAvailable
+              }
+            >
               21% MEMBER DISCOUNT
             </span>
           </div>
 
           {!isActiveMember ? (
-            <div className={styles.lockedBox}>
-              <p className={styles.lockedLabel}>
+            <div
+              className={
+                styles.lockedBox
+              }
+            >
+              <p
+                className={
+                  styles.lockedLabel
+                }
+              >
                 LOCKED
               </p>
 
-              <h3>Member Ordering Is Locked</h3>
+              <h3>
+                Member Ordering Is
+                Locked
+              </h3>
 
               <p>
-                Activate your membership to access
-                member pricing and ordering.
+                Activate your
+                membership to access
+                member pricing and
+                ordering.
               </p>
             </div>
           ) : (
             <>
-              <div className={styles.addonCategory}>
-                <div className={styles.addonCategoryHeader}>
+              <div
+                className={
+                  styles.addonCategory
+                }
+              >
+                <div
+                  className={
+                    styles.addonCategoryHeader
+                  }
+                >
                   <div>
-                    <p className={styles.lockedLabel}>
-                      FOOD
+                    <p
+                      className={
+                        styles.lockedLabel
+                      }
+                    >
+                      APPETIZERS & SNACK
                     </p>
 
-                    <h3>Snacks & Meals</h3>
+                    <h3>
+                      Appetizers & Snack
+                    </h3>
                   </div>
                 </div>
 
-                <div className={styles.addonList}>
-                  {foodAddons.map((item) => {
-                    const quantity = cart[item.id] || 0;
-                    const memberPrice =
-                      getDiscountedPrice(item.price);
+                <div
+                  className={
+                    styles.addonList
+                  }
+                >
+                  {foodAddons.map(
+                    (item) => {
+                      const quantity =
+                        cart[item.id] ||
+                        0;
 
-                    return (
-                      <div
-                        key={item.id}
-                        className={styles.addonItem}
-                      >
-                        <div className={styles.addonInfo}>
-                          <h4>{item.name}</h4>
+                      const memberPrice =
+                        getDiscountedPrice(
+                          item.price
+                        );
 
-                          <div
-                            className={styles.addonPrices}
-                          >
-                            <span
-                              className={
-                                styles.originalPrice
-                              }
-                            >
-                              {formatRupiah(item.price)}
-                            </span>
-
-                            <span>
-                              {formatRupiah(memberPrice)}
-                            </span>
-                          </div>
-
-                          <small
-                            className={
-                              styles.memberPriceLabel
-                            }
-                          >
-                            Member price
-                          </small>
-                        </div>
-
-                        <div className={styles.addonOrder}>
-                          <button
-                            type="button"
-                            className={
-                              styles.secondaryButton
-                            }
-                            onClick={() =>
-                              updateCart(
-                                item.id,
-                                quantity - 1
-                              )
-                            }
-                            disabled={quantity === 0}
-                          >
-                            −
-                          </button>
-
-                          <span className={styles.quantity}>
-                            {quantity}
-                          </span>
-
-                          <button
-                            type="button"
-                            className={
-                              styles.secondaryButton
-                            }
-                            onClick={() =>
-                              updateCart(
-                                item.id,
-                                quantity + 1
-                              )
-                            }
-                          >
-                            +
-                          </button>
-                        </div>
-                      </div>
-                    );
-                  })}
-                </div>
-              </div>
-
-              <div className={styles.addonCategory}>
-                <div className={styles.addonCategoryHeader}>
-                  <div>
-                    <p className={styles.lockedLabel}>
-                      BEVERAGE
-                    </p>
-
-                    <h3>Additional Beverages</h3>
-                  </div>
-                </div>
-
-                <div className={styles.addonList}>
-                  {beverageAddons.map((item) => {
-                    const quantity = cart[item.id] || 0;
-                    const memberPrice =
-                      getDiscountedPrice(item.price);
-
-                    return (
-                      <div
-                        key={item.id}
-                        className={styles.addonItem}
-                      >
-                        <div className={styles.addonInfo}>
-                          <h4>{item.name}</h4>
-
-                          <div
-                            className={styles.addonPrices}
-                          >
-                            <span
-                              className={
-                                styles.originalPrice
-                              }
-                            >
-                              {formatRupiah(item.price)}
-                            </span>
-
-                            <span>
-                              {formatRupiah(memberPrice)}
-                            </span>
-                          </div>
-
-                          <small
-                            className={
-                              styles.memberPriceLabel
-                            }
-                          >
-                            Member price
-                          </small>
-                        </div>
-
-                        <div className={styles.addonOrder}>
-                          <button
-                            type="button"
-                            className={
-                              styles.secondaryButton
-                            }
-                            onClick={() =>
-                              updateCart(
-                                item.id,
-                                quantity - 1
-                              )
-                            }
-                            disabled={quantity === 0}
-                          >
-                            −
-                          </button>
-
-                          <span className={styles.quantity}>
-                            {quantity}
-                          </span>
-
-                          <button
-                            type="button"
-                            className={
-                              styles.secondaryButton
-                            }
-                            onClick={() =>
-                              updateCart(
-                                item.id,
-                                quantity + 1
-                              )
-                            }
-                          >
-                            +
-                          </button>
-                        </div>
-                      </div>
-                    );
-                  })}
-                </div>
-              </div>
-
-              {cartItems.length > 0 && (
-                <div className={styles.orderSection}>
-                  <div className={styles.orderCard}>
-                    <div className={styles.items}>
-                      {cartItems.map((item) => (
+                      return (
                         <div
                           key={item.id}
-                          className={styles.item}
+                          className={
+                            styles.addonItem
+                          }
                         >
-                          <div>
-                            <strong>{item.name}</strong>
+                          <div
+                            className={
+                              styles.addonInfo
+                            }
+                          >
+                            <h4>
+                              {item.name}
+                            </h4>
 
-                            <span>
-                              {item.quantity} ×{" "}
-                              {formatRupiah(item.price)}
-                            </span>
+                            <div
+                              className={
+                                styles.addonPrices
+                              }
+                            >
+                              <span
+                                className={
+                                  styles.originalPrice
+                                }
+                              >
+                                {formatRupiah(
+                                  item.price
+                                )}
+                              </span>
+
+                              <span>
+                                {formatRupiah(
+                                  memberPrice
+                                )}
+                              </span>
+                            </div>
+
+                            <small
+                              className={
+                                styles.memberPriceLabel
+                              }
+                            >
+                              Member price
+                            </small>
                           </div>
 
-                          <strong>
-                            {formatRupiah(
-                              item.price * item.quantity
-                            )}
-                          </strong>
+                          <div
+                            className={
+                              styles.addonOrder
+                            }
+                          >
+                            <button
+                              type="button"
+                              className={
+                                styles.secondaryButton
+                              }
+                              onClick={() =>
+                                updateCart(
+                                  item.id,
+                                  quantity - 1
+                                )
+                              }
+                              disabled={
+                                quantity === 0
+                              }
+                            >
+                              −
+                            </button>
+
+                            <span
+                              className={
+                                styles.quantity
+                              }
+                            >
+                              {quantity}
+                            </span>
+
+                            <button
+                              type="button"
+                              className={
+                                styles.secondaryButton
+                              }
+                              onClick={() =>
+                                updateCart(
+                                  item.id,
+                                  quantity + 1
+                                )
+                              }
+                            >
+                              +
+                            </button>
+                          </div>
                         </div>
-                      ))}
+                      );
+                    }
+                  )}
+                </div>
+              </div>
+
+              <div
+                className={
+                  styles.addonCategory
+                }
+              >
+                <div
+                  className={
+                    styles.addonCategoryHeader
+                  }
+                >
+                  <div>
+                    <p
+                      className={
+                        styles.lockedLabel
+                      }
+                    >
+                      BEVERAGES
+                    </p>
+
+                    <h3>
+                      Beverages
+                    </h3>
+                  </div>
+                </div>
+
+                <div
+                  className={
+                    styles.addonList
+                  }
+                >
+                  {beverageAddons.map(
+                    (item) => {
+                      const quantity =
+                        cart[item.id] ||
+                        0;
+
+                      const memberPrice =
+                        getDiscountedPrice(
+                          item.price
+                        );
+
+                      return (
+                        <div
+                          key={item.id}
+                          className={
+                            styles.addonItem
+                          }
+                        >
+                          <div
+                            className={
+                              styles.addonInfo
+                            }
+                          >
+                            <h4>
+                              {item.name}
+                            </h4>
+
+                            <div
+                              className={
+                                styles.addonPrices
+                              }
+                            >
+                              <span
+                                className={
+                                  styles.originalPrice
+                                }
+                              >
+                                {formatRupiah(
+                                  item.price
+                                )}
+                              </span>
+
+                              <span>
+                                {formatRupiah(
+                                  memberPrice
+                                )}
+                              </span>
+                            </div>
+
+                            <small
+                              className={
+                                styles.memberPriceLabel
+                              }
+                            >
+                              Member price
+                            </small>
+                          </div>
+
+                          <div
+                            className={
+                              styles.addonOrder
+                            }
+                          >
+                            <button
+                              type="button"
+                              className={
+                                styles.secondaryButton
+                              }
+                              onClick={() =>
+                                updateCart(
+                                  item.id,
+                                  quantity - 1
+                                )
+                              }
+                              disabled={
+                                quantity === 0
+                              }
+                            >
+                              −
+                            </button>
+
+                            <span
+                              className={
+                                styles.quantity
+                              }
+                            >
+                              {quantity}
+                            </span>
+
+                            <button
+                              type="button"
+                              className={
+                                styles.secondaryButton
+                              }
+                              onClick={() =>
+                                updateCart(
+                                  item.id,
+                                  quantity + 1
+                                )
+                              }
+                            >
+                              +
+                            </button>
+                          </div>
+                        </div>
+                      );
+                    }
+                  )}
+                </div>
+              </div>
+
+              {cartItems.length >
+                0 && (
+                <div
+                  className={
+                    styles.orderSection
+                  }
+                >
+                  <div
+                    className={
+                      styles.orderCard
+                    }
+                  >
+                    <div
+                      className={
+                        styles.items
+                      }
+                    >
+                      {cartItems.map(
+                        (item) => (
+                          <div
+                            key={item.id}
+                            className={
+                              styles.item
+                            }
+                          >
+                            <div>
+                              <strong>
+                                {item.name}
+                              </strong>
+
+                              <span>
+                                {item.quantity} ×{" "}
+                                {formatRupiah(
+                                  item.price
+                                )}
+                              </span>
+                            </div>
+
+                            <strong>
+                              {formatRupiah(
+                                item.price *
+                                  item.quantity
+                              )}
+                            </strong>
+                          </div>
+                        )
+                      )}
                     </div>
 
-                    <div className={styles.priceLine}>
-                      <span>Subtotal</span>
+                    <div
+                      className={
+                        styles.priceLine
+                      }
+                    >
+                      <span>
+                        Subtotal
+                      </span>
 
                       <span>
-                        {formatRupiah(subtotal)}
+                        {formatRupiah(
+                          subtotal
+                        )}
                       </span>
                     </div>
 
-                    <div className={styles.priceLine}>
+                    <div
+                      className={
+                        styles.priceLine
+                      }
+                    >
                       <span>
                         Service Charge 10%
                       </span>
 
                       <span>
-                        {formatRupiah(serviceCharge)}
+                        {formatRupiah(
+                          serviceCharge
+                        )}
                       </span>
                     </div>
 
-                    <div className={styles.priceLine}>
-                      <span>Tax 11%</span>
+                    <div
+                      className={
+                        styles.priceLine
+                      }
+                    >
+                      <span>
+                        Tax 11%
+                      </span>
 
                       <span>
                         {formatRupiah(tax)}
                       </span>
                     </div>
 
-                    <div className={styles.total}>
+                    <div
+                      className={
+                        styles.total
+                      }
+                    >
                       <span>Total</span>
 
                       <strong>
-                        {formatRupiah(cartTotal)}
+                        {formatRupiah(
+                          cartTotal
+                        )}
                       </strong>
                     </div>
 
                     <button
                       type="button"
-                      className={styles.primaryButton}
-                      onClick={placeAddonOrder}
+                      className={
+                        styles.primaryButton
+                      }
+                      onClick={
+                        placeAddonOrder
+                      }
+                      disabled={
+                        orderSubmitting
+                      }
                     >
-                      PLACE ORDER
+                      {orderSubmitting
+                        ? "PLACING ORDER..."
+                        : "PLACE ORDER"}
                     </button>
 
                     {error && (
-                      <p className={styles.error}>
+                      <p
+                        className={
+                          styles.error
+                        }
+                      >
                         {error}
                       </p>
                     )}
@@ -1671,10 +2192,20 @@ export default function Dashboard() {
           )}
         </section>
 
-        <section className={styles.section}>
-          <div className={styles.sectionHeader}>
+        <section
+          className={styles.section}
+        >
+          <div
+            className={
+              styles.sectionHeader
+            }
+          >
             <div>
-              <p className={styles.eyebrow}>
+              <p
+                className={
+                  styles.eyebrow
+                }
+              >
                 ORDER HISTORY
               </p>
 
@@ -1683,116 +2214,174 @@ export default function Dashboard() {
           </div>
 
           {loadingHistory ? (
-            <div className={styles.lockedBox}>
+            <div
+              className={
+                styles.lockedBox
+              }
+            >
               <p>
-                Loading your order history...
+                Loading your order
+                history...
               </p>
             </div>
-          ) : orderHistory.length === 0 ? (
-            <div className={styles.lockedBox}>
-              <p className={styles.lockedLabel}>
+          ) : orderHistory.length ===
+            0 ? (
+            <div
+              className={
+                styles.lockedBox
+              }
+            >
+              <p
+                className={
+                  styles.lockedLabel
+                }
+              >
                 NO ORDERS
               </p>
 
               <h3>
-                Your order history is empty.
+                Your order history is
+                empty.
               </h3>
 
               <p>
-                Your Deckside orders will appear
-                here once you place an order.
+                Your Deckside orders
+                will appear here once
+                you place an order.
               </p>
             </div>
           ) : (
-            <div className={styles.history}>
-              {orderHistory.map((order) => (
-                <div
-                  key={order.id}
-                  className={styles.historyRow}
-                >
-                  <div>
-                    <p className={styles.lockedLabel}>
-                      {order.order_number}
-                    </p>
-
-                    <h3>
-                      {order.order_type ===
-                      "COMPLIMENTARY"
-                        ? "Complimentary Beverage"
-                        : "Member Add-on Order"}
-                    </h3>
-
-                    <p>
-                      {formatDateTime(
-                        order.created_at
-                      )}
-                    </p>
-
-                    {order.items.length > 0 && (
-                      <p>
-                        {order.items
-                          .map(
-                            (item) =>
-                              `${item.item_name} × ${item.quantity}`
-                          )
-                          .join(", ")}
+            <div
+              className={
+                styles.history
+              }
+            >
+              {orderHistory.map(
+                (order) => (
+                  <div
+                    key={order.id}
+                    className={
+                      styles.historyRow
+                    }
+                  >
+                    <div>
+                      <p
+                        className={
+                          styles.lockedLabel
+                        }
+                      >
+                        {
+                          order.order_number
+                        }
                       </p>
-                    )}
-                  </div>
 
-                  <div>
-                    <strong>
-                      {formatRupiah(
-                        order.total_amount
+                      <h3>
+                        {order.order_type ===
+                        "COMPLIMENTARY_BEVERAGE"
+                          ? "Complimentary Beverage"
+                          : "Member Add-on Order"}
+                      </h3>
+
+                      <p>
+                        {formatDateTime(
+                          order.created_at
+                        )}
+                      </p>
+
+                      {order.items
+                        .length >
+                        0 && (
+                        <p>
+                          {order.items
+                            .map(
+                              (item) =>
+                                `${item.item_name} × ${item.quantity}`
+                            )
+                            .join(", ")}
+                        </p>
                       )}
-                    </strong>
+                    </div>
 
-                    <p
-                      className={
-                        order.status === "DELIVERED"
-                          ? styles.delivered
-                          : ""
-                      }
-                    >
-                      {order.status}
-                    </p>
+                    <div>
+                      <strong>
+                        {formatRupiah(
+                          order.total_amount
+                        )}
+                      </strong>
+
+                      <p
+                        className={
+                          order.status ===
+                          "DELIVERED"
+                            ? styles.delivered
+                            : ""
+                        }
+                      >
+                        {order.status}
+                      </p>
+                    </div>
                   </div>
-                </div>
-              ))}
+                )
+              )}
             </div>
           )}
         </section>
       </div>
 
       {scannerOpen && (
-        <div className={styles.overlay}>
-          <div className={styles.confirmation}>
+        <div
+          className={styles.overlay}
+        >
+          <div
+            className={
+              styles.confirmation
+            }
+          >
             <button
               type="button"
-              className={styles.confirmationClose}
-              onClick={closeScanner}
+              className={
+                styles.confirmationClose
+              }
+              onClick={
+                closeScanner
+              }
             >
               ×
             </button>
 
-            <p className={styles.confirmationEyebrow}>
+            <p
+              className={
+                styles.confirmationEyebrow
+              }
+            >
               DECKSIDE QR
             </p>
 
             <h2>Scan QR Code</h2>
 
-            <p className={styles.confirmationText}>
-              Scan the QR code displayed by the
+            <p
+              className={
+                styles.confirmationText
+              }
+            >
+              Scan the QR code
+              displayed by the
               Deckside cashier.
             </p>
 
             <div
               id="deckside-qr-reader"
-              className={styles.qrReader}
+              className={
+                styles.qrReader
+              }
             />
 
             {scanError && (
-              <p className={styles.error}>
+              <p
+                className={
+                  styles.error
+                }
+              >
                 {scanError}
               </p>
             )}
@@ -1801,73 +2390,138 @@ export default function Dashboard() {
       )}
 
       {confirmationOpen && (
-        <div className={styles.overlay}>
-          <div className={styles.confirmation}>
+        <div
+          className={styles.overlay}
+        >
+          <div
+            className={
+              styles.confirmation
+            }
+          >
             <button
               type="button"
-              className={styles.confirmationClose}
+              className={
+                styles.confirmationClose
+              }
               onClick={() =>
-                setConfirmationOpen(false)
+                setConfirmationOpen(
+                  false
+                )
               }
             >
               ×
             </button>
 
-            <div className={styles.check}>
+            <div
+              className={
+                styles.check
+              }
+            >
               ✓
             </div>
 
-            <p className={styles.confirmationEyebrow}>
+            <p
+              className={
+                styles.confirmationEyebrow
+              }
+            >
               THANK YOU
             </p>
 
-            <h2>Order Confirmed</h2>
+            <h2>
+              Order Confirmed
+            </h2>
 
-            <p className={styles.confirmationText}>
-              Please wait while your order is being
-              prepared and delivered to you.
+            <p
+              className={
+                styles.confirmationText
+              }
+            >
+              Please wait while your
+              order is being prepared
+              and delivered to you.
             </p>
 
-            <div className={styles.orderInfo}>
-              <span>Order Number</span>
+            <div
+              className={
+                styles.orderInfo
+              }
+            >
+              <span>
+                Order Number
+              </span>
 
-              <strong>{orderId}</strong>
+              <strong>
+                {orderId}
+              </strong>
             </div>
 
-            {confirmationType === "beverage" ? (
-              <div className={styles.confirmationDetails}>
-                <p>Complimentary Beverage</p>
+            {confirmationType ===
+            "beverage" ? (
+              <div
+                className={
+                  styles.confirmationDetails
+                }
+              >
+                <p>
+                  Complimentary
+                  Beverage
+                </p>
 
-                <div className={styles.confirmationItem}>
-                  <span>{confirmedBeverage}</span>
+                <div
+                  className={
+                    styles.confirmationItem
+                  }
+                >
+                  <span>
+                    {confirmedBeverage}
+                  </span>
 
-                  <strong>Complimentary</strong>
+                  <strong>
+                    Complimentary
+                  </strong>
                 </div>
               </div>
             ) : (
-              <div className={styles.confirmationDetails}>
-                {confirmedItems.map((item) => (
-                  <div
-                    key={item.id}
-                    className={styles.confirmationItem}
-                  >
-                    <span>
-                      {item.name} × {item.quantity}
-                    </span>
+              <div
+                className={
+                  styles.confirmationDetails
+                }
+              >
+                {confirmedItems.map(
+                  (item) => (
+                    <div
+                      key={item.id}
+                      className={
+                        styles.confirmationItem
+                      }
+                    >
+                      <span>
+                        {item.name} ×{" "}
+                        {item.quantity}
+                      </span>
 
-                    <strong>
-                      {formatRupiah(
-                        item.price * item.quantity
-                      )}
-                    </strong>
-                  </div>
-                ))}
+                      <strong>
+                        {formatRupiah(
+                          item.price *
+                            item.quantity
+                        )}
+                      </strong>
+                    </div>
+                  )
+                )}
 
-                <div className={styles.confirmationTotal}>
+                <div
+                  className={
+                    styles.confirmationTotal
+                  }
+                >
                   <span>Total</span>
 
                   <strong>
-                    {formatRupiah(confirmedTotal)}
+                    {formatRupiah(
+                      confirmedTotal
+                    )}
                   </strong>
                 </div>
               </div>
@@ -1875,9 +2529,13 @@ export default function Dashboard() {
 
             <button
               type="button"
-              className={styles.primaryButton}
+              className={
+                styles.primaryButton
+              }
               onClick={() =>
-                setConfirmationOpen(false)
+                setConfirmationOpen(
+                  false
+                )
               }
             >
               DONE
@@ -1887,13 +2545,17 @@ export default function Dashboard() {
       )}
 
       {extendOpen && (
-        <div className={styles.overlay}>
+        <div
+          className={styles.overlay}
+        >
           <div
             className={`${styles.confirmation} ${styles.extendCard}`}
           >
             <button
               type="button"
-              className={styles.confirmationClose}
+              className={
+                styles.confirmationClose
+              }
               onClick={() =>
                 setExtendOpen(false)
               }
@@ -1903,21 +2565,38 @@ export default function Dashboard() {
 
             {!extendConfirmed ? (
               <>
-                <p className={styles.confirmationEyebrow}>
+                <p
+                  className={
+                    styles.confirmationEyebrow
+                  }
+                >
                   MEMBERSHIP
                 </p>
 
-                <h2>Extend Your Membership</h2>
+                <h2>
+                  Extend Your
+                  Membership
+                </h2>
 
-                <p className={styles.confirmationText}>
-                  Submit an extension request to the
-                  Deckside team.
+                <p
+                  className={
+                    styles.confirmationText
+                  }
+                >
+                  Please contact the
+                  Deckside team to
+                  arrange your
+                  membership extension.
                 </p>
 
                 <div
-                  className={styles.currentMembership}
+                  className={
+                    styles.currentMembership
+                  }
                 >
-                  <p>Current Membership</p>
+                  <p>
+                    Current Membership
+                  </p>
 
                   <strong>
                     {membershipStatus}
@@ -1931,48 +2610,82 @@ export default function Dashboard() {
                   )}
                 </div>
 
-                <div className={styles.extensionPlan}>
-                  <p>Extension Plan</p>
+                <div
+                  className={
+                    styles.extensionPlan
+                  }
+                >
+                  <p>
+                    Extension Plan
+                  </p>
 
-                  <strong>1 Month</strong>
+                  <strong>
+                    1 Month
+                  </strong>
 
                   <span>
-                    The Deckside team will review and
-                    verify your extension request.
+                    The Deckside team
+                    will review and
+                    verify your
+                    extension request.
                   </span>
                 </div>
 
                 <button
                   type="button"
-                  className={styles.primaryButton}
-                  onClick={extendMembership}
+                  className={
+                    styles.primaryButton
+                  }
+                  onClick={
+                    extendMembership
+                  }
                 >
-                  SUBMIT REQUEST
+                  CONTACT DECKSIDE
                 </button>
               </>
             ) : (
               <>
-                <div className={styles.check}>
+                <div
+                  className={
+                    styles.check
+                  }
+                >
                   ✓
                 </div>
 
-                <p className={styles.confirmationEyebrow}>
+                <p
+                  className={
+                    styles.confirmationEyebrow
+                  }
+                >
                   REQUEST SUBMITTED
                 </p>
 
-                <h2>Thank You</h2>
+                <h2>
+                  Thank You
+                </h2>
 
-                <p className={styles.confirmationText}>
-                  Your membership extension request
-                  has been submitted. The Deckside team
-                  will verify your request.
+                <p
+                  className={
+                    styles.confirmationText
+                  }
+                >
+                  Your membership
+                  extension request has
+                  been submitted. The
+                  Deckside team will
+                  verify your request.
                 </p>
 
                 <button
                   type="button"
-                  className={styles.primaryButton}
+                  className={
+                    styles.primaryButton
+                  }
                   onClick={() =>
-                    setExtendOpen(false)
+                    setExtendOpen(
+                      false
+                    )
                   }
                 >
                   DONE

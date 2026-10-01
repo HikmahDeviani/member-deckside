@@ -12,11 +12,10 @@ type MembershipStatus = "PENDING" | "ACTIVE" | "EXPIRED";
 type PaymentStatus = "PENDING" | "VERIFIED";
 
 type OrderStatus =
-  | "NEW"
+  | "ORDER RECEIVED"
   | "PREPARING"
-  | "READY"
   | "DELIVERED"
-  | "ORDER RECEIVED";
+  | "CANCELLED";
 
 type Member = {
   id: string;
@@ -45,6 +44,7 @@ type Order = {
   date: string;
   time: string;
   status: OrderStatus;
+  orderType: string;
 };
 
 type BeverageClaim = {
@@ -78,21 +78,12 @@ type MemberForm = {
   name: string;
   email: string;
   phone: string;
+  password: string;
   registrationDate: string;
   startDate: string;
   endDate: string;
   paymentStatus: PaymentStatus;
   membershipStatus: MembershipStatus;
-};
-
-type MembershipRow = {
-  id: string;
-  user_id: string;
-  status: MembershipStatus;
-  payment_status: PaymentStatus;
-  start_date: string | null;
-  end_date: string | null;
-  created_at: string;
 };
 
 type ProfileRow = {
@@ -102,6 +93,16 @@ type ProfileRow = {
   full_name: string;
   email: string;
   role: string;
+  created_at: string;
+};
+
+type MembershipRow = {
+  id: string;
+  user_id: string;
+  status: MembershipStatus;
+  payment_status: PaymentStatus;
+  start_date: string | null;
+  end_date: string | null;
   created_at: string;
 };
 
@@ -116,18 +117,12 @@ type OrderRow = {
 };
 
 type OrderItemRow = {
+  id: string;
   order_id: string;
   item_name: string;
   quantity: number;
   unit_price: number;
-};
-
-type ClaimRow = {
-  id: string;
-  user_id: string;
-  beverage_name: string;
-  claim_date: string;
-  created_at: string;
+  created_at?: string;
 };
 
 const emptyMemberForm: MemberForm = {
@@ -136,6 +131,7 @@ const emptyMemberForm: MemberForm = {
   name: "",
   email: "",
   phone: "",
+  password: "",
   registrationDate: "",
   startDate: "",
   endDate: "",
@@ -153,47 +149,94 @@ const formatRupiah = (value: number) =>
 const formatDate = (value: string) => {
   if (!value) return "-";
 
+  const date = new Date(`${value}T12:00:00`);
+
+  if (Number.isNaN(date.getTime())) {
+    return "-";
+  }
+
   return new Intl.DateTimeFormat("en-GB", {
     day: "2-digit",
     month: "short",
     year: "numeric",
-  }).format(new Date(`${value}T12:00:00`));
+  }).format(date);
 };
 
 const formatTime = (value: string) => {
   if (!value) return "-";
+
+  const date = new Date(value);
+
+  if (Number.isNaN(date.getTime())) {
+    return "-";
+  }
 
   return new Intl.DateTimeFormat("en-GB", {
     hour: "2-digit",
     minute: "2-digit",
     hour12: false,
     timeZone: "Asia/Jakarta",
-  }).format(new Date(value));
+  }).format(date);
 };
 
-const getTodayJakarta = () => {
+const getJakartaDate = (value: string) => {
+  if (!value) return "";
+
+  const date = new Date(value);
+
+  if (Number.isNaN(date.getTime())) {
+    return "";
+  }
+
   return new Intl.DateTimeFormat("en-CA", {
     timeZone: "Asia/Jakarta",
     year: "numeric",
     month: "2-digit",
     day: "2-digit",
+  }).format(date);
+};
+
+const getTodayJakarta = () =>
+  new Intl.DateTimeFormat("en-CA", {
+    timeZone: "Asia/Jakarta",
+    year: "numeric",
+    month: "2-digit",
+    day: "2-digit",
   }).format(new Date());
+
+const shiftDate = (dateString: string, days: number) => {
+  const date = new Date(`${dateString}T12:00:00Z`);
+
+  date.setUTCDate(date.getUTCDate() + days);
+
+  return date.toISOString().slice(0, 10);
+};
+
+const getEndDateOneMonth = (startDate: string) => {
+  if (!startDate) return "";
+
+  const date = new Date(`${startDate}T12:00:00Z`);
+
+  if (Number.isNaN(date.getTime())) {
+    return "";
+  }
+
+  date.setUTCMonth(date.getUTCMonth() + 1);
+  date.setUTCDate(date.getUTCDate() - 1);
+
+  return date.toISOString().slice(0, 10);
 };
 
 const getNextStatus = (status: OrderStatus): OrderStatus => {
-  if (status === "NEW" || status === "ORDER RECEIVED") {
+  if (status === "ORDER RECEIVED") {
     return "PREPARING";
   }
 
   if (status === "PREPARING") {
-    return "READY";
-  }
-
-  if (status === "READY") {
     return "DELIVERED";
   }
 
-  return "DELIVERED";
+  return status;
 };
 
 export default function AdminPage() {
@@ -221,6 +264,9 @@ export default function AdminPage() {
   const [editMemberOpen, setEditMemberOpen] =
     useState(false);
 
+  const [addMemberOpen, setAddMemberOpen] =
+    useState(false);
+
   const [selectedMember, setSelectedMember] =
     useState<Member | null>(null);
 
@@ -229,6 +275,14 @@ export default function AdminPage() {
 
   const [memberForm, setMemberForm] =
     useState<MemberForm>(emptyMemberForm);
+
+  const [addMemberForm, setAddMemberForm] =
+    useState<MemberForm>({
+      ...emptyMemberForm,
+      registrationDate: getTodayJakarta(),
+      startDate: getTodayJakarta(),
+      endDate: getEndDateOneMonth(getTodayJakarta()),
+    });
 
   const [notification, setNotification] =
     useState("");
@@ -250,7 +304,7 @@ export default function AdminPage() {
 
     window.setTimeout(() => {
       setNotification("");
-    }, 3000);
+    }, 3500);
   };
 
   const loadAdminData = async () => {
@@ -315,7 +369,9 @@ export default function AdminPage() {
       );
 
       setErrorMessage(
-        "Something went wrong while loading the admin dashboard."
+        error instanceof Error
+          ? error.message
+          : "Something went wrong while loading the admin dashboard."
       );
     } finally {
       setLoading(false);
@@ -323,409 +379,583 @@ export default function AdminPage() {
   };
 
   const loadMembers = async () => {
-    const {
-      data: profiles,
-      error: profileError,
-    } = await supabase
-      .from("profiles")
-      .select(
-        "id, member_id, title, full_name, email, role, created_at"
-      )
-      .eq("role", "member")
-      .order("created_at", {
-        ascending: false,
-      });
+    try {
+      const {
+        data: profiles,
+        error: profileError,
+      } = await supabase
+        .from("profiles")
+        .select(
+          "id, member_id, title, full_name, email, role, created_at"
+        )
+        .eq("role", "member")
+        .order("created_at", {
+          ascending: false,
+        });
 
-    if (profileError) {
+      if (profileError) {
+        console.error(
+          "MEMBER PROFILE ERROR:",
+          profileError
+        );
+
+        setMembers([]);
+
+        setErrorMessage(
+          `Unable to load member data: ${profileError.message}`
+        );
+
+        return;
+      }
+
+      if (!profiles || profiles.length === 0) {
+        setMembers([]);
+        return;
+      }
+
+      const userIds = profiles.map(
+        (profile) => profile.id
+      );
+
+      const {
+        data: memberships,
+        error: membershipError,
+      } = await supabase
+        .from("memberships")
+        .select(
+          "id, user_id, status, payment_status, start_date, end_date, created_at"
+        )
+        .in("user_id", userIds)
+        .order("created_at", {
+          ascending: false,
+        });
+
+      if (membershipError) {
+        console.error(
+          "MEMBERSHIP ERROR:",
+          membershipError
+        );
+
+        setErrorMessage(
+          `Unable to load membership data: ${membershipError.message}`
+        );
+      }
+
+      const membershipMap =
+        new Map<string, MembershipRow>();
+
+      (memberships ?? []).forEach(
+        (membership) => {
+          if (
+            !membershipMap.has(
+              membership.user_id
+            )
+          ) {
+            membershipMap.set(
+              membership.user_id,
+              membership as MembershipRow
+            );
+          }
+        }
+      );
+
+      const mappedMembers: Member[] =
+        (profiles as ProfileRow[]).map(
+          (profile) => {
+            const membership =
+              membershipMap.get(profile.id);
+
+            let membershipStatus: MembershipStatus =
+              membership?.status ?? "PENDING";
+
+            if (
+              membershipStatus === "ACTIVE" &&
+              membership?.end_date &&
+              membership.end_date < today
+            ) {
+              membershipStatus = "EXPIRED";
+            }
+
+            return {
+              id: profile.id,
+              userId: profile.id,
+              memberId:
+                profile.member_id ?? "-",
+              title:
+                profile.title ?? "",
+              name:
+                profile.full_name ?? "",
+              email:
+                profile.email ?? "",
+              phone: "",
+              registrationDate:
+                getJakartaDate(
+                  profile.created_at
+                ),
+              startDate:
+                membership?.start_date ?? "",
+              endDate:
+                membership?.end_date ?? "",
+              paymentStatus:
+                membership?.payment_status ??
+                "PENDING",
+              membershipStatus,
+              source: "ONLINE",
+            };
+          }
+        );
+
+      setMembers(mappedMembers);
+    } catch (error) {
       console.error(
-        "MEMBER PROFILE ERROR:",
-        profileError
+        "LOAD MEMBERS ERROR:",
+        error
       );
 
       setMembers([]);
 
       setErrorMessage(
-        `Unable to load member data: ${profileError.message}`
-      );
-
-      return;
-    }
-
-    if (!profiles || profiles.length === 0) {
-      setMembers([]);
-      return;
-    }
-
-    const userIds = profiles.map(
-      (profile) => profile.id
-    );
-
-    const {
-      data: memberships,
-      error: membershipError,
-    } = await supabase
-      .from("memberships")
-      .select(
-        "id, user_id, status, payment_status, start_date, end_date, created_at"
-      )
-      .in("user_id", userIds);
-
-    const membershipMap =
-      new Map<string, MembershipRow>();
-
-    if (!membershipError && memberships) {
-      memberships.forEach((membership) => {
-        membershipMap.set(
-          membership.user_id,
-          membership as MembershipRow
-        );
-      });
-    }
-
-    if (membershipError) {
-      console.error(
-        "MEMBERSHIP ERROR:",
-        membershipError
+        error instanceof Error
+          ? `Unable to load members: ${error.message}`
+          : "Unable to load members."
       );
     }
-
-    const mappedMembers: Member[] =
-      (profiles as ProfileRow[]).map(
-        (profile) => {
-          const membership =
-            membershipMap.get(profile.id);
-
-          let membershipStatus: MembershipStatus =
-            membership?.status ?? "PENDING";
-
-          if (
-            membershipStatus === "ACTIVE" &&
-            membership?.end_date &&
-            membership.end_date < today
-          ) {
-            membershipStatus = "EXPIRED";
-          }
-
-          return {
-            id: profile.id,
-            userId: profile.id,
-            memberId:
-              profile.member_id ?? "-",
-            title:
-              profile.title ?? "",
-            name:
-              profile.full_name ?? "",
-            email:
-              profile.email ?? "",
-            phone: "",
-            registrationDate:
-              profile.created_at.slice(
-                0,
-                10
-              ),
-            startDate:
-              membership?.start_date ?? "",
-            endDate:
-              membership?.end_date ?? "",
-            paymentStatus:
-              membership?.payment_status ??
-              "PENDING",
-            membershipStatus,
-            source: "ONLINE",
-          };
-        }
-      );
-
-    setMembers(mappedMembers);
   };
 
   const loadOrders = async () => {
-    const {
-      data: orderRows,
-      error,
-    } = await supabase
-      .from("orders")
-      .select(
-        "id, user_id, order_number, order_type, status, total_amount, created_at"
-      )
-      .order("created_at", {
-        ascending: false,
-      });
+    try {
+      console.log("LOADING ORDERS...");
 
-    if (error) {
+      const {
+        data: orderRows,
+        error,
+      } = await supabase
+        .from("orders")
+        .select(
+          "id, user_id, order_number, order_type, status, total_amount, created_at"
+        )
+        .order("created_at", {
+          ascending: false,
+        });
+
+      if (error) {
+        console.error(
+          "ORDER ERROR:",
+          error
+        );
+
+        setOrders([]);
+
+        setErrorMessage(
+          `Unable to load orders: ${error.message}`
+        );
+
+        return;
+      }
+
+      console.log(
+        "ORDERS:",
+        orderRows
+      );
+
+      if (
+        !orderRows ||
+        orderRows.length === 0
+      ) {
+        setOrders([]);
+        return;
+      }
+
+      const userIds = [
+        ...new Set(
+          orderRows.map(
+            (order) => order.user_id
+          )
+        ),
+      ];
+
+      const orderIds =
+        orderRows.map(
+          (order) => order.id
+        );
+
+      const [
+        {
+          data: profiles,
+          error: profileError,
+        },
+        {
+          data: items,
+          error: itemError,
+        },
+      ] = await Promise.all([
+        supabase
+          .from("profiles")
+          .select(
+            "id, member_id, full_name"
+          )
+          .in("id", userIds),
+
+        supabase
+          .from("order_items")
+          .select(
+            "id, order_id, item_name, quantity, unit_price, created_at"
+          )
+          .in("order_id", orderIds),
+      ]);
+
+      if (profileError) {
+        console.error(
+          "ORDER PROFILE ERROR:",
+          profileError
+        );
+      }
+
+      if (itemError) {
+        console.error(
+          "ORDER ITEM ERROR:",
+          itemError
+        );
+      }
+
+      const profileMap = new Map<
+        string,
+        {
+          member_id: string | null;
+          full_name: string;
+        }
+      >();
+
+      (profiles ?? []).forEach(
+        (profile) => {
+          profileMap.set(profile.id, {
+            member_id:
+              profile.member_id,
+            full_name:
+              profile.full_name,
+          });
+        }
+      );
+
+      const itemsMap = new Map<
+        string,
+        OrderItemRow[]
+      >();
+
+      (items ?? []).forEach(
+        (item) => {
+          const existing =
+            itemsMap.get(item.order_id) ?? [];
+
+          existing.push(
+            item as OrderItemRow
+          );
+
+          itemsMap.set(
+            item.order_id,
+            existing
+          );
+        }
+      );
+
+      const mappedOrders: Order[] =
+        (orderRows as OrderRow[]).map(
+          (order) => {
+            const profile =
+              profileMap.get(order.user_id);
+
+            const orderItems =
+              itemsMap.get(order.id) ?? [];
+
+            const itemText =
+              orderItems.length > 0
+                ? orderItems
+                    .map(
+                      (item) =>
+                        `${item.item_name} × ${item.quantity}`
+                    )
+                    .join(", ")
+                : "-";
+
+            return {
+              id: order.id,
+              orderNumber:
+                order.order_number,
+              userId:
+                order.user_id,
+              memberId:
+                profile?.member_id ?? "-",
+              memberName:
+                profile?.full_name ??
+                "Unknown Member",
+              items: itemText,
+              total:
+                Number(
+                  order.total_amount
+                ) || 0,
+              date:
+                getJakartaDate(
+                  order.created_at
+                ),
+              time:
+                formatTime(
+                  order.created_at
+                ),
+              status:
+                order.status,
+              orderType:
+                order.order_type,
+            };
+          }
+        );
+
+      console.log(
+        "MAPPED ORDERS:",
+        mappedOrders
+      );
+
+      setOrders(mappedOrders);
+    } catch (error) {
       console.error(
-        "ORDER ERROR:",
+        "LOAD ORDERS ERROR:",
         error
       );
 
       setOrders([]);
 
-      return;
-    }
-
-    if (!orderRows || orderRows.length === 0) {
-      setOrders([]);
-      return;
-    }
-
-    const userIds = [
-      ...new Set(
-        orderRows.map(
-          (order) => order.user_id
-        )
-      ),
-    ];
-
-    const orderIds = orderRows.map(
-      (order) => order.id
-    );
-
-    const [
-      {
-        data: profiles,
-        error: profileError,
-      },
-      {
-        data: items,
-        error: itemError,
-      },
-    ] = await Promise.all([
-      supabase
-        .from("profiles")
-        .select(
-          "id, member_id, full_name"
-        )
-        .in("id", userIds),
-
-      supabase
-        .from("order_items")
-        .select(
-          "order_id, item_name, quantity, unit_price"
-        )
-        .in("order_id", orderIds),
-    ]);
-
-    if (profileError) {
-      console.error(
-        "ORDER PROFILE ERROR:",
-        profileError
+      setErrorMessage(
+        error instanceof Error
+          ? `Unable to load orders: ${error.message}`
+          : "Unable to load orders."
       );
     }
-
-    if (itemError) {
-      console.error(
-        "ORDER ITEM ERROR:",
-        itemError
-      );
-    }
-
-    const profileMap = new Map<
-      string,
-      {
-        member_id: string | null;
-        full_name: string;
-      }
-    >();
-
-    (profiles ?? []).forEach(
-      (profile) => {
-        profileMap.set(profile.id, {
-          member_id:
-            profile.member_id,
-          full_name:
-            profile.full_name,
-        });
-      }
-    );
-
-    const itemsMap = new Map<
-      string,
-      OrderItemRow[]
-    >();
-
-    (items ?? []).forEach(
-      (item) => {
-        const existing =
-          itemsMap.get(item.order_id) ??
-          [];
-
-        existing.push(
-          item as OrderItemRow
-        );
-
-        itemsMap.set(
-          item.order_id,
-          existing
-        );
-      }
-    );
-
-    const mappedOrders: Order[] =
-      (orderRows as OrderRow[]).map(
-        (order) => {
-          const profile =
-            profileMap.get(
-              order.user_id
-            );
-
-          const orderItems =
-            itemsMap.get(order.id) ??
-            [];
-
-          const itemText =
-            orderItems.length > 0
-              ? orderItems
-                  .map(
-                    (item) =>
-                      `${item.item_name} × ${item.quantity}`
-                  )
-                  .join(", ")
-              : "-";
-
-          return {
-            id: order.id,
-            orderNumber:
-              order.order_number,
-            userId:
-              order.user_id,
-            memberId:
-              profile?.member_id ??
-              "-",
-            memberName:
-              profile?.full_name ??
-              "Unknown Member",
-            items: itemText,
-            total:
-              Number(
-                order.total_amount
-              ) || 0,
-            date:
-              order.created_at.slice(
-                0,
-                10
-              ),
-            time: formatTime(
-              order.created_at
-            ),
-            status:
-              order.status,
-          };
-        }
-      );
-
-    setOrders(mappedOrders);
   };
 
   const loadClaims = async () => {
-    const {
-      data: claimRows,
-      error,
-    } = await supabase
-      .from("beverage_claims")
-      .select(
-        "id, user_id, beverage_name, claim_date, created_at"
-      )
-      .order("created_at", {
-        ascending: false,
-      });
+    try {
+      console.log(
+        "LOADING CLAIM HISTORY..."
+      );
 
-    if (error) {
+      const {
+        data: claimOrders,
+        error: claimOrderError,
+      } = await supabase
+        .from("orders")
+        .select(
+          "id, user_id, order_number, order_type, status, total_amount, created_at"
+        )
+        .eq(
+          "order_type",
+          "COMPLIMENTARY_BEVERAGE"
+        )
+        .order("created_at", {
+          ascending: false,
+        });
+
+      if (claimOrderError) {
+        console.error(
+          "CLAIM ORDER ERROR:",
+          claimOrderError
+        );
+
+        setClaims([]);
+
+        setErrorMessage(
+          `Unable to load beverage claims: ${claimOrderError.message}`
+        );
+
+        return;
+      }
+
+      console.log(
+        "CLAIM ORDERS:",
+        claimOrders
+      );
+
+      if (
+        !claimOrders ||
+        claimOrders.length === 0
+      ) {
+        console.log(
+          "NO CLAIM ORDERS FOUND"
+        );
+
+        setClaims([]);
+        return;
+      }
+
+      const userIds = [
+        ...new Set(
+          claimOrders.map(
+            (order) => order.user_id
+          )
+        ),
+      ];
+
+      const orderIds =
+        claimOrders.map(
+          (order) => order.id
+        );
+
+      const [
+        {
+          data: profiles,
+          error: profileError,
+        },
+        {
+          data: orderItems,
+          error: itemError,
+        },
+      ] = await Promise.all([
+        supabase
+          .from("profiles")
+          .select(
+            "id, member_id, full_name"
+          )
+          .in("id", userIds),
+
+        supabase
+          .from("order_items")
+          .select(
+            "id, order_id, item_name, quantity, unit_price, created_at"
+          )
+          .in("order_id", orderIds),
+      ]);
+
+      if (profileError) {
+        console.error(
+          "CLAIM PROFILE ERROR:",
+          profileError
+        );
+
+        setErrorMessage(
+          `Unable to load claim member data: ${profileError.message}`
+        );
+      }
+
+      if (itemError) {
+        console.error(
+          "CLAIM ITEM ERROR:",
+          itemError
+        );
+
+        setErrorMessage(
+          `Unable to load claimed beverage: ${itemError.message}`
+        );
+      }
+
+      const profileMap = new Map<
+        string,
+        {
+          member_id: string | null;
+          full_name: string;
+        }
+      >();
+
+      (profiles ?? []).forEach(
+        (profile) => {
+          profileMap.set(
+            profile.id,
+            {
+              member_id:
+                profile.member_id,
+              full_name:
+                profile.full_name,
+            }
+          );
+        }
+      );
+
+      const itemMap = new Map<
+        string,
+        OrderItemRow[]
+      >();
+
+      (orderItems ?? []).forEach(
+        (item) => {
+          const existing =
+            itemMap.get(
+              item.order_id
+            ) ?? [];
+
+          existing.push(
+            item as OrderItemRow
+          );
+
+          itemMap.set(
+            item.order_id,
+            existing
+          );
+        }
+      );
+
+      const mappedClaims: BeverageClaim[] =
+        claimOrders.map(
+          (order) => {
+            const profile =
+              profileMap.get(
+                order.user_id
+              );
+
+            const items =
+              itemMap.get(
+                order.id
+              ) ?? [];
+
+            const beverage =
+              items[0];
+
+            return {
+              id: order.id,
+              userId:
+                order.user_id,
+              memberId:
+                profile?.member_id ??
+                "-",
+              memberName:
+                profile?.full_name ??
+                "Unknown Member",
+              beverage:
+                beverage?.item_name ??
+                "Complimentary Beverage",
+              date:
+                getJakartaDate(
+                  order.created_at
+                ),
+              time:
+                formatTime(
+                  order.created_at
+                ),
+            };
+          }
+        );
+
+      console.log(
+        "CLAIM HISTORY:",
+        mappedClaims
+      );
+
+      setClaims(
+        mappedClaims
+      );
+    } catch (error) {
       console.error(
-        "CLAIM ERROR:",
+        "LOAD CLAIMS ERROR:",
         error
       );
 
       setClaims([]);
 
-      return;
-    }
-
-    if (!claimRows || claimRows.length === 0) {
-      setClaims([]);
-      return;
-    }
-
-    const userIds = [
-      ...new Set(
-        claimRows.map(
-          (claim) => claim.user_id
-        )
-      ),
-    ];
-
-    const {
-      data: profiles,
-      error: profileError,
-    } = await supabase
-      .from("profiles")
-      .select(
-        "id, member_id, full_name"
-      )
-      .in("id", userIds);
-
-    if (profileError) {
-      console.error(
-        "CLAIM PROFILE ERROR:",
-        profileError
+      setErrorMessage(
+        error instanceof Error
+          ? `Unable to load beverage claims: ${error.message}`
+          : "Unable to load beverage claims."
       );
     }
-
-    const profileMap = new Map<
-      string,
-      {
-        member_id: string | null;
-        full_name: string;
-      }
-    >();
-
-    (profiles ?? []).forEach(
-      (profile) => {
-        profileMap.set(profile.id, {
-          member_id:
-            profile.member_id,
-          full_name:
-            profile.full_name,
-        });
-      }
-    );
-
-    const mappedClaims: BeverageClaim[] =
-      (claimRows as ClaimRow[]).map(
-        (claim) => {
-          const profile =
-            profileMap.get(
-              claim.user_id
-            );
-
-          return {
-            id: claim.id,
-            userId:
-              claim.user_id,
-            memberId:
-              profile?.member_id ??
-              "-",
-            memberName:
-              profile?.full_name ??
-              "Unknown Member",
-            beverage:
-              claim.beverage_name,
-            date:
-              claim.claim_date,
-            time: formatTime(
-              claim.created_at
-            ),
-          };
-        }
-      );
-
-    setClaims(mappedClaims);
   };
 
   const dateRange = useMemo(() => {
-    const current = new Date(
-      `${today}T12:00:00`
-    );
-
     if (dateFilter === "TODAY") {
       return {
         from: today,
@@ -733,79 +963,103 @@ export default function AdminPage() {
       };
     }
 
-    if (dateFilter === "YESTERDAY") {
+    if (
+      dateFilter ===
+      "YESTERDAY"
+    ) {
       const yesterday =
-        new Date(current);
+        shiftDate(
+          today,
+          -1
+        );
 
-      yesterday.setDate(
-        yesterday.getDate() - 1
+      return {
+        from: yesterday,
+        to: yesterday,
+      };
+    }
+
+    if (
+      dateFilter ===
+      "THIS_WEEK"
+    ) {
+      const current =
+        new Date(
+          `${today}T12:00:00Z`
+        );
+
+      const day =
+        current.getUTCDay();
+
+      const diff =
+        day === 0
+          ? 6
+          : day - 1;
+
+      const monday =
+        shiftDate(
+          today,
+          -diff
+        );
+
+      return {
+        from: monday,
+        to: today,
+      };
+    }
+
+    if (
+      dateFilter ===
+      "THIS_MONTH"
+    ) {
+      return {
+        from:
+          today.slice(0, 8) +
+          "01",
+        to: today,
+      };
+    }
+
+    if (
+      dateFilter ===
+      "LAST_MONTH"
+    ) {
+      const firstCurrentMonth =
+        new Date(
+          `${today.slice(
+            0,
+            7
+          )}-01T12:00:00Z`
+        );
+
+      firstCurrentMonth.setUTCMonth(
+        firstCurrentMonth.getUTCMonth() -
+          1
       );
 
-      const value =
-        yesterday
+      const firstDay =
+        firstCurrentMonth
+          .toISOString()
+          .slice(0, 10);
+
+      const lastDayDate =
+        new Date(
+          `${today.slice(
+            0,
+            7
+          )}-01T12:00:00Z`
+        );
+
+      lastDayDate.setUTCDate(0);
+
+      const lastDay =
+        lastDayDate
           .toISOString()
           .slice(0, 10);
 
       return {
-        from: value,
-        to: value,
-      };
-    }
-
-    if (dateFilter === "THIS_WEEK") {
-      const start =
-        new Date(current);
-
-      const day =
-        start.getDay();
-
-      const diff =
-        day === 0 ? 6 : day - 1;
-
-      start.setDate(
-        start.getDate() - diff
-      );
-
-      return {
-        from: start
-          .toISOString()
-          .slice(0, 10),
-        to: today,
-      };
-    }
-
-    if (dateFilter === "THIS_MONTH") {
-      return {
-        from: `${today.slice(
-          0,
-          8
-        )}01`,
-        to: today,
-      };
-    }
-
-    if (dateFilter === "LAST_MONTH") {
-      const firstDay =
-        new Date(
-          current.getFullYear(),
-          current.getMonth() - 1,
-          1
-        );
-
-      const lastDay =
-        new Date(
-          current.getFullYear(),
-          current.getMonth(),
-          0
-        );
-
-      return {
-        from: firstDay
-          .toISOString()
-          .slice(0, 10),
-        to: lastDay
-          .toISOString()
-          .slice(0, 10),
+        from: firstDay,
+        to: lastDay,
       };
     }
 
@@ -828,7 +1082,10 @@ export default function AdminPage() {
         order.date <=
           dateRange.to
     );
-  }, [orders, dateRange]);
+  }, [
+    orders,
+    dateRange,
+  ]);
 
   const filteredClaims = useMemo(() => {
     return claims.filter(
@@ -838,7 +1095,10 @@ export default function AdminPage() {
         claim.date <=
           dateRange.to
     );
-  }, [claims, dateRange]);
+  }, [
+    claims,
+    dateRange,
+  ]);
 
   const filteredMembers = useMemo(() => {
     return members.filter(
@@ -848,7 +1108,10 @@ export default function AdminPage() {
         member.registrationDate <=
           dateRange.to
     );
-  }, [members, dateRange]);
+  }, [
+    members,
+    dateRange,
+  ]);
 
   const activeMembers =
     members.filter(
@@ -865,11 +1128,17 @@ export default function AdminPage() {
     ).length;
 
   const totalRevenue =
-    filteredOrders.reduce(
-      (sum, order) =>
-        sum + order.total,
-      0
-    );
+    filteredOrders
+      .filter(
+        (order) =>
+          order.status !==
+          "CANCELLED"
+      )
+      .reduce(
+        (sum, order) =>
+          sum + order.total,
+        0
+      );
 
   const handleFormChange = (
     field: keyof MemberForm,
@@ -883,32 +1152,223 @@ export default function AdminPage() {
     );
   };
 
-  const openEditMember = (
-    member: Member
+  const handleAddFormChange = (
+    field: keyof MemberForm,
+    value: string
   ) => {
+    setAddMemberForm(
+      (current) => {
+        const updated = {
+          ...current,
+          [field]: value,
+        };
+
+        if (
+          field ===
+            "startDate" &&
+          value
+        ) {
+          updated.endDate =
+            getEndDateOneMonth(
+              value
+            );
+        }
+
+        return updated;
+      }
+    );
+  };
+
+  const generateMemberId = () => {
+    const numbers =
+      members
+        .map((member) => {
+          const match =
+            member.memberId.match(
+              /DS-(\d+)/
+            );
+
+          return match
+            ? Number(match[1])
+            : 0;
+        })
+        .filter(
+          (value) =>
+            !Number.isNaN(
+              value
+            )
+        );
+
+    const nextNumber =
+      numbers.length > 0
+        ? Math.max(
+            ...numbers
+          ) + 1
+        : 1;
+
+    return `DS-${String(
+      nextNumber
+    ).padStart(4, "0")}`;
+  };
+
+  const openAddMember = () => {
+    const registrationDate =
+      getTodayJakarta();
+
+    setAddMemberForm({
+      ...emptyMemberForm,
+      memberId:
+        generateMemberId(),
+      registrationDate,
+      startDate:
+        registrationDate,
+      endDate:
+        getEndDateOneMonth(
+          registrationDate
+        ),
+    });
+
+    setAddMemberOpen(true);
+  };
+
+  const closeAddMember = () => {
+    setAddMemberOpen(false);
+
+    const currentToday =
+      getTodayJakarta();
+
+    setAddMemberForm({
+      ...emptyMemberForm,
+      registrationDate:
+        currentToday,
+      startDate:
+        currentToday,
+      endDate:
+        getEndDateOneMonth(
+          currentToday
+        ),
+    });
+  };
+
+  const getAdminAccessToken = async () => {
+    const {
+      data: { session },
+      error,
+    } = await supabase.auth.getSession();
+
+    if (error) {
+      throw new Error(
+        `Unable to get admin session: ${error.message}`
+      );
+    }
+
+    if (!session?.access_token) {
+      throw new Error(
+        "Admin session tidak ditemukan. Silakan login kembali."
+      );
+    }
+
+    return session.access_token;
+  };
+
+  const addMember = async () => {
+    if (
+      !addMemberForm.name.trim() ||
+      !addMemberForm.email.trim() ||
+      !addMemberForm.password.trim()
+    ) {
+      showNotification(
+        "Please complete the member name, email, and password."
+      );
+      return;
+    }
+
+    if (addMemberForm.password.length < 6) {
+      showNotification(
+        "Password must contain at least 6 characters."
+      );
+      return;
+    }
+
+    setActionLoading(true);
+    setErrorMessage("");
+
+    try {
+      const accessToken = await getAdminAccessToken();
+
+      const response = await fetch(
+        "/api/admin/members",
+        {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+            Authorization: `Bearer ${accessToken}`,
+          },
+          body: JSON.stringify({
+            memberId:
+              addMemberForm.memberId || generateMemberId(),
+            title: addMemberForm.title.trim(),
+            fullName: addMemberForm.name.trim(),
+            email: addMemberForm.email.trim().toLowerCase(),
+            phone: addMemberForm.phone.trim(),
+            password: addMemberForm.password,
+            registrationDate:
+              addMemberForm.registrationDate || null,
+            membershipStart:
+              addMemberForm.startDate || null,
+            membershipEnd:
+              addMemberForm.endDate || null,
+            paymentStatus:
+              addMemberForm.paymentStatus,
+            membershipStatus:
+              addMemberForm.membershipStatus,
+          }),
+        }
+      );
+
+      const result = await response.json().catch(() => ({}));
+
+      if (!response.ok) {
+        console.error("ADD MEMBER API ERROR:", result);
+        throw new Error(
+          result.error || "Unable to add member."
+        );
+      }
+
+      await loadMembers();
+      closeAddMember();
+
+      showNotification(
+        "Member account and membership have been created successfully."
+      );
+    } catch (error) {
+      console.error("ADD MEMBER ERROR:", error);
+
+      showNotification(
+        error instanceof Error
+          ? error.message
+          : "Unable to add member."
+      );
+    } finally {
+      setActionLoading(false);
+    }
+  };
+
+  const openEditMember = (member: Member) => {
     setSelectedMember(member);
 
     setMemberForm({
-      memberId:
-        member.memberId,
-      title:
-        member.title,
-      name:
-        member.name,
-      email:
-        member.email,
-      phone:
-        member.phone,
-      registrationDate:
-        member.registrationDate,
-      startDate:
-        member.startDate,
-      endDate:
-        member.endDate,
-      paymentStatus:
-        member.paymentStatus,
-      membershipStatus:
-        member.membershipStatus,
+      memberId: member.memberId,
+      title: member.title,
+      name: member.name,
+      email: member.email,
+      phone: member.phone,
+      password: "",
+      registrationDate: member.registrationDate,
+      startDate: member.startDate,
+      endDate: member.endDate,
+      paymentStatus: member.paymentStatus,
+      membershipStatus: member.membershipStatus,
     });
 
     setEditMemberOpen(true);
@@ -917,99 +1377,81 @@ export default function AdminPage() {
   const closeMemberModal = () => {
     setEditMemberOpen(false);
     setSelectedMember(null);
-    setMemberForm(
-      emptyMemberForm
-    );
+    setMemberForm(emptyMemberForm);
   };
 
-  const saveEditedMember =
-    async () => {
-      if (!selectedMember) {
-        return;
-      }
+  const saveEditedMember = async () => {
+    if (!selectedMember) {
+      return;
+    }
 
-      if (
-        !memberForm.name.trim() ||
-        !memberForm.email.trim()
-      ) {
-        showNotification(
-          "Please complete the member information."
-        );
+    if (
+      !memberForm.name.trim() ||
+      !memberForm.email.trim()
+    ) {
+      showNotification(
+        "Please complete the member information."
+      );
+      return;
+    }
 
-        return;
-      }
+    setActionLoading(true);
+    setErrorMessage("");
 
-      setActionLoading(true);
+    try {
+      const accessToken = await getAdminAccessToken();
 
-      try {
-        const {
-          error: profileError,
-        } = await supabase
-          .from("profiles")
-          .update({
-            title:
-              memberForm.title,
-            full_name:
-              memberForm.name.trim(),
-            email:
-              memberForm.email.trim(),
-          })
-          .eq(
-            "id",
-            selectedMember.userId
-          );
-
-        if (profileError) {
-          throw profileError;
+      const response = await fetch(
+        "/api/admin/members",
+        {
+          method: "PUT",
+          headers: {
+            "Content-Type": "application/json",
+            Authorization: `Bearer ${accessToken}`,
+          },
+          body: JSON.stringify({
+            userId: selectedMember.userId,
+            memberId: memberForm.memberId.trim(),
+            title: memberForm.title.trim(),
+            fullName: memberForm.name.trim(),
+            email: memberForm.email.trim().toLowerCase(),
+            phone: memberForm.phone.trim(),
+            password: memberForm.password.trim() || null,
+            membershipStart: memberForm.startDate || null,
+            membershipEnd: memberForm.endDate || null,
+            paymentStatus: memberForm.paymentStatus,
+            membershipStatus: memberForm.membershipStatus,
+          }),
         }
+      );
 
-        const {
-          error: membershipError,
-        } = await supabase
-          .from("memberships")
-          .update({
-            status:
-              memberForm.membershipStatus,
-            payment_status:
-              memberForm.paymentStatus,
-            start_date:
-              memberForm.startDate ||
-              null,
-            end_date:
-              memberForm.endDate ||
-              null,
-          })
-          .eq(
-            "user_id",
-            selectedMember.userId
-          );
+      const result = await response.json().catch(() => ({}));
 
-        if (membershipError) {
-          throw membershipError;
-        }
-
-        await loadMembers();
-
-        closeMemberModal();
-
-        showNotification(
-          "Member information has been updated."
+      if (!response.ok) {
+        console.error("UPDATE MEMBER API ERROR:", result);
+        throw new Error(
+          result.error || "Unable to update member."
         );
-      } catch (error) {
-        console.error(
-          "SAVE MEMBER ERROR:",
-          error
-        );
-
-        showNotification(
-          error instanceof Error
-            ? error.message
-            : "Unable to update member."
-        );
-      } finally {
-        setActionLoading(false);
       }
-    };
+
+      await loadMembers();
+      closeMemberModal();
+
+      showNotification(
+        "Member information has been updated."
+      );
+    } catch (error) {
+      console.error("SAVE MEMBER ERROR:", error);
+
+      showNotification(
+        error instanceof Error
+          ? error.message
+          : "Unable to update member."
+      );
+    } finally {
+      setActionLoading(false);
+    }
+  };
 
   const approveMember = async (
     userId: string
@@ -1018,25 +1460,13 @@ export default function AdminPage() {
     setErrorMessage("");
 
     try {
-      const startDate = today;
-
-      const endDateObject =
-        new Date(
-          `${startDate}T12:00:00`
-        );
-
-      endDateObject.setMonth(
-        endDateObject.getMonth() + 1
-      );
-
-      endDateObject.setDate(
-        endDateObject.getDate() - 1
-      );
+      const startDate =
+        today;
 
       const endDate =
-        endDateObject
-          .toISOString()
-          .slice(0, 10);
+        getEndDateOneMonth(
+          startDate
+        );
 
       const {
         data,
@@ -1062,21 +1492,12 @@ export default function AdminPage() {
         .maybeSingle();
 
       if (error) {
-        console.error(
-          "APPROVE MEMBER ERROR:",
-          error
-        );
-
-        showNotification(
-          `Unable to approve member: ${error.message}`
-        );
-
-        return;
+        throw error;
       }
 
       if (!data) {
         showNotification(
-          "Membership record was not found. Please check the memberships table."
+          "Membership record was not found."
         );
 
         return;
@@ -1113,26 +1534,37 @@ export default function AdminPage() {
           currentStatus
         );
 
+      if (
+        nextStatus ===
+        currentStatus
+      ) {
+        return;
+      }
+
       setActionLoading(true);
 
       try {
-        const { error } =
-          await supabase
-            .from("orders")
-            .update({
-              status:
-                nextStatus,
-            })
-            .eq(
-              "id",
-              orderId
-            );
+        const {
+          error,
+        } = await supabase
+          .from("orders")
+          .update({
+            status:
+              nextStatus,
+          })
+          .eq(
+            "id",
+            orderId
+          );
 
         if (error) {
           throw error;
         }
 
-        await loadOrders();
+        await Promise.all([
+          loadOrders(),
+          loadClaims(),
+        ]);
 
         showNotification(
           "Order status has been updated."
@@ -1157,20 +1589,15 @@ export default function AdminPage() {
     status: OrderStatus
   ) => {
     if (
-      status === "NEW" ||
-      status === "ORDER RECEIVED"
+      status ===
+      "ORDER RECEIVED"
     ) {
       return "START PREPARING";
     }
 
     if (
-      status === "PREPARING"
-    ) {
-      return "MARK READY";
-    }
-
-    if (
-      status === "READY"
+      status ===
+      "PREPARING"
     ) {
       return "MARK DELIVERED";
     }
@@ -1272,7 +1699,8 @@ export default function AdminPage() {
       XLSX.utils.book_new();
 
     if (
-      reportType === "SUMMARY" ||
+      reportType ===
+        "SUMMARY" ||
       reportType === "ALL"
     ) {
       const summaryData = [
@@ -1327,7 +1755,8 @@ export default function AdminPage() {
     }
 
     if (
-      reportType === "MEMBERS" ||
+      reportType ===
+        "MEMBERS" ||
       reportType === "ALL"
     ) {
       const data =
@@ -1368,7 +1797,8 @@ export default function AdminPage() {
     }
 
     if (
-      reportType === "ORDERS" ||
+      reportType ===
+        "ORDERS" ||
       reportType === "ALL"
     ) {
       const data =
@@ -1380,6 +1810,8 @@ export default function AdminPage() {
               order.memberId,
             Member:
               order.memberName,
+            "Order Type":
+              order.orderType,
             Items:
               order.items,
             Date:
@@ -1403,7 +1835,8 @@ export default function AdminPage() {
     }
 
     if (
-      reportType === "CLAIMS" ||
+      reportType ===
+        "CLAIMS" ||
       reportType === "ALL"
     ) {
       const data =
@@ -1484,7 +1917,8 @@ export default function AdminPage() {
     let y = 32;
 
     if (
-      reportType === "SUMMARY" ||
+      reportType ===
+        "SUMMARY" ||
       reportType === "ALL"
     ) {
       pdf.setFontSize(12);
@@ -1563,7 +1997,8 @@ export default function AdminPage() {
     }
 
     if (
-      reportType === "MEMBERS" ||
+      reportType ===
+        "MEMBERS" ||
       reportType === "ALL"
     ) {
       if (y > 160) {
@@ -1606,7 +2041,8 @@ export default function AdminPage() {
                   member.memberId,
                   `${member.title} ${member.name}`,
                   member.email,
-                  member.phone || "-",
+                  member.phone ||
+                    "-",
                   formatDate(
                     member.registrationDate
                   ),
@@ -1645,7 +2081,8 @@ export default function AdminPage() {
     }
 
     if (
-      reportType === "ORDERS" ||
+      reportType ===
+        "ORDERS" ||
       reportType === "ALL"
     ) {
       if (y > 160) {
@@ -1722,7 +2159,8 @@ export default function AdminPage() {
     }
 
     if (
-      reportType === "CLAIMS" ||
+      reportType ===
+        "CLAIMS" ||
       reportType === "ALL"
     ) {
       if (y > 160) {
@@ -1802,8 +2240,10 @@ export default function AdminPage() {
         <div
           className={styles.container}
           style={{
-            paddingTop: "120px",
-            textAlign: "center",
+            paddingTop:
+              "120px",
+            textAlign:
+              "center",
           }}
         >
           Loading admin dashboard...
@@ -1823,16 +2263,23 @@ export default function AdminPage() {
         </a>
 
         <div className={styles.navLinks}>
-          <a href="/menu">
+          <a
+            href="/menu"
+            className={styles.navItem}
+          >
             MENU
           </a>
 
-          <a href="/admin">
+          <a
+            href="/admin"
+            className={styles.navItem}
+          >
             ADMIN DASHBOARD
           </a>
 
           <button
             type="button"
+            className={styles.navItem}
             onClick={async () => {
               await supabase.auth.signOut();
 
@@ -1880,6 +2327,7 @@ export default function AdminPage() {
             </span>
 
             <button
+              type="button"
               onClick={() =>
                 setErrorMessage("")
               }
@@ -1896,6 +2344,7 @@ export default function AdminPage() {
             </span>
 
             <button
+              type="button"
               onClick={() =>
                 setNotification("")
               }
@@ -1914,17 +2363,34 @@ export default function AdminPage() {
             <div className={styles.filterOptions}>
               {[
                 ["TODAY", "Today"],
-                ["YESTERDAY", "Yesterday"],
-                ["THIS_WEEK", "This Week"],
-                ["THIS_MONTH", "This Month"],
-                ["LAST_MONTH", "Last Month"],
-                ["CUSTOM", "Custom Range"],
+                [
+                  "YESTERDAY",
+                  "Yesterday",
+                ],
+                [
+                  "THIS_WEEK",
+                  "This Week",
+                ],
+                [
+                  "THIS_MONTH",
+                  "This Month",
+                ],
+                [
+                  "LAST_MONTH",
+                  "Last Month",
+                ],
+                [
+                  "CUSTOM",
+                  "Custom Range",
+                ],
               ].map(
                 ([value, label]) => (
                   <button
+                    type="button"
                     key={value}
                     className={
-                      dateFilter === value
+                      dateFilter ===
+                      value
                         ? styles.filterActive
                         : styles.filterButton
                     }
@@ -1941,8 +2407,13 @@ export default function AdminPage() {
             </div>
           </div>
 
-          {dateFilter === "CUSTOM" && (
-            <div className={styles.customRange}>
+          {dateFilter ===
+            "CUSTOM" && (
+            <div
+              className={
+                styles.customRange
+              }
+            >
               <div>
                 <label>
                   FROM
@@ -1950,10 +2421,15 @@ export default function AdminPage() {
 
                 <input
                   type="date"
-                  value={customFrom}
-                  onChange={(event) =>
+                  value={
+                    customFrom
+                  }
+                  onChange={(
+                    event
+                  ) =>
                     setCustomFrom(
-                      event.target.value
+                      event.target
+                        .value
                     )
                   }
                 />
@@ -1966,10 +2442,15 @@ export default function AdminPage() {
 
                 <input
                   type="date"
-                  value={customTo}
-                  onChange={(event) =>
+                  value={
+                    customTo
+                  }
+                  onChange={(
+                    event
+                  ) =>
                     setCustomTo(
-                      event.target.value
+                      event.target
+                        .value
                     )
                   }
                 />
@@ -1977,7 +2458,11 @@ export default function AdminPage() {
             </div>
           )}
 
-          <div className={styles.currentRange}>
+          <div
+            className={
+              styles.currentRange
+            }
+          >
             <span>
               SELECTED PERIOD
             </span>
@@ -1994,8 +2479,16 @@ export default function AdminPage() {
           </div>
         </section>
 
-        <section className={styles.overview}>
-          <div className={styles.statCard}>
+        <section
+          className={
+            styles.overview
+          }
+        >
+          <div
+            className={
+              styles.statCard
+            }
+          >
             <span>
               TOTAL MEMBERS
             </span>
@@ -2009,7 +2502,11 @@ export default function AdminPage() {
             </p>
           </div>
 
-          <div className={styles.statCard}>
+          <div
+            className={
+              styles.statCard
+            }
+          >
             <span>
               ACTIVE MEMBERS
             </span>
@@ -2023,13 +2520,19 @@ export default function AdminPage() {
             </p>
           </div>
 
-          <div className={styles.statCard}>
+          <div
+            className={
+              styles.statCard
+            }
+          >
             <span>
               ORDERS
             </span>
 
             <strong>
-              {filteredOrders.length}
+              {
+                filteredOrders.length
+              }
             </strong>
 
             <p>
@@ -2037,7 +2540,11 @@ export default function AdminPage() {
             </p>
           </div>
 
-          <div className={styles.statCard}>
+          <div
+            className={
+              styles.statCard
+            }
+          >
             <span>
               REVENUE
             </span>
@@ -2054,10 +2561,22 @@ export default function AdminPage() {
           </div>
         </section>
 
-        <section className={styles.section}>
-          <div className={styles.sectionHeader}>
+        <section
+          className={
+            styles.section
+          }
+        >
+          <div
+            className={
+              styles.sectionHeader
+            }
+          >
             <div>
-              <p className={styles.sectionLabel}>
+              <p
+                className={
+                  styles.sectionLabel
+                }
+              >
                 REPORTING
               </p>
 
@@ -2067,8 +2586,16 @@ export default function AdminPage() {
             </div>
           </div>
 
-          <div className={styles.exportCard}>
-            <div className={styles.exportText}>
+          <div
+            className={
+              styles.exportCard
+            }
+          >
+            <div
+              className={
+                styles.exportText
+              }
+            >
               <span>
                 SELECTED PERIOD
               </span>
@@ -2092,16 +2619,25 @@ export default function AdminPage() {
               </p>
             </div>
 
-            <div className={styles.reportType}>
+            <div
+              className={
+                styles.reportType
+              }
+            >
               <label>
                 REPORT TYPE
               </label>
 
               <select
-                value={reportType}
-                onChange={(event) =>
+                value={
+                  reportType
+                }
+                onChange={(
+                  event
+                ) =>
                   setReportType(
-                    event.target.value as ReportType
+                    event.target
+                      .value as ReportType
                   )
                 }
               >
@@ -2127,17 +2663,31 @@ export default function AdminPage() {
               </select>
             </div>
 
-            <div className={styles.exportActions}>
+            <div
+              className={
+                styles.exportActions
+              }
+            >
               <button
-                className={styles.primaryButton}
-                onClick={exportExcel}
+                type="button"
+                className={
+                  styles.primaryButton
+                }
+                onClick={
+                  exportExcel
+                }
               >
                 EXPORT EXCEL
               </button>
 
               <button
-                className={styles.secondaryButton}
-                onClick={exportPdf}
+                type="button"
+                className={
+                  styles.secondaryButton
+                }
+                onClick={
+                  exportPdf
+                }
               >
                 EXPORT PDF
               </button>
@@ -2145,10 +2695,22 @@ export default function AdminPage() {
           </div>
         </section>
 
-        <section className={styles.section}>
-          <div className={styles.sectionHeader}>
+        <section
+          className={
+            styles.section
+          }
+        >
+          <div
+            className={
+              styles.sectionHeader
+            }
+          >
             <div>
-              <p className={styles.sectionLabel}>
+              <p
+                className={
+                  styles.sectionLabel
+                }
+              >
                 MEMBERSHIP
               </p>
 
@@ -2157,13 +2719,44 @@ export default function AdminPage() {
               </h2>
             </div>
 
-            <span className={styles.sectionCount}>
-              {members.length} MEMBERS
-            </span>
+            <div
+              className={
+                styles.sectionHeaderActions
+              }
+            >
+              <span
+                className={
+                  styles.sectionCount
+                }
+              >
+                {members.length}{" "}
+                MEMBERS
+              </span>
+
+              <button
+                type="button"
+                className={
+                  styles.primaryButton
+                }
+                onClick={
+                  openAddMember
+                }
+              >
+                + ADD MEMBER
+              </button>
+            </div>
           </div>
 
-          <div className={styles.tableCard}>
-            <div className={styles.memberTableHeader}>
+          <div
+            className={
+              styles.tableCard
+            }
+          >
+            <div
+              className={
+                styles.memberTableHeader
+              }
+            >
               <span>
                 MEMBER
               </span>
@@ -2188,12 +2781,23 @@ export default function AdminPage() {
             {members.map(
               (member) => (
                 <div
-                  className={styles.memberTableRow}
-                  key={member.id}
+                  className={
+                    styles.memberTableRow
+                  }
+                  key={
+                    member.id
+                  }
                 >
-                  <div className={styles.memberIdentity}>
+                  <div
+                    className={
+                      styles.memberIdentity
+                    }
+                  >
                     <button
-                      className={styles.memberName}
+                      type="button"
+                      className={
+                        styles.memberName
+                      }
                       onClick={() =>
                         setSelectedHistoryMember(
                           member
@@ -2205,11 +2809,15 @@ export default function AdminPage() {
                     </button>
 
                     <span>
-                      {member.memberId}
+                      {
+                        member.memberId
+                      }
                     </span>
 
                     <small>
-                      {member.email}
+                      {
+                        member.email
+                      }
                     </small>
                   </div>
 
@@ -2230,22 +2838,39 @@ export default function AdminPage() {
                         : styles.statusExpired
                     }
                   >
-                    {member.membershipStatus}
+                    {
+                      member.membershipStatus
+                    }
                   </span>
 
-                  <span className={styles.source}>
-                    {member.source}
+                  <span
+                    className={
+                      styles.source
+                    }
+                  >
+                    {
+                      member.source
+                    }
                   </span>
 
-                  <div className={styles.actionGroup}>
+                  <div
+                    className={
+                      styles.actionGroup
+                    }
+                  >
                     <button
-                      className={styles.secondaryButton}
+                      type="button"
+                      className={
+                        styles.secondaryButton
+                      }
                       onClick={() =>
                         openEditMember(
                           member
                         )
                       }
-                      disabled={actionLoading}
+                      disabled={
+                        actionLoading
+                      }
                     >
                       EDIT
                     </button>
@@ -2253,17 +2878,22 @@ export default function AdminPage() {
                     {member.membershipStatus ===
                       "PENDING" && (
                       <button
-                        className={styles.primarySmallButton}
+                        type="button"
+                        className={
+                          styles.primarySmallButton
+                        }
                         onClick={() =>
                           approveMember(
                             member.userId
                           )
                         }
-                        disabled={actionLoading}
+                        disabled={
+                          actionLoading
+                        }
                       >
                         {actionLoading
                           ? "PROCESSING..."
-                          : "ACC MEMBER"}
+                          : "ACTIVATE"}
                       </button>
                     )}
                   </div>
@@ -2271,18 +2901,36 @@ export default function AdminPage() {
               )
             )}
 
-            {members.length === 0 && (
-              <div className={styles.emptyState}>
-                No members registered yet.
+            {members.length ===
+              0 && (
+              <div
+                className={
+                  styles.emptyState
+                }
+              >
+                No members registered
+                yet.
               </div>
             )}
           </div>
         </section>
 
-        <section className={styles.section}>
-          <div className={styles.sectionHeader}>
+        <section
+          className={
+            styles.section
+          }
+        >
+          <div
+            className={
+              styles.sectionHeader
+            }
+          >
             <div>
-              <p className={styles.sectionLabel}>
+              <p
+                className={
+                  styles.sectionLabel
+                }
+              >
                 OPERATIONS
               </p>
 
@@ -2291,57 +2939,119 @@ export default function AdminPage() {
               </h2>
             </div>
 
-            <span className={styles.sectionCount}>
-              {filteredOrders.length} ORDERS
+            <span
+              className={
+                styles.sectionCount
+              }
+            >
+              {
+                filteredOrders.length
+              }{" "}
+              ORDERS
             </span>
           </div>
 
-          <div className={styles.tableCard}>
-            <div className={styles.orderHeader}>
-              <span>ORDER</span>
-              <span>MEMBER</span>
-              <span>DATE</span>
-              <span>ITEMS</span>
-              <span>TOTAL</span>
-              <span>STATUS</span>
-              <span>ACTION</span>
+          <div
+            className={
+              styles.tableCard
+            }
+          >
+            <div
+              className={
+                styles.orderHeader
+              }
+            >
+              <span>
+                ORDER
+              </span>
+
+              <span>
+                MEMBER
+              </span>
+
+              <span>
+                MEMBER ID
+              </span>
+
+              <span>
+                DATE
+              </span>
+
+              <span>
+                ITEMS
+              </span>
+
+              <span>
+                TOTAL
+              </span>
+
+              <span>
+                STATUS
+              </span>
+
+              <span>
+                ACTION
+              </span>
             </div>
 
             {filteredOrders.map(
               (order) => (
                 <div
-                  className={styles.orderRow}
-                  key={order.id}
+                  className={
+                    styles.orderRow
+                  }
+                  key={
+                    order.id
+                  }
                 >
                   <div>
                     <strong>
-                      {order.orderNumber}
+                      {
+                        order.orderNumber
+                      }
                     </strong>
 
                     <span>
-                      {order.time}
+                      {
+                        order.time
+                      }
                     </span>
                   </div>
 
                   <button
-                    className={styles.orderMember}
+                    type="button"
+                    className={
+                      styles.orderMember
+                    }
                     onClick={() => {
                       const member =
                         members.find(
-                          (item) =>
+                          (
+                            item
+                          ) =>
                             item.userId ===
                             order.userId
                         );
 
-                      if (member) {
+                      if (
+                        member
+                      ) {
                         setSelectedHistoryMember(
                           member
                         );
                       }
                     }}
                   >
-                    {order.memberName}
+                    {
+                      order.memberName
+                    }
                   </button>
+
+                  <span>
+                    {
+                      order.memberId
+                    }
+                  </span>
 
                   <span>
                     {formatDate(
@@ -2350,7 +3060,9 @@ export default function AdminPage() {
                   </span>
 
                   <span>
-                    {order.items}
+                    {
+                      order.items
+                    }
                   </span>
 
                   <strong>
@@ -2359,30 +3071,58 @@ export default function AdminPage() {
                     )}
                   </strong>
 
-                  <span className={styles.orderStatus}>
-                    {order.status}
+                  <span
+                    className={
+                      styles.orderStatus
+                    }
+                  >
+                    {
+                      order.status
+                    }
                   </span>
 
                   <div>
-                    {order.status !==
-                    "DELIVERED" ? (
+                    {order.status ===
+                      "ORDER RECEIVED" ||
+                    order.status ===
+                      "PREPARING" ? (
                       <button
-                        className={styles.secondaryButton}
+                        type="button"
+                        className={
+                          styles.secondaryButton
+                        }
                         onClick={() =>
                           updateOrderStatus(
                             order.id,
                             order.status
                           )
                         }
-                        disabled={actionLoading}
+                        disabled={
+                          actionLoading
+                        }
                       >
-                        {getOrderAction(
-                          order.status
-                        )}
+                        {
+                          getOrderAction(
+                            order.status
+                          )
+                        }
                       </button>
-                    ) : (
-                      <span className={styles.completed}>
+                    ) : order.status ===
+                      "DELIVERED" ? (
+                      <span
+                        className={
+                          styles.completed
+                        }
+                      >
                         COMPLETED
+                      </span>
+                    ) : (
+                      <span
+                        className={
+                          styles.completed
+                        }
+                      >
+                        CANCELLED
                       </span>
                     )}
                   </div>
@@ -2390,18 +3130,36 @@ export default function AdminPage() {
               )
             )}
 
-            {filteredOrders.length === 0 && (
-              <div className={styles.emptyState}>
-                No orders found in the selected period.
+            {filteredOrders.length ===
+              0 && (
+              <div
+                className={
+                  styles.emptyState
+                }
+              >
+                No orders found in
+                the selected period.
               </div>
             )}
           </div>
         </section>
 
-        <section className={styles.section}>
-          <div className={styles.sectionHeader}>
+        <section
+          className={
+            styles.section
+          }
+        >
+          <div
+            className={
+              styles.sectionHeader
+            }
+          >
             <div>
-              <p className={styles.sectionLabel}>
+              <p
+                className={
+                  styles.sectionLabel
+                }
+              >
                 COMPLIMENTARY BEVERAGE
               </p>
 
@@ -2410,53 +3168,102 @@ export default function AdminPage() {
               </h2>
             </div>
 
-            <span className={styles.sectionCount}>
-              {filteredClaims.length} CLAIMS
+            <span
+              className={
+                styles.sectionCount
+              }
+            >
+              {
+                filteredClaims.length
+              }{" "}
+              CLAIMS
             </span>
           </div>
 
-          <div className={styles.tableCard}>
-            <div className={styles.claimHeader}>
-              <span>MEMBER</span>
-              <span>MEMBER ID</span>
-              <span>BEVERAGE</span>
-              <span>DATE</span>
-              <span>TIME</span>
-              <span>STATUS</span>
+          <div
+            className={
+              styles.tableCard
+            }
+          >
+            <div
+              className={
+                styles.claimHeader
+              }
+            >
+              <span>
+                MEMBER
+              </span>
+
+              <span>
+                MEMBER ID
+              </span>
+
+              <span>
+                BEVERAGE
+              </span>
+
+              <span>
+                DATE
+              </span>
+
+              <span>
+                TIME
+              </span>
+
+              <span>
+                STATUS
+              </span>
             </div>
 
             {filteredClaims.map(
               (claim) => (
                 <div
-                  className={styles.claimRow}
-                  key={claim.id}
+                  className={
+                    styles.claimRow
+                  }
+                  key={
+                    claim.id
+                  }
                 >
                   <button
-                    className={styles.orderMember}
+                    type="button"
+                    className={
+                      styles.orderMember
+                    }
                     onClick={() => {
                       const member =
                         members.find(
-                          (item) =>
+                          (
+                            item
+                          ) =>
                             item.userId ===
                             claim.userId
                         );
 
-                      if (member) {
+                      if (
+                        member
+                      ) {
                         setSelectedHistoryMember(
                           member
                         );
                       }
                     }}
                   >
-                    {claim.memberName}
+                    {
+                      claim.memberName
+                    }
                   </button>
 
                   <span>
-                    {claim.memberId}
+                    {
+                      claim.memberId
+                    }
                   </span>
 
                   <span>
-                    {claim.beverage}
+                    {
+                      claim.beverage
+                    }
                   </span>
 
                   <span>
@@ -2466,28 +3273,53 @@ export default function AdminPage() {
                   </span>
 
                   <span>
-                    {claim.time}
+                    {
+                      claim.time
+                    }
                   </span>
 
-                  <span className={styles.claimed}>
+                  <span
+                    className={
+                      styles.claimed
+                    }
+                  >
                     CLAIMED
                   </span>
                 </div>
               )
             )}
 
-            {filteredClaims.length === 0 && (
-              <div className={styles.emptyState}>
-                No beverage claims found in the selected period.
+            {filteredClaims.length ===
+              0 && (
+              <div
+                className={
+                  styles.emptyState
+                }
+              >
+                No beverage claims
+                found in the
+                selected period.
               </div>
             )}
           </div>
         </section>
 
-        <section className={styles.section}>
-          <div className={styles.sectionHeader}>
+        <section
+          className={
+            styles.section
+          }
+        >
+          <div
+            className={
+              styles.sectionHeader
+            }
+          >
             <div>
-              <p className={styles.sectionLabel}>
+              <p
+                className={
+                  styles.sectionLabel
+                }
+              >
                 CASHIER ACCESS
               </p>
 
@@ -2496,14 +3328,30 @@ export default function AdminPage() {
               </h2>
             </div>
 
-            <span className={styles.sectionCount}>
+            <span
+              className={
+                styles.sectionCount
+              }
+            >
               PERMANENT QR
             </span>
           </div>
 
-          <div className={styles.qrSection}>
-            <div className={styles.qrText}>
-              <p className={styles.qrLabel}>
+          <div
+            className={
+              styles.qrSection
+            }
+          >
+            <div
+              className={
+                styles.qrText
+              }
+            >
+              <p
+                className={
+                  styles.qrLabel
+                }
+              >
                 CASHIER QR CODE
               </p>
 
@@ -2512,48 +3360,80 @@ export default function AdminPage() {
               </h3>
 
               <p>
-                This QR code is used
-                by Deckside members
-                to unlock their daily
-                complimentary beverage.
+                This QR code is
+                used by Deckside
+                members to unlock
+                their daily
+                complimentary
+                beverage.
               </p>
 
-              <div className={styles.qrStatus}>
-                <span>STATUS</span>
+              <div
+                className={
+                  styles.qrStatus
+                }
+              >
+                <span>
+                  STATUS
+                </span>
 
                 <strong>
                   ACTIVE
                 </strong>
               </div>
 
-              <div className={styles.qrInfo}>
-                <span>QR TYPE</span>
+              <div
+                className={
+                  styles.qrInfo
+                }
+              >
+                <span>
+                  QR TYPE
+                </span>
 
                 <strong>
                   Permanent Cashier QR
                 </strong>
               </div>
 
-              <div className={styles.qrActions}>
+              <div
+                className={
+                  styles.qrActions
+                }
+              >
                 <button
-                  className={styles.primaryButton}
+                  type="button"
+                  className={
+                    styles.primaryButton
+                  }
                   onClick={() =>
-                    setQrOpen(true)
+                    setQrOpen(
+                      true
+                    )
                   }
                 >
                   VIEW QR
                 </button>
 
                 <button
-                  className={styles.secondaryButton}
-                  onClick={downloadQr}
+                  type="button"
+                  className={
+                    styles.secondaryButton
+                  }
+                  onClick={
+                    downloadQr
+                  }
                 >
                   DOWNLOAD QR
                 </button>
               </div>
             </div>
 
-            <div className={styles.qrPreview}>
+            <div
+              className={
+                styles.qrPreview
+              }
+            >
               <QRCodeSVG
                 id="deckside-cashier-qr"
                 value="DECKSIDE-CLAIM-BEVERAGE"
@@ -2572,10 +3452,21 @@ export default function AdminPage() {
       </div>
 
       {selectedHistoryMember && (
-        <div className={styles.overlay}>
-          <div className={styles.historyModal}>
+        <div
+          className={
+            styles.overlay
+          }
+        >
+          <div
+            className={
+              styles.historyModal
+            }
+          >
             <button
-              className={styles.closeButton}
+              type="button"
+              className={
+                styles.closeButton
+              }
               onClick={() =>
                 setSelectedHistoryMember(
                   null
@@ -2585,18 +3476,32 @@ export default function AdminPage() {
               ×
             </button>
 
-            <p className={styles.sectionLabel}>
+            <p
+              className={
+                styles.sectionLabel
+              }
+            >
               MEMBER PROFILE
             </p>
 
             <h2>
-              {selectedHistoryMember.title}{" "}
-              {selectedHistoryMember.name}
+              {
+                selectedHistoryMember.title
+              }{" "}
+              {
+                selectedHistoryMember.name
+              }
             </h2>
 
-            <div className={styles.profileMeta}>
+            <div
+              className={
+                styles.profileMeta
+              }
+            >
               <span>
-                {selectedHistoryMember.memberId}
+                {
+                  selectedHistoryMember.memberId
+                }
               </span>
 
               <span
@@ -2616,9 +3521,15 @@ export default function AdminPage() {
               </span>
             </div>
 
-            <div className={styles.profileGrid}>
+            <div
+              className={
+                styles.profileGrid
+              }
+            >
               <div>
-                <span>EMAIL</span>
+                <span>
+                  EMAIL
+                </span>
 
                 <strong>
                   {
@@ -2628,7 +3539,9 @@ export default function AdminPage() {
               </div>
 
               <div>
-                <span>PHONE</span>
+                <span>
+                  PHONE
+                </span>
 
                 <strong>
                   {
@@ -2663,27 +3576,45 @@ export default function AdminPage() {
               </div>
             </div>
 
-            <div className={styles.historyBlock}>
-              <div className={styles.historyBlockHeader}>
+            <div
+              className={
+                styles.historyBlock
+              }
+            >
+              <div
+                className={
+                  styles.historyBlockHeader
+                }
+              >
                 <h3>
                   ORDER HISTORY
                 </h3>
 
                 <span>
-                  {memberOrders.length} ORDERS
+                  {
+                    memberOrders.length
+                  }{" "}
+                  ORDERS
                 </span>
               </div>
 
-              {memberOrders.length > 0 ? (
+              {memberOrders.length >
+              0 ? (
                 memberOrders.map(
                   (order) => (
                     <div
-                      className={styles.historyItem}
-                      key={order.id}
+                      className={
+                        styles.historyItem
+                      }
+                      key={
+                        order.id
+                      }
                     >
                       <div>
                         <strong>
-                          {order.orderNumber}
+                          {
+                            order.orderNumber
+                          }
                         </strong>
 
                         <span>
@@ -2691,13 +3622,17 @@ export default function AdminPage() {
                             order.date
                           )}{" "}
                           ·{" "}
-                          {order.time}
+                          {
+                            order.time
+                          }
                         </span>
                       </div>
 
                       <div>
                         <span>
-                          {order.items}
+                          {
+                            order.items
+                          }
                         </span>
 
                         <strong>
@@ -2707,40 +3642,68 @@ export default function AdminPage() {
                         </strong>
                       </div>
 
-                      <span className={styles.orderStatus}>
-                        {order.status}
+                      <span
+                        className={
+                          styles.orderStatus
+                        }
+                      >
+                        {
+                          order.status
+                        }
                       </span>
                     </div>
                   )
                 )
               ) : (
-                <p className={styles.emptyHistory}>
+                <p
+                  className={
+                    styles.emptyHistory
+                  }
+                >
                   No orders found.
                 </p>
               )}
             </div>
 
-            <div className={styles.historyBlock}>
-              <div className={styles.historyBlockHeader}>
+            <div
+              className={
+                styles.historyBlock
+              }
+            >
+              <div
+                className={
+                  styles.historyBlockHeader
+                }
+              >
                 <h3>
                   BEVERAGE CLAIM HISTORY
                 </h3>
 
                 <span>
-                  {memberClaims.length} CLAIMS
+                  {
+                    memberClaims.length
+                  }{" "}
+                  CLAIMS
                 </span>
               </div>
 
-              {memberClaims.length > 0 ? (
+              {memberClaims.length >
+              0 ? (
                 memberClaims.map(
                   (claim) => (
                     <div
-                      className={styles.historyItem}
-                      key={claim.id}
+                      className={
+                        styles.historyItem
+                      }
+                      key={
+                        claim.id
+                      }
                     >
                       <div>
                         <strong>
-                          {claim.beverage}
+                          {
+                            claim.beverage
+                          }
                         </strong>
 
                         <span>
@@ -2751,18 +3714,29 @@ export default function AdminPage() {
                       </div>
 
                       <span>
-                        {claim.time}
+                        {
+                          claim.time
+                        }
                       </span>
 
-                      <span className={styles.claimed}>
+                      <span
+                        className={
+                          styles.claimed
+                        }
+                      >
                         CLAIMED
                       </span>
                     </div>
                   )
                 )
               ) : (
-                <p className={styles.emptyHistory}>
-                  No beverage claims found.
+                <p
+                  className={
+                    styles.emptyHistory
+                  }
+                >
+                  No beverage claims
+                  found.
                 </p>
               )}
             </div>
@@ -2770,11 +3744,377 @@ export default function AdminPage() {
         </div>
       )}
 
-      {qrOpen && (
-        <div className={styles.overlay}>
-          <div className={styles.qrModal}>
+      {addMemberOpen && (
+        <div
+          className={
+            styles.overlay
+          }
+        >
+          <div
+            className={
+              styles.historyModal
+            }
+          >
             <button
-              className={styles.closeButton}
+              type="button"
+              className={
+                styles.closeButton
+              }
+              onClick={
+                closeAddMember
+              }
+            >
+              ×
+            </button>
+
+            <p
+              className={
+                styles.sectionLabel
+              }
+            >
+              MEMBER MANAGEMENT
+            </p>
+
+            <h2>
+              Add Member
+            </h2>
+
+            <p
+              className={
+                styles.modalText
+              }
+            >
+              Create a new Deckside
+              member account and
+              membership.
+            </p>
+
+            <div
+              className={
+                styles.profileGrid
+              }
+            >
+              <div>
+                <span>
+                  MEMBER ID
+                </span>
+
+                <strong>
+                  {
+                    addMemberForm.memberId
+                  }
+                </strong>
+              </div>
+
+              <div>
+                <span>
+                  REGISTRATION
+                </span>
+
+                <strong>
+                  {formatDate(
+                    addMemberForm.registrationDate
+                  )}
+                </strong>
+              </div>
+            </div>
+
+            <div
+              className={
+                styles.memberForm
+              }
+            >
+              <div>
+                <label>
+                  TITLE
+                </label>
+
+                <select
+                  value={
+                    addMemberForm.title
+                  }
+                  onChange={(
+                    event
+                  ) =>
+                    handleAddFormChange(
+                      "title",
+                      event.target
+                        .value
+                    )
+                  }
+                >
+                  <option value="">
+                    Select
+                  </option>
+
+                  <option value="Mr.">
+                    Mr.
+                  </option>
+
+                  <option value="Mrs.">
+                    Mrs.
+                  </option>
+
+                  <option value="Ms.">
+                    Ms.
+                  </option>
+                </select>
+              </div>
+
+              <div>
+                <label>
+                  FULL NAME
+                </label>
+
+                <input
+                  type="text"
+                  value={
+                    addMemberForm.name
+                  }
+                  onChange={(
+                    event
+                  ) =>
+                    handleAddFormChange(
+                      "name",
+                      event.target
+                        .value
+                    )
+                  }
+                />
+              </div>
+
+              <div>
+                <label>
+                  EMAIL
+                </label>
+
+                <input
+                  type="email"
+                  value={
+                    addMemberForm.email
+                  }
+                  onChange={(
+                    event
+                  ) =>
+                    handleAddFormChange(
+                      "email",
+                      event.target
+                        .value
+                    )
+                  }
+                  placeholder="member@email.com"
+                />
+              </div>
+
+              <div>
+                <label>
+                  PASSWORD
+                </label>
+
+                <input
+                  type="password"
+                  value={
+                    addMemberForm.password
+                  }
+                  onChange={(
+                    event
+                  ) =>
+                    handleAddFormChange(
+                      "password",
+                      event.target
+                        .value
+                    )
+                  }
+                  placeholder="Minimum 6 characters"
+                />
+              </div>
+
+              <div>
+                <label>
+                  PHONE
+                </label>
+
+                <input
+                  type="text"
+                  value={
+                    addMemberForm.phone
+                  }
+                  onChange={(
+                    event
+                  ) =>
+                    handleAddFormChange(
+                      "phone",
+                      event.target
+                        .value
+                    )
+                  }
+                />
+              </div>
+
+              <div>
+                <label>
+                  MEMBERSHIP START
+                </label>
+
+                <input
+                  type="date"
+                  value={
+                    addMemberForm.startDate
+                  }
+                  onChange={(
+                    event
+                  ) =>
+                    handleAddFormChange(
+                      "startDate",
+                      event.target
+                        .value
+                    )
+                  }
+                />
+              </div>
+
+              <div>
+                <label>
+                  MEMBERSHIP END
+                </label>
+
+                <input
+                  type="date"
+                  value={
+                    addMemberForm.endDate
+                  }
+                  onChange={(
+                    event
+                  ) =>
+                    handleAddFormChange(
+                      "endDate",
+                      event.target
+                        .value
+                    )
+                  }
+                />
+              </div>
+
+              <div>
+                <label>
+                  PAYMENT STATUS
+                </label>
+
+                <select
+                  value={
+                    addMemberForm.paymentStatus
+                  }
+                  onChange={(
+                    event
+                  ) =>
+                    handleAddFormChange(
+                      "paymentStatus",
+                      event.target
+                        .value
+                    )
+                  }
+                >
+                  <option value="PENDING">
+                    PENDING
+                  </option>
+
+                  <option value="VERIFIED">
+                    VERIFIED
+                  </option>
+                </select>
+              </div>
+
+              <div>
+                <label>
+                  MEMBERSHIP STATUS
+                </label>
+
+                <select
+                  value={
+                    addMemberForm.membershipStatus
+                  }
+                  onChange={(
+                    event
+                  ) =>
+                    handleAddFormChange(
+                      "membershipStatus",
+                      event.target
+                        .value
+                    )
+                  }
+                >
+                  <option value="PENDING">
+                    PENDING
+                  </option>
+
+                  <option value="ACTIVE">
+                    ACTIVE
+                  </option>
+
+                  <option value="EXPIRED">
+                    EXPIRED
+                  </option>
+                </select>
+              </div>
+            </div>
+
+            <div
+              className={
+                styles.qrModalActions
+              }
+            >
+              <button
+                type="button"
+                className={
+                  styles.primaryButton
+                }
+                onClick={
+                  addMember
+                }
+                disabled={
+                  actionLoading
+                }
+              >
+                {actionLoading
+                  ? "ADDING..."
+                  : "ADD MEMBER"}
+              </button>
+
+              <button
+                type="button"
+                className={
+                  styles.secondaryButton
+                }
+                onClick={
+                  closeAddMember
+                }
+                disabled={
+                  actionLoading
+                }
+              >
+                CANCEL
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {qrOpen && (
+        <div
+          className={
+            styles.overlay
+          }
+        >
+          <div
+            className={
+              styles.qrModal
+            }
+          >
+            <button
+              type="button"
+              className={
+                styles.closeButton
+              }
               onClick={() =>
                 setQrOpen(false)
               }
@@ -2782,7 +4122,11 @@ export default function AdminPage() {
               ×
             </button>
 
-            <p className={styles.sectionLabel}>
+            <p
+              className={
+                styles.sectionLabel
+              }
+            >
               CASHIER QR
             </p>
 
@@ -2790,11 +4134,21 @@ export default function AdminPage() {
               Complimentary Beverage
             </h2>
 
-            <p className={styles.modalText}>
-              This is the permanent QR code for customer beverage claims.
+            <p
+              className={
+                styles.modalText
+              }
+            >
+              This is the permanent QR
+              code for customer
+              beverage claims.
             </p>
 
-            <div className={styles.largeQr}>
+            <div
+              className={
+                styles.largeQr
+              }
+            >
               <QRCodeSVG
                 value="DECKSIDE-CLAIM-BEVERAGE"
                 size={300}
@@ -2804,22 +4158,40 @@ export default function AdminPage() {
               />
             </div>
 
-            <p className={styles.qrCodeText}>
+            <p
+              className={
+                styles.qrCodeText
+              }
+            >
               DECKSIDE-CLAIM-BEVERAGE
             </p>
 
-            <div className={styles.qrModalActions}>
+            <div
+              className={
+                styles.qrModalActions
+              }
+            >
               <button
-                className={styles.primaryButton}
-                onClick={downloadQr}
+                type="button"
+                className={
+                  styles.primaryButton
+                }
+                onClick={
+                  downloadQr
+                }
               >
                 DOWNLOAD QR
               </button>
 
               <button
-                className={styles.secondaryButton}
+                type="button"
+                className={
+                  styles.secondaryButton
+                }
                 onClick={() =>
-                  setQrOpen(false)
+                  setQrOpen(
+                    false
+                  )
                 }
               >
                 CLOSE
@@ -2831,16 +4203,33 @@ export default function AdminPage() {
 
       {editMemberOpen &&
         selectedMember && (
-          <div className={styles.overlay}>
-            <div className={styles.historyModal}>
+          <div
+            className={
+              styles.overlay
+            }
+          >
+            <div
+              className={
+                styles.historyModal
+              }
+            >
               <button
-                className={styles.closeButton}
-                onClick={closeMemberModal}
+                type="button"
+                className={
+                  styles.closeButton
+                }
+                onClick={
+                  closeMemberModal
+                }
               >
                 ×
               </button>
 
-              <p className={styles.sectionLabel}>
+              <p
+                className={
+                  styles.sectionLabel
+                }
+              >
                 MEMBER MANAGEMENT
               </p>
 
@@ -2848,14 +4237,20 @@ export default function AdminPage() {
                 Edit Member
               </h2>
 
-              <div className={styles.profileGrid}>
+              <div
+                className={
+                  styles.profileGrid
+                }
+              >
                 <div>
                   <span>
                     MEMBER ID
                   </span>
 
                   <strong>
-                    {memberForm.memberId}
+                    {
+                      memberForm.memberId
+                    }
                   </strong>
                 </div>
 
@@ -2872,18 +4267,27 @@ export default function AdminPage() {
                 </div>
               </div>
 
-              <div className={styles.memberForm}>
+              <div
+                className={
+                  styles.memberForm
+                }
+              >
                 <div>
                   <label>
                     TITLE
                   </label>
 
                   <select
-                    value={memberForm.title}
-                    onChange={(event) =>
+                    value={
+                      memberForm.title
+                    }
+                    onChange={(
+                      event
+                    ) =>
                       handleFormChange(
                         "title",
-                        event.target.value
+                        event.target
+                          .value
                       )
                     }
                   >
@@ -2912,11 +4316,16 @@ export default function AdminPage() {
 
                   <input
                     type="text"
-                    value={memberForm.name}
-                    onChange={(event) =>
+                    value={
+                      memberForm.name
+                    }
+                    onChange={(
+                      event
+                    ) =>
                       handleFormChange(
                         "name",
-                        event.target.value
+                        event.target
+                          .value
                       )
                     }
                   />
@@ -2929,13 +4338,41 @@ export default function AdminPage() {
 
                   <input
                     type="email"
-                    value={memberForm.email}
-                    onChange={(event) =>
+                    value={
+                      memberForm.email
+                    }
+                    onChange={(
+                      event
+                    ) =>
                       handleFormChange(
                         "email",
-                        event.target.value
+                        event.target
+                          .value
                       )
                     }
+                  />
+                </div>
+
+                <div>
+                  <label>
+                    NEW PASSWORD
+                  </label>
+
+                  <input
+                    type="password"
+                    value={
+                      memberForm.password
+                    }
+                    onChange={(
+                      event
+                    ) =>
+                      handleFormChange(
+                        "password",
+                        event.target
+                          .value
+                      )
+                    }
+                    placeholder="Leave blank to keep current password"
                   />
                 </div>
 
@@ -2946,11 +4383,16 @@ export default function AdminPage() {
 
                   <input
                     type="text"
-                    value={memberForm.phone}
-                    onChange={(event) =>
+                    value={
+                      memberForm.phone
+                    }
+                    onChange={(
+                      event
+                    ) =>
                       handleFormChange(
                         "phone",
-                        event.target.value
+                        event.target
+                          .value
                       )
                     }
                   />
@@ -2963,11 +4405,16 @@ export default function AdminPage() {
 
                   <input
                     type="date"
-                    value={memberForm.startDate}
-                    onChange={(event) =>
+                    value={
+                      memberForm.startDate
+                    }
+                    onChange={(
+                      event
+                    ) =>
                       handleFormChange(
                         "startDate",
-                        event.target.value
+                        event.target
+                          .value
                       )
                     }
                   />
@@ -2980,95 +4427,124 @@ export default function AdminPage() {
 
                   <input
                     type="date"
-                    value={memberForm.endDate}
-                    onChange={(event) =>
+                    value={
+                      memberForm.endDate
+                    }
+                    onChange={(
+                      event
+                    ) =>
                       handleFormChange(
                         "endDate",
-                        event.target.value
-                      )
-                    }
-                  />
-                </div>
-
-                <div>
-                  <label>
-                    PAYMENT STATUS
-                  </label>
-
-                  <select
-                    value={memberForm.paymentStatus}
-                    onChange={(event) =>
-                      handleFormChange(
-                        "paymentStatus",
-                        event.target.value
-                      )
-                    }
-                  >
-                    <option value="PENDING">
-                      PENDING
-                    </option>
-
-                    <option value="VERIFIED">
-                      VERIFIED
-                    </option>
-                  </select>
-                </div>
-
-                <div>
-                  <label>
-                    MEMBERSHIP STATUS
-                  </label>
-
-                  <select
-                    value={
-                      memberForm.membershipStatus
-                    }
-                    onChange={(event) =>
-                      handleFormChange(
-                        "membershipStatus",
-                        event.target.value
-                      )
-                    }
-                  >
-                    <option value="PENDING">
-                      PENDING
-                    </option>
-
-                    <option value="ACTIVE">
-                      ACTIVE
-                    </option>
-
-                    <option value="EXPIRED">
-                      EXPIRED
-                    </option>
-                  </select>
-                </div>
+                        event.target
+                          .value
+                    )
+                  }
+                />
               </div>
 
-              <div className={styles.qrModalActions}>
-                <button
-                  className={styles.primaryButton}
-                  onClick={
-                    saveEditedMember
-                  }
-                  disabled={actionLoading}
-                >
-                  {actionLoading
-                    ? "SAVING..."
-                    : "SAVE CHANGES"}
-                </button>
+              <div>
+                <label>
+                  PAYMENT STATUS
+                </label>
 
-                <button
-                  className={styles.secondaryButton}
-                  onClick={closeMemberModal}
-                  disabled={actionLoading}
+                <select
+                  value={
+                    memberForm.paymentStatus
+                  }
+                  onChange={(
+                    event
+                  ) =>
+                    handleFormChange(
+                      "paymentStatus",
+                      event.target
+                        .value
+                    )
+                  }
                 >
-                  CANCEL
-                </button>
+                  <option value="PENDING">
+                    PENDING
+                  </option>
+
+                  <option value="VERIFIED">
+                    VERIFIED
+                  </option>
+                </select>
+              </div>
+
+              <div>
+                <label>
+                  MEMBERSHIP STATUS
+                </label>
+
+                <select
+                  value={
+                    memberForm.membershipStatus
+                  }
+                  onChange={(
+                    event
+                  ) =>
+                    handleFormChange(
+                      "membershipStatus",
+                      event.target
+                        .value
+                    )
+                  }
+                >
+                  <option value="PENDING">
+                    PENDING
+                  </option>
+
+                  <option value="ACTIVE">
+                    ACTIVE
+                  </option>
+
+                  <option value="EXPIRED">
+                    EXPIRED
+                  </option>
+                </select>
               </div>
             </div>
+
+            <div
+              className={
+                styles.qrModalActions
+              }
+            >
+              <button
+                type="button"
+                className={
+                  styles.primaryButton
+                }
+                onClick={
+                  saveEditedMember
+                }
+                disabled={
+                  actionLoading
+                }
+              >
+                {actionLoading
+                  ? "SAVING..."
+                  : "SAVE CHANGES"}
+              </button>
+
+              <button
+                type="button"
+                className={
+                  styles.secondaryButton
+                }
+                onClick={
+                  closeMemberModal
+                }
+                disabled={
+                  actionLoading
+                }
+              >
+                CANCEL
+              </button>
+            </div>
           </div>
-        )}
+        </div>
+      )}
     </main>
   );
 }

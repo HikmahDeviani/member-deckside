@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { FormEvent, useEffect, useState } from "react";
 import { createClient } from "../../lib/supabase/client";
 import styles from "./page.module.css";
 
@@ -19,22 +19,40 @@ export default function ResetPasswordPage() {
 
   useEffect(() => {
     const checkSession = async () => {
-      const { data, error } = await supabase.auth.getSession();
+      setCheckingSession(true);
+      setError("");
 
-      if (error) {
+      const {
+        data: { session },
+        error: sessionError,
+      } = await supabase.auth.getSession();
+
+      if (sessionError) {
+        console.error(
+          "RESET SESSION ERROR:",
+          sessionError
+        );
+
         setError(
           "Unable to verify your password reset session. Please try again."
         );
+
         setValidSession(false);
-      } else if (!data.session) {
+        setCheckingSession(false);
+        return;
+      }
+
+      if (!session) {
         setError(
           "This password reset link is invalid or has expired. Please request a new reset link."
         );
+
         setValidSession(false);
-      } else {
-        setValidSession(true);
+        setCheckingSession(false);
+        return;
       }
 
+      setValidSession(true);
       setCheckingSession(false);
     };
 
@@ -42,7 +60,7 @@ export default function ResetPasswordPage() {
   }, [supabase]);
 
   const handleResetPassword = async (
-    event: React.FormEvent<HTMLFormElement>
+    event: FormEvent<HTMLFormElement>
   ) => {
     event.preventDefault();
 
@@ -57,7 +75,9 @@ export default function ResetPasswordPage() {
     }
 
     if (password.length < 6) {
-      setError("Password must contain at least 6 characters.");
+      setError(
+        "Password must contain at least 6 characters."
+      );
       return;
     }
 
@@ -68,31 +88,44 @@ export default function ResetPasswordPage() {
 
     setLoading(true);
 
-    const { error } = await supabase.auth.updateUser({
-      password: password,
-    });
+    const { error: updateError } =
+      await supabase.auth.updateUser({
+        password,
+      });
 
     setLoading(false);
 
-    if (error) {
-      setError(error.message);
+    if (updateError) {
+      console.error(
+        "UPDATE PASSWORD ERROR:",
+        updateError
+      );
+
+      setError(
+        "We could not update your password. Please try again."
+      );
+
       return;
     }
 
     setMessage(
-      "Your password has been successfully updated. You can now log in with your new password."
+      "Your password has been successfully updated. You can now sign in with your new password."
     );
 
     setPassword("");
     setConfirmPassword("");
     setValidSession(false);
+
+    await supabase.auth.signOut();
   };
 
   if (checkingSession) {
     return (
       <main className={styles.page}>
         <div className={styles.card}>
-          <p className={styles.eyebrow}>DECKSIDE MEMBERSHIP</p>
+          <p className={styles.eyebrow}>
+            DECKSIDE MEMBERSHIP
+          </p>
 
           <h1>Reset Password</h1>
 
@@ -107,7 +140,9 @@ export default function ResetPasswordPage() {
   return (
     <main className={styles.page}>
       <div className={styles.card}>
-        <p className={styles.eyebrow}>DECKSIDE MEMBERSHIP</p>
+        <p className={styles.eyebrow}>
+          DECKSIDE MEMBERSHIP
+        </p>
 
         <h1>Reset Password</h1>
 
@@ -116,61 +151,96 @@ export default function ResetPasswordPage() {
         </p>
 
         {validSession ? (
-          <form onSubmit={handleResetPassword}>
-            <label htmlFor="password">NEW PASSWORD</label>
+          <form
+            onSubmit={handleResetPassword}
+            className={styles.form}
+          >
+            <div className={styles.formGroup}>
+              <label htmlFor="password">
+                NEW PASSWORD
+              </label>
 
-            <input
-              id="password"
-              type="password"
-              value={password}
-              onChange={(event) => setPassword(event.target.value)}
-              placeholder="Enter your new password"
-              autoComplete="new-password"
-              minLength={6}
-              required
+              <input
+                id="password"
+                type="password"
+                value={password}
+                onChange={(event) =>
+                  setPassword(event.target.value)
+                }
+                placeholder="Enter your new password"
+                autoComplete="new-password"
+                minLength={6}
+                required
+                disabled={loading}
+              />
+            </div>
+
+            <div className={styles.formGroup}>
+              <label htmlFor="confirmPassword">
+                CONFIRM PASSWORD
+              </label>
+
+              <input
+                id="confirmPassword"
+                type="password"
+                value={confirmPassword}
+                onChange={(event) =>
+                  setConfirmPassword(event.target.value)
+                }
+                placeholder="Confirm your new password"
+                autoComplete="new-password"
+                minLength={6}
+                required
+                disabled={loading}
+              />
+            </div>
+
+            {error && (
+              <p className={styles.error}>
+                {error}
+              </p>
+            )}
+
+            <button
+              type="submit"
+              className={styles.resetButton}
               disabled={loading}
-            />
-
-            <label htmlFor="confirmPassword">CONFIRM PASSWORD</label>
-
-            <input
-              id="confirmPassword"
-              type="password"
-              value={confirmPassword}
-              onChange={(event) =>
-                setConfirmPassword(event.target.value)
-              }
-              placeholder="Confirm your new password"
-              autoComplete="new-password"
-              minLength={6}
-              required
-              disabled={loading}
-            />
-
-            {error && <p className={styles.error}>{error}</p>}
-
-            {message && <p className={styles.success}>{message}</p>}
-
-            <button type="submit" disabled={loading}>
-              {loading ? "UPDATING..." : "UPDATE PASSWORD"}
+            >
+              {loading
+                ? "UPDATING..."
+                : "UPDATE PASSWORD"}
             </button>
           </form>
         ) : (
           <>
-            {error && <p className={styles.error}>{error}</p>}
+            {error && (
+              <p className={styles.error}>
+                {error}
+              </p>
+            )}
 
-            {message && <p className={styles.success}>{message}</p>}
+            {message && (
+              <p className={styles.success}>
+                {message}
+              </p>
+            )}
           </>
         )}
 
         {message && (
-          <a href="/login" className={styles.loginLink}>
-            BACK TO LOGIN
+          <a
+            href="/sign-in"
+            className={styles.loginLink}
+          >
+            BACK TO SIGN IN
           </a>
         )}
 
         {!validSession && !message && (
-          <a href="/forgot-password" className={styles.loginLink}>
+          <a
+            href="/forgot-password"
+            className={styles.loginLink}
+          >
             REQUEST NEW RESET LINK
           </a>
         )}
