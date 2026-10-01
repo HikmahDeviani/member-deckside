@@ -1621,12 +1621,7 @@ export default function Dashboard() {
                     EXTENSION REQUEST PENDING
                   </strong>
 
-                  <span>
-                    Your request is being
-                    reviewed by the
-                    Deckside team.
-                  </span>
-                </div>
+                  </div>
               )}
 
             {!extensionLoading &&
