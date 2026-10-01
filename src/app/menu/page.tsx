@@ -1,154 +1,328 @@
 "use client";
 
-import { FormEvent, useState } from "react";
-import { createClient } from "../../lib/supabase/client";
+import Link from "next/link";
 import styles from "./page.module.css";
 
-export default function ForgotPassword() {
-  const supabase = createClient();
+const memberBeverages = [
+  {
+    id: 1,
+    name: "Matcha Colada",
+    image: "/images/menu_1.png",
+  },
+  {
+    id: 2,
+    name: "Butterscotch Creamy Latte",
+    image: "/images/menu_2.png",
+  },
+  {
+    id: 3,
+    name: "Sun Kiss Coffee",
+    image: "/images/menu_3.png",
+  },
+  {
+    id: 4,
+    name: "Mood Monday",
+    image: "/images/menu_4.png",
+  },
+  {
+    id: 5,
+    name: "Lemon Peach Iced Tea",
+    image: "/images/menu_5.png",
+  },
+  {
+    id: 6,
+    name: "Coffee Boom",
+    image: "/images/menu_6.png",
+  },
+  {
+    id: 7,
+    name: "Mango Matcha Latte",
+    image: "/images/menu_7.png",
+  },
+];
 
-  const [email, setEmail] = useState("");
-  const [loading, setLoading] = useState(false);
-  const [message, setMessage] = useState("");
-  const [error, setError] = useState("");
+const foodAddons = [
+  {
+    id: 101,
+    name: "Blueberry Cheesecake",
+    price: 58000,
+  },
+  {
+    id: 102,
+    name: "Tofu Salt Chili",
+    price: 48000,
+  },
+  {
+    id: 103,
+    name: "Spring Roll Oakwood",
+    price: 48000,
+  },
+  {
+    id: 104,
+    name: "Mixed Sampler",
+    price: 58000,
+  },
+  {
+    id: 105,
+    name: "Chili Baba Fries with Cheese",
+    price: 58000,
+  },
+  {
+    id: 106,
+    name: "Cheese French Fries",
+    price: 58000,
+  },
+  {
+    id: 107,
+    name: "Crispy Corn Salted Egg",
+    price: 58000,
+  },
+  {
+    id: 108,
+    name: "Chicken Karage",
+    price: 58000,
+  },
+  {
+    id: 109,
+    name: "Fried Cakwe Prawn with Beef Floss",
+    price: 58000,
+  },
+  {
+    id: 110,
+    name: "Tempe Mendoan Sambal Kecap",
+    price: 58000,
+  },
+  {
+    id: 111,
+    name: "Pisang Goreng Gula Aren",
+    price: 58000,
+  },
+  {
+    id: 112,
+    name: "French Toast",
+    price: 58000,
+  },
+];
 
-  const handleSubmit = async (event: FormEvent<HTMLFormElement>) => {
-    event.preventDefault();
+const beverageAddons = [
+  {
+    id: 201,
+    name: "Matcha Colada",
+    price: 58000,
+  },
+  {
+    id: 202,
+    name: "Butterscotch Creamy Latte",
+    price: 68000,
+  },
+  {
+    id: 203,
+    name: "Sun Kiss Coffee",
+    price: 68000,
+  },
+  {
+    id: 204,
+    name: "Mood Monday",
+    price: 68000,
+  },
+  {
+    id: 205,
+    name: "Lemon Peach Iced Tea",
+    price: 58000,
+  },
+  {
+    id: 206,
+    name: "Coffee Boom",
+    price: 68000,
+  },
+  {
+    id: 207,
+    name: "Mango Matcha Latte",
+    price: 58000,
+  },
+  {
+    id: 208,
+    name: "Matcha Passion",
+    price: 58000,
+  },
+  {
+    id: 209,
+    name: "Strawberry Splash",
+    price: 58000,
+  },
+  {
+    id: 210,
+    name: "Salted Caramel Crème Brule",
+    price: 68000,
+  },
+];
 
-    setLoading(true);
-    setMessage("");
-    setError("");
+const formatPrice = (price: number) => {
+  return new Intl.NumberFormat("id-ID", {
+    style: "currency",
+    currency: "IDR",
+    maximumFractionDigits: 0,
+  }).format(price);
+};
 
-    const cleanEmail = email.trim();
-
-    if (!cleanEmail) {
-      setError("Please enter your email address.");
-      setLoading(false);
-      return;
-    }
-
-    try {
-      const redirectTo =
-        `${window.location.origin}/reset-password`;
-
-      console.log("RESET EMAIL:", cleanEmail);
-      console.log("RESET REDIRECT:", redirectTo);
-
-      const { data, error } =
-        await supabase.auth.resetPasswordForEmail(
-          cleanEmail,
-          {
-            redirectTo,
-          }
-        );
-
-      console.log("RESET RESPONSE:", data);
-      console.log("RESET ERROR:", error);
-
-      if (error) {
-        setError(error.message);
-        setLoading(false);
-        return;
-      }
-
-      setMessage(
-        "Password reset link has been sent to your email. Please check your inbox."
-      );
-
-      setEmail("");
-    } catch (err) {
-      console.error("FORGOT PASSWORD ERROR:", err);
-
-      setError(
-        "Something went wrong. Please try again."
-      );
-    }
-
-    setLoading(false);
-  };
-
+export default function MenuPage() {
   return (
-    <main className={styles.page}>
+    <div className={styles.page}>
       <nav className={styles.navbar}>
-        <a href="/" className={styles.logo}>
+        <Link href="/" className={styles.logo}>
           Deckside
-        </a>
+        </Link>
 
         <div className={styles.menu}>
-          <a href="/membership">MEMBERSHIP</a>
-          <a href="/menu">MENU</a>
-          <a href="/sign-in">SIGN IN</a>
+          <Link href="/membership">Membership</Link>
+          <Link href="/menu">Menu</Link>
+          <Link href="/about">About</Link>
         </div>
       </nav>
 
-      <section className={styles.section}>
-        <div className={styles.card}>
-          <p className={styles.label}>
-            DECKSIDE MEMBERSHIP
-          </p>
+      <main className={styles.menuSection}>
+        <section className={styles.heading}>
+          <div className={styles.label}>DECKSIDE MENU</div>
 
-          <h1>Reset Your Password</h1>
+          <h1>
+            Something good
+            <br />
+            for every moment.
+          </h1>
 
           <p className={styles.description}>
-            Enter the email address associated with your
-            Deckside membership. We will send you a link
-            to reset your password.
+            Explore our selection of complimentary member beverages and
+            additional food and beverage options available at Deckside.
           </p>
+        </section>
 
-          {error && (
-            <div className={styles.error}>
-              {error}
-            </div>
-          )}
+        <section className={styles.category}>
+          <div className={styles.categoryHeader}>
+            <div>
+              <div className={styles.categoryLabel}>MEMBER BENEFIT</div>
 
-          {message && (
-            <div className={styles.success}>
-              {message}
-            </div>
-          )}
-
-          <form
-            className={styles.form}
-            onSubmit={handleSubmit}
-          >
-            <div className={styles.formGroup}>
-              <label htmlFor="email">
-                Email Address
-              </label>
-
-              <input
-                id="email"
-                name="email"
-                type="email"
-                value={email}
-                onChange={(event) =>
-                  setEmail(event.target.value)
-                }
-                placeholder="Enter your email address"
-                autoComplete="email"
-                required
-                disabled={loading}
-              />
+              <h2>Member Beverage</h2>
             </div>
 
-            <button
-              type="submit"
-              className={styles.resetButton}
-              disabled={loading}
-            >
-              {loading
-                ? "SENDING..."
-                : "SEND RESET LINK"}
-            </button>
-          </form>
+            <div className={styles.categoryInfo}>
+              <div>Choose one complimentary beverage every day.</div>
 
-          <div className={styles.back}>
-            <a href="/sign-in">
-              BACK TO SIGN IN
-            </a>
+              <div className={styles.discount}>
+                1 beverage / day
+              </div>
+            </div>
           </div>
-        </div>
-      </section>
-    </main>
+
+          <div className={styles.menuGrid}>
+            {memberBeverages.map((beverage) => (
+              <article
+                key={beverage.id}
+                className={styles.menuCard}
+              >
+                <img
+                  src={beverage.image}
+                  alt={beverage.name}
+                  className={styles.menuImage}
+                />
+
+                <div className={styles.cardContent}>
+                  <h3>{beverage.name}</h3>
+
+                  <p className={styles.complimentary}>
+                    Complimentary for Deckside Members
+                  </p>
+                </div>
+              </article>
+            ))}
+          </div>
+        </section>
+
+        <section className={styles.category}>
+          <div className={styles.categoryHeader}>
+            <div>
+              <div className={styles.categoryLabel}>ADDITIONAL MENU</div>
+
+              <h2>Add-ons</h2>
+            </div>
+
+            <div className={styles.categoryInfo}>
+              <div>Enjoy more from our selection.</div>
+
+              <div className={styles.discount}>
+                21% member discount
+              </div>
+            </div>
+          </div>
+
+          <div className={styles.addonCategory}>
+            <div className={styles.addonCategoryHeader}>
+              <h3>Food Add-ons</h3>
+
+              <span>Available for Deckside Members</span>
+            </div>
+
+            <div className={styles.addonList}>
+              {foodAddons.map((item) => (
+                <article
+                  key={item.id}
+                  className={styles.addonItem}
+                >
+                  <div className={styles.addonInfo}>
+                    <h3>{item.name}</h3>
+
+                    <p>
+                      Enjoy this selection as an additional item to
+                      your complimentary daily beverage.
+                    </p>
+                  </div>
+
+                  <div className={styles.addonPrice}>
+                    <strong>{formatPrice(item.price)}</strong>
+
+                    <span className={styles.memberPriceLabel}>
+                      Member price available
+                    </span>
+                  </div>
+                </article>
+              ))}
+            </div>
+          </div>
+
+          <div className={styles.addonCategory}>
+            <div className={styles.addonCategoryHeader}>
+              <h3>Beverage Add-ons</h3>
+
+              <span>Available for Deckside Members</span>
+            </div>
+
+            <div className={styles.addonList}>
+              {beverageAddons.map((item) => (
+                <article
+                  key={item.id}
+                  className={styles.addonItem}
+                >
+                  <div className={styles.addonInfo}>
+                    <h3>{item.name}</h3>
+
+                    <p>
+                      Explore another beverage option beyond your
+                      complimentary daily selection.
+                    </p>
+                  </div>
+
+                  <div className={styles.addonPrice}>
+                    <strong>{formatPrice(item.price)}</strong>
+
+                    <span className={styles.memberPriceLabel}>
+                      Member price available
+                    </span>
+                  </div>
+                </article>
+              ))}
+            </div>
+          </div>
+        </section>
+      </main>
+    </div>
   );
 }
