@@ -9,6 +9,11 @@ import styles from "./page.module.css";
 type MembershipStatus = "PENDING" | "ACTIVE" | "EXPIRED";
 type PaymentStatus = "PENDING" | "VERIFIED";
 
+type ExtensionRequestStatus =
+  | "PENDING"
+  | "APPROVED"
+  | "REJECTED";
+
 type Profile = {
   id: string;
   title: string | null;
@@ -25,6 +30,15 @@ type Membership = {
   payment_status: PaymentStatus;
   start_date: string | null;
   end_date: string | null;
+};
+
+type ExtensionRequest = {
+  id: string;
+  user_id: string;
+  status: ExtensionRequestStatus;
+  payment_status: PaymentStatus;
+  requested_at: string;
+  processed_at: string | null;
 };
 
 type CartItem = {
@@ -320,6 +334,12 @@ export default function Dashboard() {
   const [startDate, setStartDate] = useState<string | null>(null);
   const [endDate, setEndDate] = useState<string | null>(null);
 
+  const [extensionRequest, setExtensionRequest] =
+    useState<ExtensionRequest | null>(null);
+
+  const [extensionLoading, setExtensionLoading] =
+    useState(false);
+
   const [claimWindowOpen, setClaimWindowOpen] = useState(false);
   const [claimedToday, setClaimedToday] = useState(false);
   const [claimedBeverage, setClaimedBeverage] = useState("");
@@ -360,6 +380,19 @@ export default function Dashboard() {
   const isActiveMember =
     membershipStatus === "ACTIVE" &&
     paymentStatus === "VERIFIED";
+
+  const hasPendingExtension =
+    extensionRequest?.status === "PENDING";
+
+  const hasApprovedExtension =
+    extensionRequest?.status === "APPROVED";
+
+  const hasRejectedExtension =
+    extensionRequest?.status === "REJECTED";
+
+  const canRequestExtension =
+    !hasPendingExtension &&
+    !hasApprovedExtension;
 
   const refreshClaimWindow = () => {
     setClaimWindowOpen(isBeverageClaimTime());
@@ -478,6 +511,66 @@ export default function Dashboard() {
     setPaymentStatus(membership.payment_status);
     setStartDate(membership.start_date);
     setEndDate(membership.end_date);
+  };
+
+  const loadExtensionRequest = async (userId: string) => {
+    setExtensionLoading(true);
+
+    try {
+      const { data, error: extensionLoadError } =
+        await supabase
+          .from("membership_extension_requests")
+          .select(
+            "id, user_id, status, payment_status, requested_at, processed_at"
+          )
+          .eq("user_id", userId)
+          .order("requested_at", {
+            ascending: false,
+          })
+          .limit(1);
+
+      if (extensionLoadError) {
+        console.error(
+          "LOAD EXTENSION REQUEST ERROR:",
+          extensionLoadError
+        );
+
+        setExtensionRequest(null);
+        return;
+      }
+
+      if (!data || data.length === 0) {
+        setExtensionRequest(null);
+        return;
+      }
+
+      const row = data[0];
+
+      const safeStatus: ExtensionRequestStatus =
+        row.status === "APPROVED"
+          ? "APPROVED"
+          : row.status === "REJECTED"
+            ? "REJECTED"
+            : "PENDING";
+
+      const safePaymentStatus: PaymentStatus =
+        row.payment_status === "VERIFIED"
+          ? "VERIFIED"
+          : "PENDING";
+
+      setExtensionRequest({
+        id: String(row.id),
+        user_id: String(row.user_id),
+        status: safeStatus,
+        payment_status: safePaymentStatus,
+        requested_at: String(row.requested_at),
+        processed_at: row.processed_at
+          ? String(row.processed_at)
+          : null,
+      });
+    } finally {
+      setExtensionLoading(false);
+    }
   };
 
   const loadTodayClaim = async (userId: string) => {
@@ -618,6 +711,7 @@ export default function Dashboard() {
 
       await Promise.all([
         loadMembership(user.id),
+        loadExtensionRequest(user.id),
         loadTodayClaim(user.id),
         loadOrderHistory(user.id),
       ]);
@@ -1170,6 +1264,20 @@ export default function Dashboard() {
       return;
     }
 
+    if (hasPendingExtension) {
+      setExtensionError(
+        "Your membership extension request is already being reviewed."
+      );
+      return;
+    }
+
+    if (hasApprovedExtension) {
+      setExtensionError(
+        "Your membership extension has already been processed."
+      );
+      return;
+    }
+
     setExtensionSubmitting(true);
     setExtensionError("");
 
@@ -1194,7 +1302,10 @@ export default function Dashboard() {
         }
       );
 
-      const result = await response.json();
+      const result =
+        await response.json().catch(
+          () => ({})
+        );
 
       if (!response.ok) {
         setExtensionError(
@@ -1203,6 +1314,22 @@ export default function Dashboard() {
         );
         return;
       }
+
+      setExtensionRequest({
+        id: String(
+          result?.request?.id ||
+            result?.id ||
+            `temporary-${Date.now()}`
+        ),
+        user_id: currentUserId,
+        status: "PENDING",
+        payment_status: "PENDING",
+        requested_at:
+          result?.request?.requestedAt ||
+          result?.request?.requested_at ||
+          new Date().toISOString(),
+        processed_at: null,
+      });
 
       setExtendConfirmed(true);
     } catch (extensionRequestError) {
@@ -1473,28 +1600,95 @@ export default function Dashboard() {
               </p>
             )}
 
-            {(membershipStatus ===
-              "EXPIRED" ||
-              (membershipStatus ===
-                "PENDING" &&
-                paymentStatus ===
-                  "VERIFIED")) && (
-              <button
-                type="button"
+            {extensionLoading && (
+              <p
                 className={
-                  styles.extendButton
+                  styles.extensionStatusText
                 }
-                onClick={() => {
-                  setExtensionError("");
-                  setExtendConfirmed(
-                    false
-                  );
-                  setExtendOpen(true);
-                }}
               >
-                EXTEND MEMBERSHIP
-              </button>
+                Checking extension status...
+              </p>
             )}
+
+            {!extensionLoading &&
+              hasPendingExtension && (
+                <div
+                  className={
+                    styles.extensionPending
+                  }
+                >
+                  <strong>
+                    EXTENSION REQUEST PENDING
+                  </strong>
+
+                  <span>
+                    Your request is being
+                    reviewed by the
+                    Deckside team.
+                  </span>
+                </div>
+              )}
+
+            {!extensionLoading &&
+              hasRejectedExtension && (
+                <div
+                  className={
+                    styles.extensionRejected
+                  }
+                >
+                  <strong>
+                    EXTENSION REQUEST REJECTED
+                  </strong>
+
+                  <span>
+                    You may submit a new
+                    extension request.
+                  </span>
+                </div>
+              )}
+
+            {!extensionLoading &&
+              hasApprovedExtension && (
+                <div
+                  className={
+                    styles.extensionApproved
+                  }
+                >
+                  <strong>
+                    EXTENSION PROCESSED
+                  </strong>
+
+                  <span>
+                    Your membership extension
+                    has been processed.
+                  </span>
+                </div>
+              )}
+
+            {!extensionLoading &&
+              canRequestExtension &&
+              (membershipStatus ===
+                "EXPIRED" ||
+                (membershipStatus ===
+                  "PENDING" &&
+                  paymentStatus ===
+                    "VERIFIED")) && (
+                <button
+                  type="button"
+                  className={
+                    styles.extendButton
+                  }
+                  onClick={() => {
+                    setExtensionError("");
+                    setExtendConfirmed(
+                      false
+                    );
+                    setExtendOpen(true);
+                  }}
+                >
+                  EXTEND MEMBERSHIP
+                </button>
+              )}
           </div>
         </section>
 
@@ -2782,7 +2976,7 @@ export default function Dashboard() {
                 </p>
 
                 <h2>
-                  Thank You
+                  Request Received
                 </h2>
 
                 <p
@@ -2792,10 +2986,28 @@ export default function Dashboard() {
                 >
                   Your membership
                   extension request has
-                  been submitted. The
-                  Deckside team will
-                  verify your request.
+                  been submitted and is
+                  now pending review.
                 </p>
+
+                <div
+                  className={
+                    styles.extensionPlan
+                  }
+                >
+                  <p>
+                    REQUEST STATUS
+                  </p>
+
+                  <strong>
+                    PENDING
+                  </strong>
+
+                  <span>
+                    The Deckside team will
+                    review your request.
+                  </span>
+                </div>
 
                 <button
                   type="button"
