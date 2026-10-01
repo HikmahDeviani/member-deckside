@@ -12,7 +12,7 @@ const memberBeverages = [
   {
     id: 2,
     name: "Butterscotch Creamy Latte",
-    image: "/images/menu_2.png",
+    image: "/images/menu_8.png",
   },
   {
     id: 3,
