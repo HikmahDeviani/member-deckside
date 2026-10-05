@@ -26,7 +26,7 @@ export default function Home() {
 
           <h2>Deckside Member</h2>
 
-          <div className={styles.pric`e}>
+          <div className={styles.price}>
             <span>IDR</span> 288.000
           </div>
 

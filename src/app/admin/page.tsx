@@ -17,6 +17,11 @@ type OrderStatus =
   | "DELIVERED"
   | "CANCELLED";
 
+type ExtensionRequestStatus =
+  | "PENDING"
+  | "APPROVED"
+  | "REJECTED";
+
 type Member = {
   id: string;
   userId: string;
@@ -31,6 +36,70 @@ type Member = {
   paymentStatus: PaymentStatus;
   membershipStatus: MembershipStatus;
   source: "ONLINE" | "MANUAL";
+};
+
+type Menu = {
+  id: string | number;
+  name: string;
+  category: "FOOD" | "BEVERAGE";
+  price: number;
+  stock: number;
+  is_available: boolean;
+  image_url: string | null;
+};
+
+type MenuForm = {
+  name: string;
+  category: "FOOD" | "BEVERAGE";
+  price: string;
+  stock: string;
+  isAvailable: boolean;
+  imageUrl: string;
+};
+
+
+const legacyMenuItems: Menu[] = [
+  { id: 101, name: "Blueberry Cheesecake", category: "FOOD", price: 58000, stock: 99, is_available: true, image_url: null },
+  { id: 102, name: "Tofu Salt Chili", category: "FOOD", price: 48000, stock: 99, is_available: true, image_url: null },
+  { id: 103, name: "Spring Roll Oakwood", category: "FOOD", price: 48000, stock: 99, is_available: true, image_url: null },
+  { id: 104, name: "Mixed Sampler", category: "FOOD", price: 58000, stock: 99, is_available: true, image_url: null },
+  { id: 105, name: "Chili Baba Fries with Cheese", category: "FOOD", price: 58000, stock: 99, is_available: true, image_url: null },
+  { id: 106, name: "Cheese French Fries", category: "FOOD", price: 58000, stock: 99, is_available: true, image_url: null },
+  { id: 107, name: "Crispy Corn Salted Egg", category: "FOOD", price: 58000, stock: 99, is_available: true, image_url: null },
+  { id: 108, name: "Chicken Karage", category: "FOOD", price: 58000, stock: 99, is_available: true, image_url: null },
+  { id: 109, name: "Fried Cakwe Prawn with Beef Floss", category: "FOOD", price: 58000, stock: 99, is_available: true, image_url: null },
+  { id: 110, name: "Tempe Mendoan Sambal Kecap", category: "FOOD", price: 58000, stock: 99, is_available: true, image_url: null },
+  { id: 111, name: "Pisang Goreng Gula Aren", category: "FOOD", price: 58000, stock: 99, is_available: true, image_url: null },
+  { id: 112, name: "French Toast", category: "FOOD", price: 58000, stock: 99, is_available: true, image_url: null },
+  { id: 201, name: "Matcha Colada", category: "BEVERAGE", price: 58000, stock: 99, is_available: true, image_url: "/images/menu_6.png" },
+  { id: 202, name: "Butterscotch Creamy Latte", category: "BEVERAGE", price: 68000, stock: 99, is_available: true, image_url: null },
+  { id: 203, name: "Sun Kiss Coffee", category: "BEVERAGE", price: 68000, stock: 99, is_available: true, image_url: "/images/menu_7.png" },
+  { id: 204, name: "Mood Monday", category: "BEVERAGE", price: 68000, stock: 99, is_available: true, image_url: null },
+  { id: 205, name: "Lemon Peach Iced Tea", category: "BEVERAGE", price: 58000, stock: 99, is_available: true, image_url: "/images/menu_1.png" },
+  { id: 206, name: "Coffee Boom", category: "BEVERAGE", price: 68000, stock: 99, is_available: true, image_url: "/images/menu_5.png" },
+  { id: 207, name: "Mango Matcha Latte", category: "BEVERAGE", price: 58000, stock: 99, is_available: true, image_url: "/images/menu_3.png" },
+  { id: 208, name: "Matcha Passion", category: "BEVERAGE", price: 58000, stock: 99, is_available: true, image_url: null },
+  { id: 209, name: "Strawberry Splash", category: "BEVERAGE", price: 58000, stock: 99, is_available: true, image_url: "/images/menu_4.png" },
+  { id: 210, name: "Salted Caramel Crème Brule", category: "BEVERAGE", price: 68000, stock: 99, is_available: true, image_url: "/images/menu_8.png" },
+];
+
+const mergeMenus = (databaseMenus: Menu[]) => {
+  const merged = new Map<string, Menu>();
+  legacyMenuItems.forEach((item) => merged.set(item.name.trim().toLowerCase(), item));
+  databaseMenus.forEach((item) => merged.set(item.name.trim().toLowerCase(), item));
+  return Array.from(merged.values()).sort((a, b) => {
+    if (a.category !== b.category) return a.category === "FOOD" ? -1 : 1;
+    return a.name.localeCompare(b.name);
+  });
+};
+
+const emptyMenuForm: MenuForm = {
+  name: "",
+  category: "FOOD",
+  price: "",
+  stock: "0",
+  isAvailable: true,
+  imageUrl: "",
 };
 
 type Order = {
@@ -55,6 +124,23 @@ type BeverageClaim = {
   beverage: string;
   date: string;
   time: string;
+};
+
+type ExtensionRequest = {
+  id: string;
+  userId: string;
+  memberId: string;
+  title: string;
+  memberName: string;
+  email: string;
+  requestStatus: ExtensionRequestStatus;
+  paymentStatus: PaymentStatus;
+  requestedAt: string;
+  processedAt: string | null;
+  currentMembershipStatus: MembershipStatus;
+  currentPaymentStatus: PaymentStatus;
+  currentStartDate: string | null;
+  currentEndDate: string | null;
 };
 
 type DateFilter =
@@ -248,6 +334,16 @@ export default function AdminPage() {
   const [members, setMembers] = useState<Member[]>([]);
   const [orders, setOrders] = useState<Order[]>([]);
   const [claims, setClaims] = useState<BeverageClaim[]>([]);
+  const [extensionRequests, setExtensionRequests] = useState<
+    ExtensionRequest[]
+  >([]);
+
+  const [menus, setMenus] = useState<Menu[]>([]);
+  const [menuLoading, setMenuLoading] = useState(false);
+  const [menuSaving, setMenuSaving] = useState(false);
+  const [menuModalOpen, setMenuModalOpen] = useState(false);
+  const [selectedMenu, setSelectedMenu] = useState<Menu | null>(null);
+  const [menuForm, setMenuForm] = useState<MenuForm>(emptyMenuForm);
 
   const [dateFilter, setDateFilter] =
     useState<DateFilter>("TODAY");
@@ -307,6 +403,269 @@ export default function AdminPage() {
     }, 3500);
   };
 
+  const getAdminAccessToken = async () => {
+    const {
+      data: { session },
+      error,
+    } = await supabase.auth.getSession();
+
+    if (error) {
+      throw new Error(
+        `Unable to get admin session: ${error.message}`
+      );
+    }
+
+    if (!session?.access_token) {
+      throw new Error(
+        "Admin session tidak ditemukan. Silakan login kembali."
+      );
+    }
+
+    return session.access_token;
+  };
+
+  const normalizeMenu = (row: any): Menu => ({
+    id: row.id,
+    name: String(row.name ?? ""),
+    category:
+      String(row.category ?? "FOOD").toUpperCase() === "BEVERAGE"
+        ? "BEVERAGE"
+        : "FOOD",
+    price: Number(row.price ?? 0),
+    stock: Math.max(0, Number(row.stock ?? 0)),
+    is_available: row.is_available ?? row.isAvailable ?? true,
+    image_url: row.image_url ?? row.imageUrl ?? null,
+  });
+
+  const loadMenus = async () => {
+    setMenuLoading(true);
+
+    try {
+      let databaseMenus: Menu[] = [];
+      let apiLoaded = false;
+
+      try {
+        const accessToken = await getAdminAccessToken();
+        const response = await fetch("/api/admin/menu", {
+          method: "GET",
+          headers: { Authorization: `Bearer ${accessToken}` },
+          cache: "no-store",
+        });
+        const result = await response.json().catch(() => ({}));
+
+        if (response.ok) {
+          const rows = Array.isArray(result) ? result : result.menus ?? result.data ?? [];
+          databaseMenus = rows.map(normalizeMenu).filter((item: Menu) => item.name);
+          apiLoaded = true;
+        } else {
+          console.warn("MENU API GET FAILED:", result.error || response.statusText);
+        }
+      } catch (apiError) {
+        console.warn("MENU API GET ERROR:", apiError);
+      }
+
+      // The API is preferred, but the admin page should still work if the route/RLS is not ready.
+      if (!apiLoaded) {
+        const { data, error } = await supabase
+          .from("menus")
+          .select("id, name, category, price, stock, is_available, image_url")
+          .order("category", { ascending: true })
+          .order("name", { ascending: true });
+
+        if (!error) {
+          databaseMenus = (data ?? []).map(normalizeMenu).filter((item: Menu) => item.name);
+        } else {
+          console.warn("DIRECT MENU QUERY FAILED:", error);
+        }
+      }
+
+      setMenus(mergeMenus(databaseMenus));
+      setErrorMessage("");
+    } catch (error) {
+      console.error("LOAD MENUS ERROR:", error);
+      // Never wipe the old menu just because the new menu API is unavailable.
+      setMenus(legacyMenuItems);
+      setErrorMessage("");
+    } finally {
+      setMenuLoading(false);
+    }
+  };
+
+  const openAddMenu = () => {
+    setSelectedMenu(null);
+    setMenuForm(emptyMenuForm);
+    setMenuModalOpen(true);
+  };
+
+  const openEditMenu = (menu: Menu) => {
+    setSelectedMenu(menu);
+    setMenuForm({
+      name: menu.name,
+      category: menu.category,
+      price: String(menu.price),
+      stock: String(menu.stock),
+      isAvailable: menu.is_available,
+      imageUrl: menu.image_url ?? "",
+    });
+    setMenuModalOpen(true);
+  };
+
+  const closeMenuModal = () => {
+    setMenuModalOpen(false);
+    setSelectedMenu(null);
+    setMenuForm(emptyMenuForm);
+  };
+
+  const saveMenu = async () => {
+    const name = menuForm.name.trim();
+    const price = Number(menuForm.price);
+    const stock = Number(menuForm.stock);
+
+    if (!name) {
+      showNotification("Menu name is required.");
+      return;
+    }
+
+    if (!Number.isFinite(price) || price < 0) {
+      showNotification("Please enter a valid price.");
+      return;
+    }
+
+    if (!Number.isInteger(stock) || stock < 0) {
+      showNotification(
+        "Stock must be a whole number 0 or higher."
+      );
+      return;
+    }
+
+    setMenuSaving(true);
+    setErrorMessage("");
+
+    try {
+      const menuPayload = {
+        name,
+        category: menuForm.category,
+        price: Math.round(price),
+        stock,
+        is_available: menuForm.isAvailable,
+        image_url: menuForm.imageUrl.trim() || null,
+      };
+
+      if (selectedMenu) {
+        // Legacy menu items use numeric IDs and are not stored in the menus table.
+        // When one of those is edited, create its DB-backed version instead of
+        // running an UPDATE against an ID that does not exist in the table.
+        if (typeof selectedMenu.id === "number") {
+          const { data, error } = await supabase
+            .from("menus")
+            .insert(menuPayload)
+            .select("id, name, category, price, stock, is_available, image_url")
+            .single();
+
+          if (error) {
+            console.error("CREATE EDITED LEGACY MENU ERROR:", error);
+            throw new Error(
+              `Unable to update menu item: ${error.message}`
+            );
+          }
+
+          console.log("LEGACY MENU CONVERTED TO DATABASE MENU:", data);
+          showNotification("Menu item has been updated.");
+        } else {
+          const { data, error } = await supabase
+            .from("menus")
+            .update(menuPayload)
+            .eq("id", selectedMenu.id)
+            .select("id, name, category, price, stock, is_available, image_url")
+            .maybeSingle();
+
+          if (error) {
+            console.error("UPDATE MENU DATABASE ERROR:", error);
+            throw new Error(
+              `Unable to update menu item: ${error.message}`
+            );
+          }
+
+          // If the ID exists but no row was updated, surface a useful error
+          // instead of silently pretending the edit succeeded.
+          if (!data) {
+            throw new Error(
+              "Unable to update menu item: menu data was not found."
+            );
+          }
+
+          showNotification("Menu item has been updated.");
+        }
+      } else {
+        const { error } = await supabase
+          .from("menus")
+          .insert(menuPayload);
+
+        if (error) {
+          console.error("CREATE MENU DATABASE ERROR:", error);
+          throw new Error(
+            `Unable to create menu item: ${error.message}`
+          );
+        }
+
+        showNotification("Menu item has been created.");
+      }
+
+      await loadMenus();
+      closeMenuModal();
+    } catch (error) {
+      console.error("SAVE MENU ERROR:", error);
+
+      showNotification(
+        error instanceof Error
+          ? error.message
+          : "Unable to save menu item."
+      );
+    } finally {
+      setMenuSaving(false);
+    }
+  };
+
+  const deleteMenu = async (menu: Menu) => {
+    if (menuSaving) return;
+
+    const confirmed = window.confirm(
+      `Delete ${menu.name}? This menu item will no longer be available to members.`
+    );
+
+    if (!confirmed) return;
+
+    setMenuSaving(true);
+    setErrorMessage("");
+
+    try {
+      const { error } = await supabase
+        .from("menus")
+        .delete()
+        .eq("id", menu.id);
+
+      if (error) {
+        console.error("DELETE MENU DATABASE ERROR:", error);
+        throw new Error(
+          `Unable to delete menu item: ${error.message}`
+        );
+      }
+
+      await loadMenus();
+      showNotification("Menu item has been deleted.");
+    } catch (error) {
+      console.error("DELETE MENU ERROR:", error);
+
+      showNotification(
+        error instanceof Error
+          ? error.message
+          : "Unable to delete menu item."
+      );
+    } finally {
+      setMenuSaving(false);
+    }
+  };
+
   const loadAdminData = async () => {
     setLoading(true);
     setErrorMessage("");
@@ -361,6 +720,8 @@ export default function AdminPage() {
         loadMembers(),
         loadOrders(),
         loadClaims(),
+        loadExtensionRequests(),
+        loadMenus(),
       ]);
     } catch (error) {
       console.error(
@@ -553,11 +914,6 @@ export default function AdminPage() {
         return;
       }
 
-      console.log(
-        "ORDERS:",
-        orderRows
-      );
-
       if (
         !orderRows ||
         orderRows.length === 0
@@ -709,11 +1065,6 @@ export default function AdminPage() {
           }
         );
 
-      console.log(
-        "MAPPED ORDERS:",
-        mappedOrders
-      );
-
       setOrders(mappedOrders);
     } catch (error) {
       console.error(
@@ -733,10 +1084,6 @@ export default function AdminPage() {
 
   const loadClaims = async () => {
     try {
-      console.log(
-        "LOADING CLAIM HISTORY..."
-      );
-
       const {
         data: claimOrders,
         error: claimOrderError,
@@ -768,19 +1115,10 @@ export default function AdminPage() {
         return;
       }
 
-      console.log(
-        "CLAIM ORDERS:",
-        claimOrders
-      );
-
       if (
         !claimOrders ||
         claimOrders.length === 0
       ) {
-        console.log(
-          "NO CLAIM ORDERS FOUND"
-        );
-
         setClaims([]);
         return;
       }
@@ -828,20 +1166,12 @@ export default function AdminPage() {
           "CLAIM PROFILE ERROR:",
           profileError
         );
-
-        setErrorMessage(
-          `Unable to load claim member data: ${profileError.message}`
-        );
       }
 
       if (itemError) {
         console.error(
           "CLAIM ITEM ERROR:",
           itemError
-        );
-
-        setErrorMessage(
-          `Unable to load claimed beverage: ${itemError.message}`
         );
       }
 
@@ -903,9 +1233,6 @@ export default function AdminPage() {
                 order.id
               ) ?? [];
 
-            const beverage =
-              items[0];
-
             return {
               id: order.id,
               userId:
@@ -917,7 +1244,7 @@ export default function AdminPage() {
                 profile?.full_name ??
                 "Unknown Member",
               beverage:
-                beverage?.item_name ??
+                items[0]?.item_name ??
                 "Complimentary Beverage",
               date:
                 getJakartaDate(
@@ -930,11 +1257,6 @@ export default function AdminPage() {
             };
           }
         );
-
-      console.log(
-        "CLAIM HISTORY:",
-        mappedClaims
-      );
 
       setClaims(
         mappedClaims
@@ -955,6 +1277,136 @@ export default function AdminPage() {
     }
   };
 
+  const loadExtensionRequests = async () => {
+    try {
+      console.log(
+        "LOADING MEMBERSHIP EXTENSION REQUESTS..."
+      );
+
+      const accessToken =
+        await getAdminAccessToken();
+
+      const response = await fetch(
+        "/api/admin/extensions",
+        {
+          method: "GET",
+          headers: {
+            Authorization: `Bearer ${accessToken}`,
+          },
+          cache: "no-store",
+        }
+      );
+
+      const result =
+        await response.json().catch(
+          () => ({})
+        );
+
+      if (!response.ok) {
+        console.error(
+          "EXTENSION REQUEST ERROR:",
+          result
+        );
+
+        throw new Error(
+          result.error ||
+            "Unable to load membership extension requests."
+        );
+      }
+
+      console.log(
+        "EXTENSION REQUESTS:",
+        result.requests
+      );
+
+      setExtensionRequests(
+        (result.requests ?? []) as ExtensionRequest[]
+      );
+    } catch (error) {
+      console.error(
+        "LOAD EXTENSION REQUESTS ERROR:",
+        error
+      );
+
+      setExtensionRequests([]);
+
+      setErrorMessage(
+        error instanceof Error
+          ? `Unable to load extension requests: ${error.message}`
+          : "Unable to load extension requests."
+      );
+    }
+  };
+
+  const handleExtensionAction = async (
+    requestId: string,
+    action: "APPROVE" | "REJECT"
+  ) => {
+    setActionLoading(true);
+    setErrorMessage("");
+
+    try {
+      const accessToken =
+        await getAdminAccessToken();
+
+      const response = await fetch(
+        "/api/admin/extensions",
+        {
+          method: "PUT",
+          headers: {
+            "Content-Type": "application/json",
+            Authorization: `Bearer ${accessToken}`,
+          },
+          body: JSON.stringify({
+            requestId,
+            action,
+          }),
+        }
+      );
+
+      const result =
+        await response.json().catch(
+          () => ({})
+        );
+
+      if (!response.ok) {
+        console.error(
+          "EXTENSION ACTION ERROR:",
+          result
+        );
+
+        throw new Error(
+          result.error ||
+            `Unable to ${action.toLowerCase()} extension request.`
+        );
+      }
+
+      await Promise.all([
+        loadExtensionRequests(),
+        loadMembers(),
+      ]);
+
+      showNotification(
+        action === "APPROVE"
+          ? "Membership extension has been approved."
+          : "Membership extension request has been rejected."
+      );
+    } catch (error) {
+      console.error(
+        "HANDLE EXTENSION ACTION ERROR:",
+        error
+      );
+
+      showNotification(
+        error instanceof Error
+          ? error.message
+          : "Unable to process extension request."
+      );
+    } finally {
+      setActionLoading(false);
+    }
+  };
+
   const dateRange = useMemo(() => {
     if (dateFilter === "TODAY") {
       return {
@@ -963,15 +1415,9 @@ export default function AdminPage() {
       };
     }
 
-    if (
-      dateFilter ===
-      "YESTERDAY"
-    ) {
+    if (dateFilter === "YESTERDAY") {
       const yesterday =
-        shiftDate(
-          today,
-          -1
-        );
+        shiftDate(today, -1);
 
       return {
         from: yesterday,
@@ -979,10 +1425,7 @@ export default function AdminPage() {
       };
     }
 
-    if (
-      dateFilter ===
-      "THIS_WEEK"
-    ) {
+    if (dateFilter === "THIS_WEEK") {
       const current =
         new Date(
           `${today}T12:00:00Z`
@@ -1008,10 +1451,7 @@ export default function AdminPage() {
       };
     }
 
-    if (
-      dateFilter ===
-      "THIS_MONTH"
-    ) {
+    if (dateFilter === "THIS_MONTH") {
       return {
         from:
           today.slice(0, 8) +
@@ -1020,10 +1460,7 @@ export default function AdminPage() {
       };
     }
 
-    if (
-      dateFilter ===
-      "LAST_MONTH"
-    ) {
+    if (dateFilter === "LAST_MONTH") {
       const firstCurrentMonth =
         new Date(
           `${today.slice(
@@ -1033,8 +1470,7 @@ export default function AdminPage() {
         );
 
       firstCurrentMonth.setUTCMonth(
-        firstCurrentMonth.getUTCMonth() -
-          1
+        firstCurrentMonth.getUTCMonth() - 1
       );
 
       const firstDay =
@@ -1074,44 +1510,41 @@ export default function AdminPage() {
     today,
   ]);
 
-  const filteredOrders = useMemo(() => {
-    return orders.filter(
-      (order) =>
-        order.date >=
-          dateRange.from &&
-        order.date <=
-          dateRange.to
-    );
-  }, [
-    orders,
-    dateRange,
-  ]);
+  const filteredOrders = useMemo(
+    () =>
+      orders.filter(
+        (order) =>
+          order.date >=
+            dateRange.from &&
+          order.date <=
+            dateRange.to
+      ),
+    [orders, dateRange]
+  );
 
-  const filteredClaims = useMemo(() => {
-    return claims.filter(
-      (claim) =>
-        claim.date >=
-          dateRange.from &&
-        claim.date <=
-          dateRange.to
-    );
-  }, [
-    claims,
-    dateRange,
-  ]);
+  const filteredClaims = useMemo(
+    () =>
+      claims.filter(
+        (claim) =>
+          claim.date >=
+            dateRange.from &&
+          claim.date <=
+            dateRange.to
+      ),
+    [claims, dateRange]
+  );
 
-  const filteredMembers = useMemo(() => {
-    return members.filter(
-      (member) =>
-        member.registrationDate >=
-          dateRange.from &&
-        member.registrationDate <=
-          dateRange.to
-    );
-  }, [
-    members,
-    dateRange,
-  ]);
+  const filteredMembers = useMemo(
+    () =>
+      members.filter(
+        (member) =>
+          member.registrationDate >=
+            dateRange.from &&
+          member.registrationDate <=
+            dateRange.to
+      ),
+    [members, dateRange]
+  );
 
   const activeMembers =
     members.filter(
@@ -1124,6 +1557,13 @@ export default function AdminPage() {
     members.filter(
       (member) =>
         member.paymentStatus ===
+        "PENDING"
+    ).length;
+
+  const pendingExtensionRequests =
+    extensionRequests.filter(
+      (request) =>
+        request.requestStatus ===
         "PENDING"
     ).length;
 
@@ -1194,9 +1634,7 @@ export default function AdminPage() {
         })
         .filter(
           (value) =>
-            !Number.isNaN(
-              value
-            )
+            !Number.isNaN(value)
         );
 
     const nextNumber =
@@ -1250,27 +1688,6 @@ export default function AdminPage() {
     });
   };
 
-  const getAdminAccessToken = async () => {
-    const {
-      data: { session },
-      error,
-    } = await supabase.auth.getSession();
-
-    if (error) {
-      throw new Error(
-        `Unable to get admin session: ${error.message}`
-      );
-    }
-
-    if (!session?.access_token) {
-      throw new Error(
-        "Admin session tidak ditemukan. Silakan login kembali."
-      );
-    }
-
-    return session.access_token;
-  };
-
   const addMember = async () => {
     if (
       !addMemberForm.name.trim() ||
@@ -1283,7 +1700,10 @@ export default function AdminPage() {
       return;
     }
 
-    if (addMemberForm.password.length < 6) {
+    if (
+      addMemberForm.password.length <
+      6
+    ) {
       showNotification(
         "Password must contain at least 6 characters."
       );
@@ -1294,7 +1714,8 @@ export default function AdminPage() {
     setErrorMessage("");
 
     try {
-      const accessToken = await getAdminAccessToken();
+      const accessToken =
+        await getAdminAccessToken();
 
       const response = await fetch(
         "/api/admin/members",
@@ -1306,18 +1727,29 @@ export default function AdminPage() {
           },
           body: JSON.stringify({
             memberId:
-              addMemberForm.memberId || generateMemberId(),
-            title: addMemberForm.title.trim(),
-            fullName: addMemberForm.name.trim(),
-            email: addMemberForm.email.trim().toLowerCase(),
-            phone: addMemberForm.phone.trim(),
-            password: addMemberForm.password,
+              addMemberForm.memberId ||
+              generateMemberId(),
+            title:
+              addMemberForm.title.trim(),
+            fullName:
+              addMemberForm.name.trim(),
+            email:
+              addMemberForm.email
+                .trim()
+                .toLowerCase(),
+            phone:
+              addMemberForm.phone.trim(),
+            password:
+              addMemberForm.password,
             registrationDate:
-              addMemberForm.registrationDate || null,
+              addMemberForm.registrationDate ||
+              null,
             membershipStart:
-              addMemberForm.startDate || null,
+              addMemberForm.startDate ||
+              null,
             membershipEnd:
-              addMemberForm.endDate || null,
+              addMemberForm.endDate ||
+              null,
             paymentStatus:
               addMemberForm.paymentStatus,
             membershipStatus:
@@ -1326,12 +1758,15 @@ export default function AdminPage() {
         }
       );
 
-      const result = await response.json().catch(() => ({}));
+      const result =
+        await response.json().catch(
+          () => ({})
+        );
 
       if (!response.ok) {
-        console.error("ADD MEMBER API ERROR:", result);
         throw new Error(
-          result.error || "Unable to add member."
+          result.error ||
+            "Unable to add member."
         );
       }
 
@@ -1342,7 +1777,10 @@ export default function AdminPage() {
         "Member account and membership have been created successfully."
       );
     } catch (error) {
-      console.error("ADD MEMBER ERROR:", error);
+      console.error(
+        "ADD MEMBER ERROR:",
+        error
+      );
 
       showNotification(
         error instanceof Error
@@ -1354,21 +1792,33 @@ export default function AdminPage() {
     }
   };
 
-  const openEditMember = (member: Member) => {
+  const openEditMember = (
+    member: Member
+  ) => {
     setSelectedMember(member);
 
     setMemberForm({
-      memberId: member.memberId,
-      title: member.title,
-      name: member.name,
-      email: member.email,
-      phone: member.phone,
+      memberId:
+        member.memberId,
+      title:
+        member.title,
+      name:
+        member.name,
+      email:
+        member.email,
+      phone:
+        member.phone,
       password: "",
-      registrationDate: member.registrationDate,
-      startDate: member.startDate,
-      endDate: member.endDate,
-      paymentStatus: member.paymentStatus,
-      membershipStatus: member.membershipStatus,
+      registrationDate:
+        member.registrationDate,
+      startDate:
+        member.startDate,
+      endDate:
+        member.endDate,
+      paymentStatus:
+        member.paymentStatus,
+      membershipStatus:
+        member.membershipStatus,
     });
 
     setEditMemberOpen(true);
@@ -1380,78 +1830,104 @@ export default function AdminPage() {
     setMemberForm(emptyMemberForm);
   };
 
-  const saveEditedMember = async () => {
-    if (!selectedMember) {
-      return;
-    }
-
-    if (
-      !memberForm.name.trim() ||
-      !memberForm.email.trim()
-    ) {
-      showNotification(
-        "Please complete the member information."
-      );
-      return;
-    }
-
-    setActionLoading(true);
-    setErrorMessage("");
-
-    try {
-      const accessToken = await getAdminAccessToken();
-
-      const response = await fetch(
-        "/api/admin/members",
-        {
-          method: "PUT",
-          headers: {
-            "Content-Type": "application/json",
-            Authorization: `Bearer ${accessToken}`,
-          },
-          body: JSON.stringify({
-            userId: selectedMember.userId,
-            memberId: memberForm.memberId.trim(),
-            title: memberForm.title.trim(),
-            fullName: memberForm.name.trim(),
-            email: memberForm.email.trim().toLowerCase(),
-            phone: memberForm.phone.trim(),
-            password: memberForm.password.trim() || null,
-            membershipStart: memberForm.startDate || null,
-            membershipEnd: memberForm.endDate || null,
-            paymentStatus: memberForm.paymentStatus,
-            membershipStatus: memberForm.membershipStatus,
-          }),
-        }
-      );
-
-      const result = await response.json().catch(() => ({}));
-
-      if (!response.ok) {
-        console.error("UPDATE MEMBER API ERROR:", result);
-        throw new Error(
-          result.error || "Unable to update member."
-        );
+  const saveEditedMember =
+    async () => {
+      if (!selectedMember) {
+        return;
       }
 
-      await loadMembers();
-      closeMemberModal();
+      if (
+        !memberForm.name.trim() ||
+        !memberForm.email.trim()
+      ) {
+        showNotification(
+          "Please complete the member information."
+        );
+        return;
+      }
 
-      showNotification(
-        "Member information has been updated."
-      );
-    } catch (error) {
-      console.error("SAVE MEMBER ERROR:", error);
+      setActionLoading(true);
+      setErrorMessage("");
 
-      showNotification(
-        error instanceof Error
-          ? error.message
-          : "Unable to update member."
-      );
-    } finally {
-      setActionLoading(false);
-    }
-  };
+      try {
+        const accessToken =
+          await getAdminAccessToken();
+
+        const response =
+          await fetch(
+            "/api/admin/members",
+            {
+              method: "PUT",
+              headers: {
+                "Content-Type":
+                  "application/json",
+                Authorization: `Bearer ${accessToken}`,
+              },
+              body: JSON.stringify({
+                userId:
+                  selectedMember.userId,
+                memberId:
+                  memberForm.memberId.trim(),
+                title:
+                  memberForm.title.trim(),
+                fullName:
+                  memberForm.name.trim(),
+                email:
+                  memberForm.email
+                    .trim()
+                    .toLowerCase(),
+                phone:
+                  memberForm.phone.trim(),
+                password:
+                  memberForm.password.trim() ||
+                  null,
+                membershipStart:
+                  memberForm.startDate ||
+                  null,
+                membershipEnd:
+                  memberForm.endDate ||
+                  null,
+                paymentStatus:
+                  memberForm.paymentStatus,
+                membershipStatus:
+                  memberForm.membershipStatus,
+              }),
+            }
+          );
+
+        const result =
+          await response
+            .json()
+            .catch(() => ({}));
+
+        if (!response.ok) {
+          throw new Error(
+            result.error ||
+              "Unable to update member."
+          );
+        }
+
+        await loadMembers();
+        closeMemberModal();
+
+        showNotification(
+          "Member information has been updated."
+        );
+      } catch (error) {
+        console.error(
+          "SAVE MEMBER ERROR:",
+          error
+        );
+
+        showNotification(
+          error instanceof Error
+            ? error.message
+            : "Unable to update member."
+        );
+      } finally {
+        setActionLoading(false);
+      }
+    };
 
   const approveMember = async (
     userId: string
@@ -1728,6 +2204,10 @@ export default function AdminPage() {
           pendingPayments,
         ],
         [
+          "Pending Extension Requests",
+          pendingExtensionRequests,
+        ],
+        [
           "New Members in Period",
           filteredMembers.length,
         ],
@@ -1956,6 +2436,12 @@ export default function AdminPage() {
             "Pending Payments",
             String(
               pendingPayments
+            ),
+          ],
+          [
+            "Pending Extension Requests",
+            String(
+              pendingExtensionRequests
             ),
           ],
           [
@@ -2240,10 +2726,8 @@ export default function AdminPage() {
         <div
           className={styles.container}
           style={{
-            paddingTop:
-              "120px",
-            textAlign:
-              "center",
+            paddingTop: "120px",
+            textAlign: "center",
           }}
         >
           Loading admin dashboard...
@@ -2282,7 +2766,6 @@ export default function AdminPage() {
             className={styles.navItem}
             onClick={async () => {
               await supabase.auth.signOut();
-
               window.location.href =
                 "/sign-in";
             }}
@@ -2363,34 +2846,18 @@ export default function AdminPage() {
             <div className={styles.filterOptions}>
               {[
                 ["TODAY", "Today"],
-                [
-                  "YESTERDAY",
-                  "Yesterday",
-                ],
-                [
-                  "THIS_WEEK",
-                  "This Week",
-                ],
-                [
-                  "THIS_MONTH",
-                  "This Month",
-                ],
-                [
-                  "LAST_MONTH",
-                  "Last Month",
-                ],
-                [
-                  "CUSTOM",
-                  "Custom Range",
-                ],
+                ["YESTERDAY", "Yesterday"],
+                ["THIS_WEEK", "This Week"],
+                ["THIS_MONTH", "This Month"],
+                ["LAST_MONTH", "Last Month"],
+                ["CUSTOM", "Custom Range"],
               ].map(
                 ([value, label]) => (
                   <button
                     type="button"
                     key={value}
                     className={
-                      dateFilter ===
-                      value
+                      dateFilter === value
                         ? styles.filterActive
                         : styles.filterButton
                     }
@@ -2421,15 +2888,10 @@ export default function AdminPage() {
 
                 <input
                   type="date"
-                  value={
-                    customFrom
-                  }
-                  onChange={(
-                    event
-                  ) =>
+                  value={customFrom}
+                  onChange={(event) =>
                     setCustomFrom(
-                      event.target
-                        .value
+                      event.target.value
                     )
                   }
                 />
@@ -2442,15 +2904,10 @@ export default function AdminPage() {
 
                 <input
                   type="date"
-                  value={
-                    customTo
-                  }
-                  onChange={(
-                    event
-                  ) =>
+                  value={customTo}
+                  onChange={(event) =>
                     setCustomTo(
-                      event.target
-                        .value
+                      event.target.value
                     )
                   }
                 />
@@ -2530,9 +2987,7 @@ export default function AdminPage() {
             </span>
 
             <strong>
-              {
-                filteredOrders.length
-              }
+              {filteredOrders.length}
             </strong>
 
             <p>
@@ -2629,12 +3084,8 @@ export default function AdminPage() {
               </label>
 
               <select
-                value={
-                  reportType
-                }
-                onChange={(
-                  event
-                ) =>
+                value={reportType}
+                onChange={(event) =>
                   setReportType(
                     event.target
                       .value as ReportType
@@ -2729,8 +3180,7 @@ export default function AdminPage() {
                   styles.sectionCount
                 }
               >
-                {members.length}{" "}
-                MEMBERS
+                {members.length} MEMBERS
               </span>
 
               <button
@@ -2809,15 +3259,11 @@ export default function AdminPage() {
                     </button>
 
                     <span>
-                      {
-                        member.memberId
-                      }
+                      {member.memberId}
                     </span>
 
                     <small>
-                      {
-                        member.email
-                      }
+                      {member.email}
                     </small>
                   </div>
 
@@ -2838,9 +3284,7 @@ export default function AdminPage() {
                         : styles.statusExpired
                     }
                   >
-                    {
-                      member.membershipStatus
-                    }
+                    {member.membershipStatus}
                   </span>
 
                   <span
@@ -2848,9 +3292,7 @@ export default function AdminPage() {
                       styles.source
                     }
                   >
-                    {
-                      member.source
-                    }
+                    {member.source}
                   </span>
 
                   <div
@@ -2915,6 +3357,376 @@ export default function AdminPage() {
           </div>
         </section>
 
+        {/* MEMBERSHIP EXTENSION */}
+
+        <section
+          className={
+            styles.section
+          }
+        >
+          <div
+            className={
+              styles.sectionHeader
+            }
+          >
+            <div>
+              <p
+                className={
+                  styles.sectionLabel
+                }
+              >
+                MEMBERSHIP
+              </p>
+
+              <h2>
+                Membership Extension
+              </h2>
+            </div>
+
+            <span
+              className={
+                styles.sectionCount
+              }
+            >
+              {pendingExtensionRequests}{" "}
+              PENDING REQUESTS
+            </span>
+          </div>
+
+          <div
+            className={
+              styles.tableCard
+            }
+          >
+            <div
+              className={
+                styles.memberTableHeader
+              }
+            >
+              <span>
+                MEMBER
+              </span>
+
+              <span>
+                CURRENT MEMBERSHIP
+              </span>
+
+              <span>
+                REQUESTED
+              </span>
+
+              <span>
+                STATUS
+              </span>
+
+              <span>
+                ACTION
+              </span>
+            </div>
+
+            {extensionRequests.map(
+              (request) => (
+                <div
+                  className={
+                    styles.memberTableRow
+                  }
+                  key={
+                    request.id
+                  }
+                >
+                  <div
+                    className={
+                      styles.memberIdentity
+                    }
+                  >
+                    <strong>
+                      {request.title}{" "}
+                      {
+                        request.memberName
+                      }
+                    </strong>
+
+                    <span>
+                      {
+                        request.memberId
+                      }
+                    </span>
+
+                    <small>
+                      {request.email}
+                    </small>
+                  </div>
+
+                  <div>
+                    <span
+                      className={
+                        request.currentMembershipStatus ===
+                        "ACTIVE"
+                          ? styles.statusActive
+                          : request.currentMembershipStatus ===
+                            "PENDING"
+                          ? styles.statusPending
+                          : styles.statusExpired
+                      }
+                    >
+                      {
+                        request.currentMembershipStatus
+                      }
+                    </span>
+
+                    <small
+                      style={{
+                        display:
+                          "block",
+                        marginTop:
+                          "6px",
+                      }}
+                    >
+                      {formatDate(
+                        request.currentStartDate ||
+                          ""
+                      )}{" "}
+                      —{" "}
+                      {formatDate(
+                        request.currentEndDate ||
+                          ""
+                      )}
+                    </small>
+                  </div>
+
+                  <div>
+                    <span>
+                      {formatDate(
+                        getJakartaDate(
+                          request.requestedAt
+                        )
+                      )}
+                    </span>
+
+                    <small
+                      style={{
+                        display:
+                          "block",
+                        marginTop:
+                          "4px",
+                      }}
+                    >
+                      {formatTime(
+                        request.requestedAt
+                      )}
+                    </small>
+                  </div>
+
+                  <span
+                    className={
+                      request.requestStatus ===
+                      "PENDING"
+                        ? styles.statusPending
+                        : request.requestStatus ===
+                          "APPROVED"
+                        ? styles.statusActive
+                        : styles.statusExpired
+                    }
+                  >
+                    {
+                      request.requestStatus
+                    }
+                  </span>
+
+                  <div
+                    className={
+                      styles.actionGroup
+                    }
+                  >
+                    {request.requestStatus ===
+                    "PENDING" ? (
+                      <>
+                        <button
+                          type="button"
+                          className={
+                            styles.primarySmallButton
+                          }
+                          onClick={() =>
+                            handleExtensionAction(
+                              request.id,
+                              "APPROVE"
+                            )
+                          }
+                          disabled={
+                            actionLoading
+                          }
+                        >
+                          {actionLoading
+                            ? "PROCESSING..."
+                            : "APPROVE"}
+                        </button>
+
+                        <button
+                          type="button"
+                          className={
+                            styles.secondaryButton
+                          }
+                          onClick={() =>
+                            handleExtensionAction(
+                              request.id,
+                              "REJECT"
+                            )
+                          }
+                          disabled={
+                            actionLoading
+                          }
+                        >
+                          REJECT
+                        </button>
+                      </>
+                    ) : (
+                      <span
+                        className={
+                          styles.completed
+                        }
+                      >
+                        PROCESSED
+                      </span>
+                    )}
+                  </div>
+                </div>
+              )
+            )}
+
+            {extensionRequests.length ===
+              0 && (
+              <div
+                className={
+                  styles.emptyState
+                }
+              >
+                No membership extension
+                requests yet.
+              </div>
+            )}
+          </div>
+        </section>
+
+        <section className={styles.section}>
+          <div className={styles.sectionHeader}>
+            <div>
+              <p className={styles.sectionLabel}>MENU MANAGEMENT</p>
+              <h2>Food &amp; Beverage Menu</h2>
+            </div>
+
+            <div className={styles.sectionHeaderActions}>
+              <span className={styles.sectionCount}>
+                {menus.length} ITEMS
+              </span>
+              <button
+                type="button"
+                className={styles.primaryButton}
+                onClick={openAddMenu}
+                disabled={menuSaving}
+              >
+                + ADD MENU
+              </button>
+            </div>
+          </div>
+
+          <div className={styles.tableCard}>
+            {menuLoading ? (
+              <div className={styles.emptyState}>Loading menu items...</div>
+            ) : menus.length === 0 ? (
+              <div className={styles.emptyState}>No menu items yet.</div>
+            ) : (
+              <div
+                style={{
+                  display: "grid",
+                  gap: "0",
+                  overflowX: "auto",
+                }}
+              >
+                <div
+                  style={{
+                    minWidth: "760px",
+                    display: "grid",
+                    gridTemplateColumns: "2fr 1fr 1fr 0.8fr 1fr 1.4fr",
+                    gap: "16px",
+                    padding: "14px 18px",
+                    borderBottom: "1px solid rgba(0,0,0,0.1)",
+                    fontSize: "11px",
+                    letterSpacing: "0.08em",
+                    fontWeight: 700,
+                  }}
+                >
+                  <span>MENU</span>
+                  <span>CATEGORY</span>
+                  <span>PRICE</span>
+                  <span>STOCK</span>
+                  <span>STATUS</span>
+                  <span>ACTION</span>
+                </div>
+
+                {menus.map((menu) => (
+                  <div
+                    key={String(menu.id)}
+                    style={{
+                      minWidth: "760px",
+                      display: "grid",
+                      gridTemplateColumns: "2fr 1fr 1fr 0.8fr 1fr 1.4fr",
+                      gap: "16px",
+                      alignItems: "center",
+                      padding: "16px 18px",
+                      borderBottom: "1px solid rgba(0,0,0,0.06)",
+                    }}
+                  >
+                    <div>
+                      <strong>{menu.name}</strong>
+                      {menu.image_url && (
+                        <small style={{ display: "block", marginTop: 4, opacity: 0.65 }}>
+                          Image configured
+                        </small>
+                      )}
+                    </div>
+                    <span>{menu.category}</span>
+                    <span>{formatRupiah(menu.price)}</span>
+                    <span>{menu.stock}</span>
+                    <span
+                      className={
+                        menu.is_available && menu.stock > 0
+                          ? styles.statusActive
+                          : styles.statusExpired
+                      }
+                    >
+                      {menu.is_available && menu.stock > 0
+                        ? "AVAILABLE"
+                        : menu.stock === 0
+                          ? "SOLD OUT"
+                          : "HIDDEN"}
+                    </span>
+                    <div className={styles.actionGroup}>
+                      <button
+                        type="button"
+                        className={styles.secondaryButton}
+                        onClick={() => openEditMenu(menu)}
+                        disabled={menuSaving}
+                      >
+                        EDIT
+                      </button>
+                      <button
+                        type="button"
+                        className={styles.secondaryButton}
+                        onClick={() => deleteMenu(menu)}
+                        disabled={menuSaving}
+                      >
+                        DELETE
+                      </button>
+                    </div>
+                  </div>
+                ))}
+              </div>
+            )}
+          </div>
+        </section>
+
+        {/* ORDERS */}
+
         <section
           className={
             styles.section
@@ -2944,10 +3756,7 @@ export default function AdminPage() {
                 styles.sectionCount
               }
             >
-              {
-                filteredOrders.length
-              }{" "}
-              ORDERS
+              {filteredOrders.length} ORDERS
             </span>
           </div>
 
@@ -3012,9 +3821,7 @@ export default function AdminPage() {
                     </strong>
 
                     <span>
-                      {
-                        order.time
-                      }
+                      {order.time}
                     </span>
                   </div>
 
@@ -3048,9 +3855,7 @@ export default function AdminPage() {
                   </button>
 
                   <span>
-                    {
-                      order.memberId
-                    }
+                    {order.memberId}
                   </span>
 
                   <span>
@@ -3060,9 +3865,7 @@ export default function AdminPage() {
                   </span>
 
                   <span>
-                    {
-                      order.items
-                    }
+                    {order.items}
                   </span>
 
                   <strong>
@@ -3076,9 +3879,7 @@ export default function AdminPage() {
                       styles.orderStatus
                     }
                   >
-                    {
-                      order.status
-                    }
+                    {order.status}
                   </span>
 
                   <div>
@@ -3144,6 +3945,8 @@ export default function AdminPage() {
           </div>
         </section>
 
+        {/* CLAIM HISTORY */}
+
         <section
           className={
             styles.section
@@ -3173,10 +3976,7 @@ export default function AdminPage() {
                 styles.sectionCount
               }
             >
-              {
-                filteredClaims.length
-              }{" "}
-              CLAIMS
+              {filteredClaims.length} CLAIMS
             </span>
           </div>
 
@@ -3255,15 +4055,11 @@ export default function AdminPage() {
                   </button>
 
                   <span>
-                    {
-                      claim.memberId
-                    }
+                    {claim.memberId}
                   </span>
 
                   <span>
-                    {
-                      claim.beverage
-                    }
+                    {claim.beverage}
                   </span>
 
                   <span>
@@ -3273,9 +4069,7 @@ export default function AdminPage() {
                   </span>
 
                   <span>
-                    {
-                      claim.time
-                    }
+                    {claim.time}
                   </span>
 
                   <span
@@ -3303,6 +4097,8 @@ export default function AdminPage() {
             )}
           </div>
         </section>
+
+        {/* QR */}
 
         <section
           className={
@@ -3407,9 +4203,7 @@ export default function AdminPage() {
                     styles.primaryButton
                   }
                   onClick={() =>
-                    setQrOpen(
-                      true
-                    )
+                    setQrOpen(true)
                   }
                 >
                   VIEW QR
@@ -3450,6 +4244,8 @@ export default function AdminPage() {
           </div>
         </section>
       </div>
+
+      {/* MEMBER HISTORY MODAL */}
 
       {selectedHistoryMember && (
         <div
@@ -3591,10 +4387,7 @@ export default function AdminPage() {
                 </h3>
 
                 <span>
-                  {
-                    memberOrders.length
-                  }{" "}
-                  ORDERS
+                  {memberOrders.length} ORDERS
                 </span>
               </div>
 
@@ -3680,10 +4473,7 @@ export default function AdminPage() {
                 </h3>
 
                 <span>
-                  {
-                    memberClaims.length
-                  }{" "}
-                  CLAIMS
+                  {memberClaims.length} CLAIMS
                 </span>
               </div>
 
@@ -3743,6 +4533,8 @@ export default function AdminPage() {
           </div>
         </div>
       )}
+
+      {/* ADD MEMBER */}
 
       {addMemberOpen && (
         <div
@@ -3833,13 +4625,10 @@ export default function AdminPage() {
                   value={
                     addMemberForm.title
                   }
-                  onChange={(
-                    event
-                  ) =>
+                  onChange={(event) =>
                     handleAddFormChange(
                       "title",
-                      event.target
-                        .value
+                      event.target.value
                     )
                   }
                 >
@@ -3871,13 +4660,10 @@ export default function AdminPage() {
                   value={
                     addMemberForm.name
                   }
-                  onChange={(
-                    event
-                  ) =>
+                  onChange={(event) =>
                     handleAddFormChange(
                       "name",
-                      event.target
-                        .value
+                      event.target.value
                     )
                   }
                 />
@@ -3893,13 +4679,10 @@ export default function AdminPage() {
                   value={
                     addMemberForm.email
                   }
-                  onChange={(
-                    event
-                  ) =>
+                  onChange={(event) =>
                     handleAddFormChange(
                       "email",
-                      event.target
-                        .value
+                      event.target.value
                     )
                   }
                   placeholder="member@email.com"
@@ -3916,13 +4699,10 @@ export default function AdminPage() {
                   value={
                     addMemberForm.password
                   }
-                  onChange={(
-                    event
-                  ) =>
+                  onChange={(event) =>
                     handleAddFormChange(
                       "password",
-                      event.target
-                        .value
+                      event.target.value
                     )
                   }
                   placeholder="Minimum 6 characters"
@@ -3939,13 +4719,10 @@ export default function AdminPage() {
                   value={
                     addMemberForm.phone
                   }
-                  onChange={(
-                    event
-                  ) =>
+                  onChange={(event) =>
                     handleAddFormChange(
                       "phone",
-                      event.target
-                        .value
+                      event.target.value
                     )
                   }
                 />
@@ -3961,13 +4738,10 @@ export default function AdminPage() {
                   value={
                     addMemberForm.startDate
                   }
-                  onChange={(
-                    event
-                  ) =>
+                  onChange={(event) =>
                     handleAddFormChange(
                       "startDate",
-                      event.target
-                        .value
+                      event.target.value
                     )
                   }
                 />
@@ -3983,13 +4757,10 @@ export default function AdminPage() {
                   value={
                     addMemberForm.endDate
                   }
-                  onChange={(
-                    event
-                  ) =>
+                  onChange={(event) =>
                     handleAddFormChange(
                       "endDate",
-                      event.target
-                        .value
+                      event.target.value
                     )
                   }
                 />
@@ -4004,13 +4775,10 @@ export default function AdminPage() {
                   value={
                     addMemberForm.paymentStatus
                   }
-                  onChange={(
-                    event
-                  ) =>
+                  onChange={(event) =>
                     handleAddFormChange(
                       "paymentStatus",
-                      event.target
-                        .value
+                      event.target.value
                     )
                   }
                 >
@@ -4033,13 +4801,10 @@ export default function AdminPage() {
                   value={
                     addMemberForm.membershipStatus
                   }
-                  onChange={(
-                    event
-                  ) =>
+                  onChange={(event) =>
                     handleAddFormChange(
                       "membershipStatus",
-                      event.target
-                        .value
+                      event.target.value
                     )
                   }
                 >
@@ -4098,6 +4863,8 @@ export default function AdminPage() {
           </div>
         </div>
       )}
+
+      {/* QR MODAL */}
 
       {qrOpen && (
         <div
@@ -4189,9 +4956,7 @@ export default function AdminPage() {
                   styles.secondaryButton
                 }
                 onClick={() =>
-                  setQrOpen(
-                    false
-                  )
+                  setQrOpen(false)
                 }
               >
                 CLOSE
@@ -4201,8 +4966,147 @@ export default function AdminPage() {
         </div>
       )}
 
-      {editMemberOpen &&
-        selectedMember && (
+      {/* EDIT MEMBER */}
+
+      {menuModalOpen && (
+        <div className={styles.overlay}>
+          <div className={styles.qrModal} style={{ maxWidth: "720px", width: "calc(100% - 32px)" }}>
+            <button
+              type="button"
+              className={styles.closeButton}
+              onClick={closeMenuModal}
+              disabled={menuSaving}
+            >
+              ×
+            </button>
+
+            <p className={styles.sectionLabel}>MENU MANAGEMENT</p>
+            <h2>{selectedMenu ? "Edit Menu" : "Add Menu"}</h2>
+
+            <div className={styles.memberForm}>
+              <div>
+                <label>MENU NAME</label>
+                <input
+                  type="text"
+                  value={menuForm.name}
+                  onChange={(event) =>
+                    setMenuForm((previous) => ({
+                      ...previous,
+                      name: event.target.value,
+                    }))
+                  }
+                  placeholder="e.g. Blueberry Cheesecake"
+                />
+              </div>
+
+              <div>
+                <label>CATEGORY</label>
+                <select
+                  value={menuForm.category}
+                  onChange={(event) =>
+                    setMenuForm((previous) => ({
+                      ...previous,
+                      category:
+                        event.target.value === "BEVERAGE"
+                          ? "BEVERAGE"
+                          : "FOOD",
+                    }))
+                  }
+                >
+                  <option value="FOOD">FOOD</option>
+                  <option value="BEVERAGE">BEVERAGE</option>
+                </select>
+              </div>
+
+              <div>
+                <label>PRICE</label>
+                <input
+                  type="number"
+                  min="0"
+                  step="1000"
+                  value={menuForm.price}
+                  onChange={(event) =>
+                    setMenuForm((previous) => ({
+                      ...previous,
+                      price: event.target.value,
+                    }))
+                  }
+                  placeholder="58000"
+                />
+              </div>
+
+              <div>
+                <label>STOCK</label>
+                <input
+                  type="number"
+                  min="0"
+                  step="1"
+                  value={menuForm.stock}
+                  onChange={(event) =>
+                    setMenuForm((previous) => ({
+                      ...previous,
+                      stock: event.target.value,
+                    }))
+                  }
+                  placeholder="10"
+                />
+              </div>
+
+              <div>
+                <label>IMAGE URL</label>
+                <input
+                  type="url"
+                  value={menuForm.imageUrl}
+                  onChange={(event) =>
+                    setMenuForm((previous) => ({
+                      ...previous,
+                      imageUrl: event.target.value,
+                    }))
+                  }
+                  placeholder="/images/menu_1.png"
+                />
+              </div>
+
+              <div>
+                <label>AVAILABILITY</label>
+                <select
+                  value={menuForm.isAvailable ? "AVAILABLE" : "HIDDEN"}
+                  onChange={(event) =>
+                    setMenuForm((previous) => ({
+                      ...previous,
+                      isAvailable: event.target.value === "AVAILABLE",
+                    }))
+                  }
+                >
+                  <option value="AVAILABLE">AVAILABLE</option>
+                  <option value="HIDDEN">HIDDEN</option>
+                </select>
+              </div>
+            </div>
+
+            <div style={{ display: "flex", justifyContent: "flex-end", gap: "12px", marginTop: "24px" }}>
+              <button
+                type="button"
+                className={styles.secondaryButton}
+                onClick={closeMenuModal}
+                disabled={menuSaving}
+              >
+                CANCEL
+              </button>
+              <button
+                type="button"
+                className={styles.primaryButton}
+                onClick={saveMenu}
+                disabled={menuSaving}
+              >
+                {menuSaving ? "SAVING..." : "SAVE MENU"}
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {editMemberOpen && (
           <div
             className={
               styles.overlay
@@ -4281,13 +5185,10 @@ export default function AdminPage() {
                     value={
                       memberForm.title
                     }
-                    onChange={(
-                      event
-                    ) =>
+                    onChange={(event) =>
                       handleFormChange(
                         "title",
-                        event.target
-                          .value
+                        event.target.value
                       )
                     }
                   >
@@ -4319,13 +5220,10 @@ export default function AdminPage() {
                     value={
                       memberForm.name
                     }
-                    onChange={(
-                      event
-                    ) =>
+                    onChange={(event) =>
                       handleFormChange(
                         "name",
-                        event.target
-                          .value
+                        event.target.value
                       )
                     }
                   />
@@ -4341,13 +5239,10 @@ export default function AdminPage() {
                     value={
                       memberForm.email
                     }
-                    onChange={(
-                      event
-                    ) =>
+                    onChange={(event) =>
                       handleFormChange(
                         "email",
-                        event.target
-                          .value
+                        event.target.value
                       )
                     }
                   />
@@ -4363,13 +5258,10 @@ export default function AdminPage() {
                     value={
                       memberForm.password
                     }
-                    onChange={(
-                      event
-                    ) =>
+                    onChange={(event) =>
                       handleFormChange(
                         "password",
-                        event.target
-                          .value
+                        event.target.value
                       )
                     }
                     placeholder="Leave blank to keep current password"
@@ -4386,13 +5278,10 @@ export default function AdminPage() {
                     value={
                       memberForm.phone
                     }
-                    onChange={(
-                      event
-                    ) =>
+                    onChange={(event) =>
                       handleFormChange(
                         "phone",
-                        event.target
-                          .value
+                        event.target.value
                       )
                     }
                   />
@@ -4408,13 +5297,10 @@ export default function AdminPage() {
                     value={
                       memberForm.startDate
                     }
-                    onChange={(
-                      event
-                    ) =>
+                    onChange={(event) =>
                       handleFormChange(
                         "startDate",
-                        event.target
-                          .value
+                        event.target.value
                       )
                     }
                   />
@@ -4430,121 +5316,112 @@ export default function AdminPage() {
                     value={
                       memberForm.endDate
                     }
-                    onChange={(
-                      event
-                    ) =>
+                    onChange={(event) =>
                       handleFormChange(
                         "endDate",
-                        event.target
-                          .value
-                    )
-                  }
-                />
+                        event.target.value
+                      )
+                    }
+                  />
+                </div>
+
+                <div>
+                  <label>
+                    PAYMENT STATUS
+                  </label>
+
+                  <select
+                    value={
+                      memberForm.paymentStatus
+                    }
+                    onChange={(event) =>
+                      handleFormChange(
+                        "paymentStatus",
+                        event.target.value
+                      )
+                    }
+                  >
+                    <option value="PENDING">
+                      PENDING
+                    </option>
+
+                    <option value="VERIFIED">
+                      VERIFIED
+                    </option>
+                  </select>
+                </div>
+
+                <div>
+                  <label>
+                    MEMBERSHIP STATUS
+                  </label>
+
+                  <select
+                    value={
+                      memberForm.membershipStatus
+                    }
+                    onChange={(event) =>
+                      handleFormChange(
+                        "membershipStatus",
+                        event.target.value
+                      )
+                    }
+                  >
+                    <option value="PENDING">
+                      PENDING
+                    </option>
+
+                    <option value="ACTIVE">
+                      ACTIVE
+                    </option>
+
+                    <option value="EXPIRED">
+                      EXPIRED
+                    </option>
+                  </select>
+                </div>
               </div>
 
-              <div>
-                <label>
-                  PAYMENT STATUS
-                </label>
-
-                <select
-                  value={
-                    memberForm.paymentStatus
-                  }
-                  onChange={(
-                    event
-                  ) =>
-                    handleFormChange(
-                      "paymentStatus",
-                      event.target
-                        .value
-                    )
-                  }
-                >
-                  <option value="PENDING">
-                    PENDING
-                  </option>
-
-                  <option value="VERIFIED">
-                    VERIFIED
-                  </option>
-                </select>
-              </div>
-
-              <div>
-                <label>
-                  MEMBERSHIP STATUS
-                </label>
-
-                <select
-                  value={
-                    memberForm.membershipStatus
-                  }
-                  onChange={(
-                    event
-                  ) =>
-                    handleFormChange(
-                      "membershipStatus",
-                      event.target
-                        .value
-                    )
-                  }
-                >
-                  <option value="PENDING">
-                    PENDING
-                  </option>
-
-                  <option value="ACTIVE">
-                    ACTIVE
-                  </option>
-
-                  <option value="EXPIRED">
-                    EXPIRED
-                  </option>
-                </select>
-              </div>
-            </div>
-
-            <div
-              className={
-                styles.qrModalActions
-              }
-            >
-              <button
-                type="button"
+              <div
                 className={
-                  styles.primaryButton
-                }
-                onClick={
-                  saveEditedMember
-                }
-                disabled={
-                  actionLoading
+                  styles.qrModalActions
                 }
               >
-                {actionLoading
-                  ? "SAVING..."
-                  : "SAVE CHANGES"}
-              </button>
+                <button
+                  type="button"
+                  className={
+                    styles.primaryButton
+                  }
+                  onClick={
+                    saveEditedMember
+                  }
+                  disabled={
+                    actionLoading
+                  }
+                >
+                  {actionLoading
+                    ? "SAVING..."
+                    : "SAVE CHANGES"}
+                </button>
 
-              <button
-                type="button"
-                className={
-                  styles.secondaryButton
-                }
-                onClick={
-                  closeMemberModal
-                }
-                disabled={
-                  actionLoading
-                }
-              >
-                CANCEL
-              </button>
+                <button
+                  type="button"
+                  className={
+                    styles.secondaryButton
+                  }
+                  onClick={
+                    closeMemberModal
+                  }
+                  disabled={
+                    actionLoading
+                  }
+                >
+                  CANCEL
+                </button>
+              </div>
             </div>
           </div>
-        </div>
-      )}
+        )}
     </main>
   );
 }

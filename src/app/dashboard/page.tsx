@@ -41,8 +41,18 @@ type ExtensionRequest = {
   processed_at: string | null;
 };
 
+type Menu = {
+  id: string | number;
+  name: string;
+  category: "FOOD" | "BEVERAGE";
+  price: number;
+  stock: number;
+  is_available: boolean;
+  image_url: string | null;
+};
+
 type CartItem = {
-  id: number;
+  id: string | number;
   name: string;
   price: number;
   quantity: number;
@@ -64,160 +74,79 @@ type HistoryOrder = {
   created_at: string;
   items: HistoryItem[];
 };
-
 const memberBeverages = [
-  {
+   {
     id: 1,
-    name: "Matcha Colada",
+    name: "Lemon Peach Iced Tea", 
     image: "/images/menu_1.png",
-  },
+  },                                     
   {
     id: 2,
-    name: "Butterscotch Creamy Latte",
-    image: "/images/menu_2.png",
-  },
-  {
-    id: 3,
-    name: "Sun Kiss Coffee",
+    name: "Mango Matcha Latte",
     image: "/images/menu_3.png",
   },
   {
-    id: 4,
-    name: "Mood Monday",
+    id: 3,
+    name: "Strawberry Splash",
     image: "/images/menu_4.png",
   },
   {
-    id: 5,
-    name: "Lemon Peach Iced Tea",
+    id: 4,
+    name: "Coffee Boom",
     image: "/images/menu_5.png",
   },
   {
-    id: 6,
-    name: "Coffee Boom",
+    id: 5,
+    name:"Matcha Colada",
     image: "/images/menu_6.png",
   },
   {
-    id: 7,
-    name: "Mango Matcha Latte",
+    id: 6,
+    name: "Sunkiss Coffee",
     image: "/images/menu_7.png",
   },
-];
-
-const foodAddons = [
   {
-    id: 101,
-    name: "Blueberry Cheesecake",
-    price: 58000,
-  },
-  {
-    id: 102,
-    name: "Tofu Salt Chili",
-    price: 48000,
-  },
-  {
-    id: 103,
-    name: "Spring Roll Oakwood",
-    price: 48000,
-  },
-  {
-    id: 104,
-    name: "Mixed Sampler",
-    price: 58000,
-  },
-  {
-    id: 105,
-    name: "Chili Baba Fries with Cheese",
-    price: 58000,
-  },
-  {
-    id: 106,
-    name: "Cheese French Fries",
-    price: 58000,
-  },
-  {
-    id: 107,
-    name: "Crispy Corn Salted Egg",
-    price: 58000,
-  },
-  {
-    id: 108,
-    name: "Chicken Karage",
-    price: 58000,
-  },
-  {
-    id: 109,
-    name: "Fried Cakwe Prawn with Beef Floss",
-    price: 58000,
-  },
-  {
-    id: 110,
-    name: "Tempe Mendoan Sambal Kecap",
-    price: 58000,
-  },
-  {
-    id: 111,
-    name: "Pisang Goreng Gula Aren",
-    price: 58000,
-  },
-  {
-    id: 112,
-    name: "French Toast",
-    price: 58000,
-  },
-];
-
-const beverageAddons = [
-  {
-    id: 201,
-    name: "Matcha Colada",
-    price: 58000,
-  },
-  {
-    id: 202,
-    name: "Butterscotch Creamy Latte",
-    price: 68000,
-  },
-  {
-    id: 203,
-    name: "Sun Kiss Coffee",
-    price: 68000,
-  },
-  {
-    id: 204,
-    name: "Mood Monday",
-    price: 68000,
-  },
-  {
-    id: 205,
-    name: "Lemon Peach Iced Tea",
-    price: 58000,
-  },
-  {
-    id: 206,
-    name: "Coffee Boom",
-    price: 68000,
-  },
-  {
-    id: 207,
-    name: "Mango Matcha Latte",
-    price: 58000,
-  },
-  {
-    id: 208,
-    name: "Matcha Passion",
-    price: 58000,
-  },
-  {
-    id: 209,
-    name: "Strawberry Splash",
-    price: 58000,
-  },
-  {
-    id: 210,
+    id: 7,
     name: "Salted Caramel Crème Brule",
-    price: 68000,
+    image: "/images/menu_8.png",
   },
 ];
+
+
+const legacyMenuItems: Menu[] = [
+  { id: 101, name: "Blueberry Cheesecake", category: "FOOD", price: 58000, stock: 99, is_available: true, image_url: null },
+  { id: 102, name: "Tofu Salt Chili", category: "FOOD", price: 48000, stock: 99, is_available: true, image_url: null },
+  { id: 103, name: "Spring Roll Oakwood", category: "FOOD", price: 48000, stock: 99, is_available: true, image_url: null },
+  { id: 104, name: "Mixed Sampler", category: "FOOD", price: 58000, stock: 99, is_available: true, image_url: null },
+  { id: 105, name: "Chili Baba Fries with Cheese", category: "FOOD", price: 58000, stock: 99, is_available: true, image_url: null },
+  { id: 106, name: "Cheese French Fries", category: "FOOD", price: 58000, stock: 99, is_available: true, image_url: null },
+  { id: 107, name: "Crispy Corn Salted Egg", category: "FOOD", price: 58000, stock: 99, is_available: true, image_url: null },
+  { id: 108, name: "Chicken Karage", category: "FOOD", price: 58000, stock: 99, is_available: true, image_url: null },
+  { id: 109, name: "Fried Cakwe Prawn with Beef Floss", category: "FOOD", price: 58000, stock: 99, is_available: true, image_url: null },
+  { id: 110, name: "Tempe Mendoan Sambal Kecap", category: "FOOD", price: 58000, stock: 99, is_available: true, image_url: null },
+  { id: 111, name: "Pisang Goreng Gula Aren", category: "FOOD", price: 58000, stock: 99, is_available: true, image_url: null },
+  { id: 112, name: "French Toast", category: "FOOD", price: 58000, stock: 99, is_available: true, image_url: null },
+  { id: 201, name: "Matcha Colada", category: "BEVERAGE", price: 58000, stock: 99, is_available: true, image_url: "/images/menu_6.png" },
+  { id: 202, name: "Butterscotch Creamy Latte", category: "BEVERAGE", price: 68000, stock: 99, is_available: true, image_url: null },
+  { id: 203, name: "Sun Kiss Coffee", category: "BEVERAGE", price: 68000, stock: 99, is_available: true, image_url: "/images/menu_7.png" },
+  { id: 204, name: "Mood Monday", category: "BEVERAGE", price: 68000, stock: 99, is_available: true, image_url: null },
+  { id: 205, name: "Lemon Peach Iced Tea", category: "BEVERAGE", price: 58000, stock: 99, is_available: true, image_url: "/images/menu_1.png" },
+  { id: 206, name: "Coffee Boom", category: "BEVERAGE", price: 68000, stock: 99, is_available: true, image_url: "/images/menu_5.png" },
+  { id: 207, name: "Mango Matcha Latte", category: "BEVERAGE", price: 58000, stock: 99, is_available: true, image_url: "/images/menu_3.png" },
+  { id: 208, name: "Matcha Passion", category: "BEVERAGE", price: 58000, stock: 99, is_available: true, image_url: null },
+  { id: 209, name: "Strawberry Splash", category: "BEVERAGE", price: 58000, stock: 99, is_available: true, image_url: "/images/menu_4.png" },
+  { id: 210, name: "Salted Caramel Crème Brule", category: "BEVERAGE", price: 68000, stock: 99, is_available: true, image_url: "/images/menu_8.png" },
+];
+
+const mergeMenus = (databaseMenus: Menu[]) => {
+  const merged = new Map<string, Menu>();
+  legacyMenuItems.forEach((item) => merged.set(item.name.trim().toLowerCase(), item));
+  databaseMenus.forEach((item) => merged.set(item.name.trim().toLowerCase(), item));
+  return Array.from(merged.values()).sort((a, b) => {
+    if (a.category !== b.category) return a.category === "FOOD" ? -1 : 1;
+    return a.name.localeCompare(b.name);
+  });
+};
 
 const CLAIM_QR_VALUE = "DECKSIDE-CLAIM-BEVERAGE";
 
@@ -351,7 +280,10 @@ export default function Dashboard() {
   const [selectedBeverage, setSelectedBeverage] =
     useState<number | null>(null);
 
-  const [cart, setCart] = useState<Record<number, number>>({});
+  const [menus, setMenus] = useState<Menu[]>([]);
+  const [menuLoading, setMenuLoading] = useState(true);
+
+  const [cart, setCart] = useState<Record<string, number>>({});
 
   const [confirmationOpen, setConfirmationOpen] = useState(false);
 
@@ -683,6 +615,52 @@ export default function Dashboard() {
     setLoadingHistory(false);
   };
 
+  const loadMenus = async () => {
+    setMenuLoading(true);
+
+    try {
+      const { data, error: menuError } = await supabase
+        .from("menus")
+        .select("id, name, category, price, stock, is_available, image_url")
+        .order("category", { ascending: true })
+        .order("name", { ascending: true });
+
+      // The menus table is an optional database enhancement. If it is not
+      // available yet (or its schema is not ready), keep the original menu
+      // catalog working instead of throwing a dashboard error.
+      if (menuError) {
+        setMenus(legacyMenuItems);
+        setError("");
+        return;
+      }
+
+      const mappedMenus: Menu[] = (data ?? [])
+        .map<Menu>((row) => ({
+          id: row.id,
+          name: String(row.name ?? ""),
+          category:
+            String(row.category).toUpperCase() === "BEVERAGE"
+              ? "BEVERAGE"
+              : "FOOD",
+          price: Number(row.price ?? 0),
+          stock: Math.max(0, Number(row.stock ?? 0)),
+          is_available: row.is_available !== false,
+          image_url: row.image_url ?? null,
+        }))
+        .filter((item) => item.name);
+
+      setMenus(mergeMenus(mappedMenus));
+      setError("");
+    } catch {
+      // Keep the dashboard usable even when the optional menus table is not
+      // installed yet or Supabase rejects the query.
+      setMenus(legacyMenuItems);
+      setError("");
+    } finally {
+      setMenuLoading(false);
+    }
+  };
+
   useEffect(() => {
     let mounted = true;
 
@@ -714,6 +692,7 @@ export default function Dashboard() {
         loadExtensionRequest(user.id),
         loadTodayClaim(user.id),
         loadOrderHistory(user.id),
+        loadMenus(),
       ]);
 
       if (!mounted) {
@@ -1089,44 +1068,49 @@ export default function Dashboard() {
   };
 
   const getCartItems = (): CartItem[] => {
-    const items: CartItem[] = [];
+    return menus
+      .filter(
+        (item) =>
+          item.is_available && item.stock > 0 &&
+          (cart[String(item.id)] || 0) > 0
+      )
+      .map((item) => {
+        const quantity = Math.min(
+          cart[String(item.id)] || 0,
+          item.stock
+        );
 
-    [...foodAddons, ...beverageAddons].forEach(
-      (item) => {
-        const quantity =
-          cart[item.id] || 0;
-
-        if (quantity > 0) {
-          items.push({
-            id: item.id,
-            name: item.name,
-            price: getDiscountedPrice(
-              item.price
-            ),
-            quantity,
-            type:
-              item.id >= 200
-                ? "BEVERAGE"
-                : "FOOD",
-          });
-        }
-      }
-    );
-
-    return items;
+        return {
+          id: item.id,
+          name: item.name,
+          price: getDiscountedPrice(item.price),
+          quantity,
+          type: item.category,
+        };
+      });
   };
 
   const updateCart = (
-    itemId: number,
+    itemId: string | number,
     quantity: number
   ) => {
+    const key = String(itemId);
+    const menuItem = menus.find(
+      (item) => String(item.id) === key
+    );
+
     setCart((previous) => {
       const next = { ...previous };
 
-      if (quantity <= 0) {
-        delete next[itemId];
-      } else {
-        next[itemId] = quantity;
+      if (quantity <= 0 || !menuItem || !menuItem.is_available) {
+        delete next[key];
+        return next;
+      }
+
+      next[key] = Math.min(quantity, Math.max(0, menuItem.stock));
+
+      if (next[key] <= 0) {
+        delete next[key];
       }
 
       return next;
@@ -1158,16 +1142,12 @@ export default function Dashboard() {
 
   const placeAddonOrder = async () => {
     if (!isActiveMember) {
-      setError(
-        "Your membership must be active to place an order."
-      );
+      setError("Your membership must be active to place an order.");
       return;
     }
 
     if (cartItems.length === 0) {
-      setError(
-        "Please select at least one item."
-      );
+      setError("Please select at least one item.");
       return;
     }
 
@@ -1188,8 +1168,60 @@ export default function Dashboard() {
         return;
       }
 
-      const orderNumber =
-        generateOrderNumber();
+      // Database menus are optional for backwards compatibility. The old
+      // Deckside catalog must still be orderable even if the new menus table
+      // has not been created or does not contain the old items yet.
+      let databaseMenus: Menu[] = [];
+
+      const { data: latestMenus, error: latestMenuError } = await supabase
+        .from("menus")
+        .select("id, name, category, price, stock, is_available, image_url");
+
+      if (!latestMenuError) {
+        databaseMenus = (latestMenus ?? [])
+          .map<Menu>((row) => ({
+            id: row.id,
+            name: String(row.name ?? ""),
+            category:
+              String(row.category).toUpperCase() === "BEVERAGE"
+                ? "BEVERAGE"
+                : "FOOD",
+            price: Number(row.price ?? 0),
+            stock: Math.max(0, Number(row.stock ?? 0)),
+            is_available: row.is_available !== false,
+            image_url: row.image_url ?? null,
+          }))
+          .filter((item) => item.name);
+      }
+
+      const databaseByName = new Map<string, Menu>();
+      databaseMenus.forEach((item) => {
+        databaseByName.set(item.name.trim().toLowerCase(), item);
+      });
+
+      // Validate every selected item against the database when a matching
+      // database row exists. Legacy items remain valid when they have not yet
+      // been migrated into the menus table.
+      for (const item of cartItems) {
+        const databaseItem = databaseByName.get(
+          item.name.trim().toLowerCase()
+        );
+
+        if (!databaseItem) {
+          continue;
+        }
+
+        if (
+          databaseItem.is_available === false ||
+          databaseItem.stock < item.quantity
+        ) {
+          throw new Error(
+            `${item.name} is no longer available in the requested quantity.`
+          );
+        }
+      }
+
+      const orderNumber = generateOrderNumber();
 
       const {
         data: orderData,
@@ -1206,43 +1238,88 @@ export default function Dashboard() {
         .select("id")
         .single();
 
-      if (
-        orderError ||
-        !orderData
-      ) {
-        setError(
-          orderError?.message ||
-            "Unable to create your order."
+      if (orderError || !orderData) {
+        throw new Error(
+          orderError?.message || "Unable to create your order."
         );
-        return;
       }
 
-      const itemsToInsert =
-        cartItems.map((item) => ({
-          order_id: orderData.id,
-          item_name: item.name,
-          quantity: item.quantity,
-          unit_price: item.price,
-        }));
+      const itemsToInsert = cartItems.map((item) => ({
+        order_id: orderData.id,
+        item_name: item.name,
+        quantity: item.quantity,
+        unit_price: item.price,
+      }));
 
-      const {
-        error: itemError,
-      } = await supabase
+      const { error: itemError } = await supabase
         .from("order_items")
         .insert(itemsToInsert);
 
       if (itemError) {
-        await supabase
-          .from("orders")
-          .delete()
-          .eq("id", orderData.id);
-
-        setError(
+        await supabase.from("orders").delete().eq("id", orderData.id);
+        throw new Error(
           itemError.message ||
             "Unable to add the items to your order."
         );
-        return;
       }
+
+      // Decrease stock only for items that actually exist in the database.
+      // Legacy items are intentionally left untouched so the old catalog
+      // continues to work exactly as before.
+      const stockUpdates: Array<{
+        menu: Menu;
+        quantity: number;
+        previousStock: number;
+      }> = [];
+
+      try {
+        for (const item of cartItems) {
+          const databaseItem = databaseByName.get(
+            item.name.trim().toLowerCase()
+          );
+
+          if (!databaseItem) {
+            continue;
+          }
+
+          const currentStock = databaseItem.stock;
+
+          const { data: updatedMenu, error: stockError } = await supabase
+            .from("menus")
+            .update({
+              stock: currentStock - item.quantity,
+            })
+            .eq("id", databaseItem.id)
+            .eq("stock", currentStock)
+            .select("id, stock")
+            .maybeSingle();
+
+          if (stockError || !updatedMenu) {
+            throw new Error(
+              stockError?.message ||
+                `${item.name} stock changed. Please try again.`
+            );
+          }
+
+          stockUpdates.push({
+            menu: databaseItem,
+            quantity: item.quantity,
+            previousStock: currentStock,
+          });
+        }
+      } catch (stockError) {
+        for (const update of stockUpdates) {
+          await supabase
+            .from("menus")
+            .update({ stock: update.previousStock })
+            .eq("id", update.menu.id);
+        }
+
+        await supabase.from("orders").delete().eq("id", orderData.id);
+        throw stockError;
+      }
+
+      await loadMenus();
 
       setConfirmationType("addon");
       setOrderId(orderNumber);
@@ -1250,10 +1327,15 @@ export default function Dashboard() {
       setConfirmedItems(cartItems);
       setConfirmedTotal(cartTotal);
       setConfirmationOpen(true);
-
       setCart({});
 
       await loadOrderHistory(user.id);
+    } catch (error) {
+      setError(
+        error instanceof Error
+          ? error.message
+          : "Unable to place your order."
+      );
     } finally {
       setOrderSubmitting(false);
     }
@@ -2061,287 +2143,109 @@ export default function Dashboard() {
             </div>
           ) : (
             <>
-              <div
-                className={
-                  styles.addonCategory
-                }
-              >
-                <div
-                  className={
-                    styles.addonCategoryHeader
-                  }
-                >
-                  <div>
-                    <p
-                      className={
-                        styles.lockedLabel
-                      }
-                    >
-                      APPETIZERS & SNACK
-                    </p>
-
-                    <h3>
-                      Appetizers & Snack
-                    </h3>
-                  </div>
+              {menuLoading ? (
+                <div className={styles.lockedBox}>
+                  <p>Loading menu...</p>
                 </div>
+              ) : (
+                <>
+                  {[
+                    ["FOOD", "APPETIZERS & SNACK", "Appetizers & Snack"],
+                    ["BEVERAGE", "BEVERAGES", "Beverages"],
+                  ].map(([category, eyebrow, title]) => {
+                    const categoryItems = menus.filter(
+                      (item) => item.category === category
+                    );
 
-                <div
-                  className={
-                    styles.addonList
-                  }
-                >
-                  {foodAddons.map(
-                    (item) => {
-                      const quantity =
-                        cart[item.id] ||
-                        0;
-
-                      const memberPrice =
-                        getDiscountedPrice(
-                          item.price
-                        );
-
-                      return (
-                        <div
-                          key={item.id}
-                          className={
-                            styles.addonItem
-                          }
-                        >
-                          <div
-                            className={
-                              styles.addonInfo
-                            }
-                          >
-                            <h4>
-                              {item.name}
-                            </h4>
-
-                            <div
-                              className={
-                                styles.addonPrices
-                              }
-                            >
-                              <span
-                                className={
-                                  styles.originalPrice
-                                }
-                              >
-                                {formatRupiah(
-                                  item.price
-                                )}
-                              </span>
-
-                              <span>
-                                {formatRupiah(
-                                  memberPrice
-                                )}
-                              </span>
-                            </div>
-
-                            <small
-                              className={
-                                styles.memberPriceLabel
-                              }
-                            >
-                              Member price
-                            </small>
-                          </div>
-
-                          <div
-                            className={
-                              styles.addonOrder
-                            }
-                          >
-                            <button
-                              type="button"
-                              className={
-                                styles.secondaryButton
-                              }
-                              onClick={() =>
-                                updateCart(
-                                  item.id,
-                                  quantity - 1
-                                )
-                              }
-                              disabled={
-                                quantity === 0
-                              }
-                            >
-                              −
-                            </button>
-
-                            <span
-                              className={
-                                styles.quantity
-                              }
-                            >
-                              {quantity}
-                            </span>
-
-                            <button
-                              type="button"
-                              className={
-                                styles.secondaryButton
-                              }
-                              onClick={() =>
-                                updateCart(
-                                  item.id,
-                                  quantity + 1
-                                )
-                              }
-                            >
-                              +
-                            </button>
+                    return (
+                      <div
+                        className={styles.addonCategory}
+                        key={category}
+                      >
+                        <div className={styles.addonCategoryHeader}>
+                          <div>
+                            <p className={styles.lockedLabel}>
+                              {eyebrow}
+                            </p>
+                            <h3>{title}</h3>
                           </div>
                         </div>
-                      );
-                    }
-                  )}
-                </div>
-              </div>
 
-              <div
-                className={
-                  styles.addonCategory
-                }
-              >
-                <div
-                  className={
-                    styles.addonCategoryHeader
-                  }
-                >
-                  <div>
-                    <p
-                      className={
-                        styles.lockedLabel
-                      }
-                    >
-                      BEVERAGES
-                    </p>
-
-                    <h3>
-                      Beverages
-                    </h3>
-                  </div>
-                </div>
-
-                <div
-                  className={
-                    styles.addonList
-                  }
-                >
-                  {beverageAddons.map(
-                    (item) => {
-                      const quantity =
-                        cart[item.id] ||
-                        0;
-
-                      const memberPrice =
-                        getDiscountedPrice(
-                          item.price
-                        );
-
-                      return (
-                        <div
-                          key={item.id}
-                          className={
-                            styles.addonItem
-                          }
-                        >
-                          <div
-                            className={
-                              styles.addonInfo
-                            }
-                          >
-                            <h4>
-                              {item.name}
-                            </h4>
-
-                            <div
-                              className={
-                                styles.addonPrices
-                              }
-                            >
-                              <span
-                                className={
-                                  styles.originalPrice
-                                }
-                              >
-                                {formatRupiah(
-                                  item.price
-                                )}
-                              </span>
-
-                              <span>
-                                {formatRupiah(
-                                  memberPrice
-                                )}
-                              </span>
+                        <div className={styles.addonList}>
+                          {categoryItems.length === 0 ? (
+                            <div className={styles.lockedBox}>
+                              <p>No menu items available.</p>
                             </div>
+                          ) : (
+                            categoryItems.map((item) => {
+                              const key = String(item.id);
+                              const quantity = cart[key] || 0;
+                              const memberPrice = getDiscountedPrice(item.price);
+                              const soldOut =
+                                !item.is_available || item.stock <= 0;
 
-                            <small
-                              className={
-                                styles.memberPriceLabel
-                              }
-                            >
-                              Member price
-                            </small>
-                          </div>
+                              return (
+                                <div
+                                  key={key}
+                                  className={styles.addonItem}
+                                  style={{ opacity: soldOut ? 0.55 : 1 }}
+                                >
+                                  <div className={styles.addonInfo}>
+                                    <h4>{item.name}</h4>
 
-                          <div
-                            className={
-                              styles.addonOrder
-                            }
-                          >
-                            <button
-                              type="button"
-                              className={
-                                styles.secondaryButton
-                              }
-                              onClick={() =>
-                                updateCart(
-                                  item.id,
-                                  quantity - 1
-                                )
-                              }
-                              disabled={
-                                quantity === 0
-                              }
-                            >
-                              −
-                            </button>
+                                    <div className={styles.addonPrices}>
+                                      <span className={styles.originalPrice}>
+                                        {formatRupiah(item.price)}
+                                      </span>
+                                      <span>{formatRupiah(memberPrice)}</span>
+                                    </div>
 
-                            <span
-                              className={
-                                styles.quantity
-                              }
-                            >
-                              {quantity}
-                            </span>
+                                    <small className={styles.memberPriceLabel}>
+                                      {soldOut
+                                        ? "SOLD OUT"
+                                        : `${item.stock} available · Member price`}
+                                    </small>
+                                  </div>
 
-                            <button
-                              type="button"
-                              className={
-                                styles.secondaryButton
-                              }
-                              onClick={() =>
-                                updateCart(
-                                  item.id,
-                                  quantity + 1
-                                )
-                              }
-                            >
-                              +
-                            </button>
-                          </div>
+                                  <div className={styles.addonOrder}>
+                                    <button
+                                      type="button"
+                                      className={styles.secondaryButton}
+                                      onClick={() =>
+                                        updateCart(item.id, quantity - 1)
+                                      }
+                                      disabled={quantity === 0 || soldOut}
+                                    >
+                                      −
+                                    </button>
+
+                                    <span className={styles.quantity}>
+                                      {quantity}
+                                    </span>
+
+                                    <button
+                                      type="button"
+                                      className={styles.secondaryButton}
+                                      onClick={() =>
+                                        updateCart(item.id, quantity + 1)
+                                      }
+                                      disabled={
+                                        soldOut || quantity >= item.stock
+                                      }
+                                    >
+                                      +
+                                    </button>
+                                  </div>
+                                </div>
+                              );
+                            })
+                          )}
                         </div>
-                      );
-                    }
-                  )}
-                </div>
-              </div>
+                      </div>
+                    );
+                  })}
+                </>
+              )}
 
               {cartItems.length >
                 0 && (

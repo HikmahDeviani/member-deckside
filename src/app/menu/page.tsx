@@ -6,9 +6,9 @@ import styles from "./page.module.css";
 const memberBeverages = [
    {
     id: 1,
-    name: "Lemon Peach Iced Tea",
+    name: "Lemon Peach Iced Tea", 
     image: "/images/menu_1.png",
-  },
+  },                                     
   {
     id: 2,
     name: "Mango Matcha Latte",

@@ -1,6 +1,9 @@
 import { NextRequest, NextResponse } from "next/server";
 import { createClient } from "@supabase/supabase-js";
 
+export const dynamic = "force-dynamic";
+export const runtime = "nodejs";
+
 function getSupabaseAdmin() {
   const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL;
   const serviceRoleKey = process.env.SUPABASE_SERVICE_ROLE_KEY;
@@ -42,6 +45,7 @@ function getEndDateOneMonth(startDate: string): string {
 
 async function getAuthenticatedUser(request: NextRequest) {
   const supabaseAdmin = getSupabaseAdmin();
+
   const authorization = request.headers.get("authorization");
 
   if (!authorization?.startsWith("Bearer ")) {
@@ -51,7 +55,7 @@ async function getAuthenticatedUser(request: NextRequest) {
     };
   }
 
-  const token = authorization.replace("Bearer ", "").trim();
+  const token = authorization.slice(7).trim();
 
   if (!token) {
     return {
@@ -102,6 +106,7 @@ async function checkAdmin(userId: string): Promise<boolean> {
 export async function GET(request: NextRequest) {
   try {
     const supabaseAdmin = getSupabaseAdmin();
+
     const { user, error: authError } =
       await getAuthenticatedUser(request);
 
@@ -129,24 +134,22 @@ export async function GET(request: NextRequest) {
       );
     }
 
-    const {
-      data: requests,
-      error: requestsError,
-    } = await supabaseAdmin
-      .from("membership_extension_requests")
-      .select(
-        `
-          id,
-          user_id,
-          status,
-          payment_status,
-          requested_at,
-          processed_at
-        `
-      )
-      .order("requested_at", {
-        ascending: false,
-      });
+    const { data: requests, error: requestsError } =
+      await supabaseAdmin
+        .from("membership_extension_requests")
+        .select(
+          `
+            id,
+            user_id,
+            status,
+            payment_status,
+            requested_at,
+            processed_at
+          `
+        )
+        .order("requested_at", {
+          ascending: false,
+        });
 
     if (requestsError) {
       console.error(
@@ -296,7 +299,9 @@ export async function GET(request: NextRequest) {
     return NextResponse.json(
       {
         error:
-          "Something went wrong while loading extension requests.",
+          error instanceof Error
+            ? error.message
+            : "Something went wrong while loading extension requests.",
       },
       {
         status: 500,
@@ -313,6 +318,7 @@ export async function GET(request: NextRequest) {
 export async function POST(request: NextRequest) {
   try {
     const supabaseAdmin = getSupabaseAdmin();
+
     const { user, error: authError } =
       await getAuthenticatedUser(request);
 
@@ -341,16 +347,14 @@ export async function POST(request: NextRequest) {
       );
     }
 
-    const {
-      data: existingRequest,
-      error: existingError,
-    } = await supabaseAdmin
-      .from("membership_extension_requests")
-      .select("id, status, payment_status")
-      .eq("user_id", user.id)
-      .eq("status", "PENDING")
-      .limit(1)
-      .maybeSingle();
+    const { data: existingRequest, error: existingError } =
+      await supabaseAdmin
+        .from("membership_extension_requests")
+        .select("id, status, payment_status")
+        .eq("user_id", user.id)
+        .eq("status", "PENDING")
+        .limit(1)
+        .maybeSingle();
 
     if (existingError) {
       console.error(
@@ -376,14 +380,21 @@ export async function POST(request: NextRequest) {
       });
     }
 
-    const {
-      data: membership,
-      error: membershipError,
-    } = await supabaseAdmin
-      .from("memberships")
-      .select("id, status, payment_status, end_date")
-      .eq("user_id", user.id)
-      .maybeSingle();
+    const { data: membership, error: membershipError } =
+      await supabaseAdmin
+        .from("memberships")
+        .select(
+          `
+            id,
+            user_id,
+            status,
+            payment_status,
+            start_date,
+            end_date
+          `
+        )
+        .eq("user_id", user.id)
+        .maybeSingle();
 
     if (membershipError) {
       console.error(
@@ -404,8 +415,7 @@ export async function POST(request: NextRequest) {
     if (!membership) {
       return NextResponse.json(
         {
-          error:
-            "Membership record could not be found.",
+          error: "Membership record could not be found.",
         },
         {
           status: 404,
@@ -422,7 +432,13 @@ export async function POST(request: NextRequest) {
           payment_status: "PENDING",
         })
         .select(
-          "id, user_id, status, payment_status, requested_at"
+          `
+            id,
+            user_id,
+            status,
+            payment_status,
+            requested_at
+          `
         )
         .single();
 
@@ -456,7 +472,9 @@ export async function POST(request: NextRequest) {
     return NextResponse.json(
       {
         error:
-          "Something went wrong while submitting your extension request.",
+          error instanceof Error
+            ? error.message
+            : "Something went wrong while submitting your extension request.",
       },
       {
         status: 500,
@@ -473,6 +491,7 @@ export async function POST(request: NextRequest) {
 export async function PUT(request: NextRequest) {
   try {
     const supabaseAdmin = getSupabaseAdmin();
+
     const { user, error: authError } =
       await getAuthenticatedUser(request);
 
@@ -500,10 +519,26 @@ export async function PUT(request: NextRequest) {
       );
     }
 
-    const body = await request.json();
+    let body: {
+      requestId?: string;
+      action?: string;
+    };
 
-    const requestId = body?.requestId;
-    const action = body?.action;
+    try {
+      body = await request.json();
+    } catch {
+      return NextResponse.json(
+        {
+          error: "Invalid JSON request body.",
+        },
+        {
+          status: 400,
+        }
+      );
+    }
+
+    const requestId = body.requestId;
+    const action = body.action;
 
     if (!requestId) {
       return NextResponse.json(
@@ -692,19 +727,6 @@ export async function PUT(request: NextRequest) {
     let newStartDate: string;
     let newEndDate: string;
 
-    /*
-      Jika membership masih aktif dan punya end_date,
-      extension ditambahkan dari end_date lama.
-
-      Contoh:
-      end_date lama = 2026-10-15
-      end_date baru = 2026-11-15
-
-      Kalau membership sudah expired:
-      start_date = hari ini
-      end_date = hari ini + 1 bulan
-    */
-
     if (
       membership.end_date &&
       membership.end_date >= today
@@ -790,12 +812,6 @@ export async function PUT(request: NextRequest) {
       )
       .single();
 
-    /*
-      Kalau membership berhasil diubah tetapi request gagal
-      di-update, kita coba kembalikan membership ke kondisi
-      sebelumnya supaya datanya tidak setengah berubah.
-    */
-
     if (requestUpdateError) {
       console.error(
         "EXTENSION REQUEST UPDATE ERROR:",
@@ -832,7 +848,9 @@ export async function PUT(request: NextRequest) {
     return NextResponse.json(
       {
         error:
-          "Something went wrong while processing the extension request.",
+          error instanceof Error
+            ? error.message
+            : "Something went wrong while processing the extension request.",
       },
       {
         status: 500,
