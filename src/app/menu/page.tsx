@@ -261,7 +261,7 @@ export default function MenuPage() {
               </div>
 
               <div className={styles.discount}>
-                21% member discount
+                20% member discount
               </div>
             </div>
           </div>
