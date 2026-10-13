@@ -42,7 +42,7 @@ export default function Home() {
             <p>High-speed Wi-Fi access</p>
             <p>Convenient charging outlets</p>
             <p>Air-conditioned environment</p>
-            <p>21% off food & beverages</p>
+            <p>20% off food & beverages</p>
           </div>
 
           <a
