@@ -150,7 +150,7 @@ const mergeMenus = (databaseMenus: Menu[]) => {
 
 const CLAIM_QR_VALUE = "DECKSIDE-CLAIM-BEVERAGE";
 
-const DISCOUNT_RATE = 0.21;
+const DISCOUNT_RATE = 0.20;
 const SERVICE_RATE = 0.1;
 const TAX_RATE = 0.11;
 
@@ -2111,7 +2111,7 @@ export default function Dashboard() {
                 styles.badgeAvailable
               }
             >
-              21% MEMBER DISCOUNT
+              20% MEMBER DISCOUNT
             </span>
           </div>
 
